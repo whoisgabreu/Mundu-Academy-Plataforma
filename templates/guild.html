@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Mundu Academy - The Guild{% endblock %}
+{% block page_title %}The Guild{% endblock %}
+
+{% block content %}
+
+<!-- ============ PILAR HEADER ============ -->
+<section class="pillar-header">
+  <div class="pillar-header-content">
+    <div class="pillar-eyebrow">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>The Guild</span>
+    </div>
+    <h1 class="pillar-title">A discussão de caso virou comunidade</h1>
+    <p class="pillar-subtitle">O coração da Mundu. Onde o aprendizado deixa de ser passivo e vira social, crítico — método de Harvard com a turma toda.</p>
+  </div>
+  <div class="pillar-header-stats">
+    <div class="pillar-stat">
+      <span class="pillar-stat-value">{{ communities|length }}</span>
+      <span class="pillar-stat-label">comunidades</span>
+    </div>
+    <div class="pillar-stat">
+      <span class="pillar-stat-value">{{ communities|sum(attribute='posts_today') }}</span>
+      <span class="pillar-stat-label">posts hoje</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ COMUNIDADES ============ -->
+<section class="library-section">
+  <div class="library-section-header">
+    <div>
+      <h2>Suas comunidades</h2>
+      <p>Entre por interesse, fique pelo time.</p>
+    </div>
+    <button class="btn-outline" onclick="showToast('Em breve: criar uma nova comunidade')">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+      Nova comunidade
+    </button>
+  </div>
+
+  <div class="communities-grid">
+    {% for c in communities %}
+    <a href="/g/{{ c.slug }}" class="community-card community-{{ c.color }} animate-fade-in-up" data-delay="{{ loop.index0 * 0.05 }}">
+      <div class="community-card-icon">
+        <i data-lucide="{{ c.icon }}"></i>
+      </div>
+      <h3 class="community-card-name">r/{{ c.slug }}</h3>
+      <p class="community-card-desc">{{ c.description }}</p>
+      <div class="community-card-stats">
+        <span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          {{ c.members }} membros
+        </span>
+        <span>
+          <span class="community-pulse"></span>
+          {{ c.posts_today }} hoje
+        </span>
+      </div>
+      <span class="community-card-btn">Entrar →</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ============ THREADS — FEED DE DISCUSSÃO ============ -->
+<section class="library-section">
+  <div class="library-section-header">
+    <div>
+      <h2>Em alta na Guild</h2>
+      <p>Discussões de caso reais — entre, comente, defenda um ponto.</p>
+    </div>
+    <div class="thread-filters">
+      <button class="thread-filter-chip active">Em alta</button>
+      <button class="thread-filter-chip">Recentes</button>
+      <button class="thread-filter-chip">Sem resposta</button>
+    </div>
+  </div>
+
+  <div class="threads-list">
+    {% for t in threads %}
+    <article class="thread-card animate-fade-in-up" data-delay="{{ loop.index0 * 0.05 }}">
+      <div class="thread-card-vote">
+        <button class="thread-vote-btn" aria-label="Upvote">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+        </button>
+        <span class="thread-vote-count">{{ t.upvotes }}</span>
+        <button class="thread-vote-btn" aria-label="Downvote">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+      </div>
+
+      <div class="thread-card-body">
+        <div class="thread-card-meta">
+          <a href="/g/{{ t.community_slug }}" class="thread-card-community">r/{{ t.community_slug }}</a>
+          <span>·</span>
+          <a href="/u/{{ t.author }}" class="author-link">por u/{{ t.author }}</a>
+          <span>·</span>
+          <span>{{ t.time_ago }}</span>
+          <span class="thread-card-tag thread-tag-{{ t.tag }}">{{ t.tag }}</span>
+        </div>
+        <a href="/g/{{ t.community_slug }}/post/{{ t.slug }}" class="thread-card-titlelink">
+          <h3 class="thread-card-title">{{ t.title }}</h3>
+          <p class="thread-card-preview">{{ t.preview }}</p>
+        </a>
+        <div class="thread-card-footer">
+          <a href="/g/{{ t.community_slug }}/post/{{ t.slug }}" class="thread-action">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            {{ t.replies }} respostas
+          </a>
+          <span class="thread-action">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+            Salvar
+          </span>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ============ CRIAR DISCUSSÃO ============ -->
+<section class="guild-cta animate-fade-in-up">
+  <div>
+    <h3>Você tem um caso?</h3>
+    <p>Compartilhe um problema real do seu dia. A comunidade discute e você sai com 3 hipóteses pra testar.</p>
+  </div>
+  <a href="/g/gestao-pessoas" class="btn-primary">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+    Entrar em uma comunidade
+  </a>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.querySelectorAll('.thread-filter-chip').forEach(function(chip){
+    chip.addEventListener('click', function(){
+      document.querySelectorAll('.thread-filter-chip').forEach(function(c){ c.classList.remove('active'); });
+      chip.classList.add('active');
+    });
+  });
+</script>
+{% endblock %}

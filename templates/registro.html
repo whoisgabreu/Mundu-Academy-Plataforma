@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Criar Conta - Mundu Academy</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: {
+        colors: {
+          primary: { DEFAULT: 'hsl(262 83% 58%)', foreground: 'hsl(0 0% 100%)' },
+          background: 'hsl(224 71% 4%)',
+          card: 'hsl(224 71% 7%)',
+          border: 'hsl(215 28% 17%)',
+          foreground: 'hsl(213 31% 91%)',
+        }
+      }}
+    }
+    document.documentElement.classList.add('dark');
+  </script>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+</head>
+<body class="min-h-screen bg-background flex items-center justify-center p-4">
+  <div class="w-full max-w-md">
+    <!-- Logo -->
+    <div class="text-center mb-8">
+      <img src="{{ url_for('static', filename='img/mundu-logo-horizontal.webp') }}" alt="MUNDU Academy" class="h-10 mx-auto mb-4">
+      <h1 class="text-2xl font-bold text-foreground">Crie sua conta</h1>
+      <p class="text-sm text-slate-400 mt-1">Comece sua jornada de aprendizado</p>
+    </div>
+
+    <!-- Card -->
+    <div class="bg-card border border-border rounded-2xl p-8">
+      {% if error %}
+      <div class="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+        {{ error }}
+      </div>
+      {% endif %}
+
+      <form method="POST" action="/registro" class="space-y-4">
+        {{ csrf_input }}
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-1.5">Nome completo</label>
+          <input type="text" name="nome" required
+            class="w-full px-4 py-3 rounded-xl bg-background border border-border text-foreground placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors"
+            placeholder="João da Silva">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-1.5">Usuário</label>
+          <input type="text" name="username" required autocomplete="username"
+            class="w-full px-4 py-3 rounded-xl bg-background border border-border text-foreground placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors"
+            placeholder="joaosilva">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-1.5">E-mail</label>
+          <input type="email" name="email"
+            class="w-full px-4 py-3 rounded-xl bg-background border border-border text-foreground placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors"
+            placeholder="joao@email.com">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-1.5">Senha</label>
+          <input type="password" name="password" required autocomplete="new-password"
+            class="w-full px-4 py-3 rounded-xl bg-background border border-border text-foreground placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors"
+            placeholder="••••••••">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-foreground mb-1.5">Confirmar senha</label>
+          <input type="password" name="password2" required autocomplete="new-password"
+            class="w-full px-4 py-3 rounded-xl bg-background border border-border text-foreground placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors"
+            placeholder="••••••••">
+        </div>
+
+        <button type="submit"
+          class="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-semibold transition-colors mt-2">
+          Criar conta
+        </button>
+      </form>
+
+      <p class="text-center text-sm text-slate-400 mt-6">
+        Já tem conta?
+        <a href="/login" class="text-purple-400 hover:text-purple-300 font-medium transition-colors">Entrar</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,69 @@
+from django.db import models
+
+
+class Community(models.Model):
+    slug = models.SlugField(unique=True)
+    name = models.CharField(max_length=200)
+    members = models.IntegerField(default=0)
+    posts_today = models.IntegerField(default=0)
+    online_now = models.IntegerField(default=0)
+    icon = models.CharField(max_length=50)
+    color = models.CharField(max_length=20)
+    description = models.TextField()
+    description_long = models.TextField(blank=True)
+    rules = models.JSONField(default=list, blank=True)
+    moderators = models.JSONField(default=list, blank=True)
+    created_at = models.CharField(max_length=50)
+    related = models.JSONField(default=list, blank=True)
+
+    class Meta:
+        verbose_name_plural = 'Communities'
+
+    def __str__(self):
+        return self.name
+
+
+class Thread(models.Model):
+    POST_TYPE_CHOICES = [
+        ('text', 'Text'),
+        ('link', 'Link'),
+        ('media', 'Media'),
+    ]
+    community = models.ForeignKey(
+        Community, on_delete=models.CASCADE, related_name='threads'
+    )
+    slug = models.SlugField()
+    title = models.CharField(max_length=300)
+    author_handle = models.CharField(max_length=100, db_index=True)
+    body = models.TextField(blank=True)
+    preview = models.TextField(blank=True)
+    post_type = models.CharField(
+        max_length=20, choices=POST_TYPE_CHOICES, default='text'
+    )
+    tag = models.CharField(max_length=50, blank=True)
+    upvotes = models.IntegerField(default=0)
+    replies = models.IntegerField(default=0)
+    time_ago = models.CharField(max_length=50)
+
+    class Meta:
+        unique_together = ('community', 'slug')
+
+    def __str__(self):
+        return self.title
+
+
+class Comment(models.Model):
+    thread = models.ForeignKey(
+        Thread, on_delete=models.CASCADE, related_name='comments'
+    )
+    parent = models.ForeignKey(
+        'self', on_delete=models.CASCADE, null=True, blank=True,
+        related_name='children'
+    )
+    author_handle = models.CharField(max_length=100, db_index=True)
+    body = models.TextField()
+    upvotes = models.IntegerField(default=0)
+    time_ago = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f'{self.author_handle}: {self.body[:50]}'

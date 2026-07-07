@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block title %}Meu Perfil - Mundu Academy{% endblock %}
+{% block page_title %}Meu Perfil{% endblock %}
+
+{% block content %}
+<div class="space-y-4 md:space-y-8 pb-20 md:pb-6 w-full max-w-5xl mx-auto">
+  <!-- Header -->
+  <section class="relative overflow-hidden rounded-xl sm:rounded-2xl border border-secondary/20 bg-gradient-to-br from-background via-secondary/5 to-background">
+    <div class="h-24 sm:h-32 md:h-40 bg-gradient-to-r from-primary/20 via-secondary/15 to-primary/10 relative overflow-hidden">
+      <div class="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent"></div>
+    </div>
+    <div class="px-4 sm:px-6 md:px-8 pb-4 sm:pb-6 -mt-12 sm:-mt-16 md:-mt-20 relative z-10">
+      <div class="flex flex-col sm:flex-row gap-3 sm:gap-5 md:gap-6 sm:items-end">
+        <div class="flex-shrink-0 relative">
+          <div class="h-20 w-20 sm:h-28 sm:w-28 md:h-36 md:w-36 rounded-xl sm:rounded-2xl border-3 sm:border-4 border-background bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-2xl sm:text-4xl md:text-5xl font-bold text-white shadow-2xl shadow-primary/30">{{ current_user.perfil.iniciais }}</div>
+          <div class="absolute -bottom-1 -right-1 sm:bottom-0 sm:right-0 sm:translate-x-1 sm:translate-y-1 h-7 w-7 sm:h-9 sm:w-9 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 sm:border-3 border-background flex items-center justify-center shadow-lg">
+            <i data-lucide="crown" class="h-3 w-3 sm:h-4 sm:w-4 text-white"></i>
+          </div>
+        </div>
+        <div class="flex-1 min-w-0 py-1 sm:py-2">
+          <div class="flex items-center gap-2 sm:gap-3">
+            <h1 class="text-lg sm:text-2xl md:text-3xl font-bold text-foreground truncate">{{ current_user.nome_completo or current_user.username }}</h1>
+            <i data-lucide="shield" class="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0"></i>
+          </div>
+          <p class="text-foreground-muted flex items-center flex-wrap gap-1.5 sm:gap-2 mt-1 sm:mt-1.5 text-xs sm:text-sm">
+            <span>@{{ current_user.username }}</span><span class="text-border hidden sm:inline">•</span>
+            <span class="flex items-center gap-1 sm:gap-1.5"><i data-lucide="calendar" class="h-3 w-3 sm:h-3.5 sm:w-3.5"></i><span class="hidden sm:inline">Membro desde</span> Jan 2024</span>
+          </p>
+          <div class="flex flex-wrap gap-1.5 sm:gap-2 mt-2 sm:mt-4">
+            <span class="px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] sm:text-xs font-medium flex items-center gap-1 sm:gap-1.5 hover:bg-primary/15 transition-colors"><i data-lucide="trending-up" class="h-2.5 w-2.5 sm:h-3 sm:w-3"></i> Growth Hacker</span>
+            <span class="px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-secondary/10 border border-secondary/20 text-secondary text-[10px] sm:text-xs font-medium flex items-center gap-1 sm:gap-1.5 hover:bg-secondary/15 transition-colors"><i data-lucide="star" class="h-2.5 w-2.5 sm:h-3 sm:w-3"></i> Nível {{ current_user.perfil.nivel }}</span>
+            <span class="px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] sm:text-xs font-medium flex items-center gap-1 sm:gap-1.5 hover:bg-orange-500/15 transition-colors"><i data-lucide="flame" class="h-2.5 w-2.5 sm:h-3 sm:w-3"></i> {{ current_user.perfil.streak_dias }} dias</span>
+          </div>
+        </div>
+        <a href="/config" class="self-start sm:self-auto block">
+          <button class="px-4 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl bg-gradient-to-r from-primary to-secondary text-white hover:opacity-90 transition-all text-xs sm:text-sm font-semibold flex items-center gap-1.5 sm:gap-2 shadow-lg shadow-secondary/30">
+            <i data-lucide="settings" class="h-3.5 w-3.5 sm:h-4 sm:w-4"></i><span class="hidden sm:inline">Editar Perfil</span><span class="sm:hidden">Editar</span>
+          </button>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tabs Nav -->
+  <div class="w-full">
+    <div class="flex w-full justify-start bg-card border border-border/30 rounded-lg sm:rounded-xl p-0.5 sm:p-1 mb-4 sm:mb-6">
+      <button onclick="switchTab('perfil')" id="btn-tab-perfil" class="flex-1 md:flex-none text-xs sm:text-sm py-2 sm:py-2.5 px-4 rounded-md transition-colors bg-primary text-primary-foreground font-medium">Meu Perfil</button>
+      <button onclick="switchTab('progresso')" id="btn-tab-progresso" class="flex-1 md:flex-none text-xs sm:text-sm py-2 sm:py-2.5 px-4 rounded-md transition-colors text-foreground-muted hover:text-foreground font-medium flex items-center justify-center">
+        <i data-lucide="trending-up" class="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2"></i><span class="hidden sm:inline">Meu</span> Progresso
+      </button>
+    </div>
+
+    <!-- Perfil Tab -->
+    <div id="tab-perfil" class="space-y-4 sm:space-y-6">
+      <section class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
+        {% set stats = [
+          {'label': 'XP Total', 'value': '4.850', 'icon': 'zap', 'color': 'text-yellow-400', 'bg': 'bg-yellow-400/10'},
+          {'label': 'Cursos Concluídos', 'value': '12', 'icon': 'book-open', 'color': 'text-blue-400', 'bg': 'bg-blue-400/10'},
+          {'label': 'Desafios Vencidos', 'value': '8', 'icon': 'trophy', 'color': 'text-amber-400', 'bg': 'bg-amber-400/10'},
+          {'label': 'Conexões', 'value': '156', 'icon': 'users', 'color': 'text-purple-400', 'bg': 'bg-purple-400/10'}
+        ] %}
+        {% for stat in stats %}
+        <div class="p-3 sm:p-5 rounded-xl sm:rounded-2xl border border-border/30 bg-gradient-to-br from-card to-secondary/5 hover:border-secondary/40 transition-all hover:shadow-xl hover:shadow-secondary/10 group cursor-pointer hover:-translate-y-1">
+          <div class="flex items-start justify-between mb-2 sm:mb-3">
+            <div class="h-9 w-9 sm:h-12 sm:w-12 rounded-lg sm:rounded-xl {{ stat.bg }} flex items-center justify-center group-hover:scale-110 transition-transform"><i data-lucide="{{ stat.icon }}" class="h-4 w-4 sm:h-6 sm:w-6 {{ stat.color }}"></i></div>
+          </div>
+          <p class="text-xl sm:text-3xl font-bold text-foreground mb-0.5 sm:mb-1">{{ stat.value }}</p>
+          <p class="text-[10px] sm:text-sm text-foreground-muted truncate">{{ stat.label }}</p>
+        </div>
+        {% endfor %}
+      </section>
+
+      <div class="grid md:grid-cols-3 gap-3 sm:gap-6">
+        <div class="md:col-span-2 space-y-3 sm:space-y-6">
+          <section class="rounded-xl sm:rounded-2xl border border-border/30 bg-card p-3 sm:p-6">
+            <div class="flex items-center justify-between mb-3 sm:mb-5">
+              <h2 class="text-sm sm:text-lg font-semibold text-foreground flex items-center gap-1.5 sm:gap-2"><i data-lucide="route" class="h-4 w-4 sm:h-5 sm:w-5 text-secondary"></i> Trilhas em Progresso</h2>
+            </div>
+            <div class="space-y-2.5 sm:space-y-5">
+              <div class="p-2.5 sm:p-4 rounded-lg sm:rounded-xl bg-secondary/5 border border-secondary/10">
+                <div class="flex justify-between mb-1.5 sm:mb-2"><span class="text-xs sm:text-base font-medium text-foreground truncate">Growth Marketing</span><span class="text-xs sm:text-sm font-bold text-secondary flex-shrink-0 ml-2">65%</span></div>
+                <div class="h-1.5 sm:h-2.5 rounded-full bg-secondary/20 overflow-hidden"><div class="h-full rounded-full bg-gradient-to-r from-primary to-secondary" style="width: 65%;"></div></div>
+                <div class="flex items-center gap-2 sm:gap-4 mt-1.5 sm:mt-3 text-[10px] sm:text-xs text-foreground-muted"><span class="flex items-center gap-1"><i data-lucide="clock" class="h-2.5 w-2.5 sm:h-3 sm:w-3"></i> 4h</span><span class="flex items-center gap-1"><i data-lucide="play-circle" class="h-2.5 w-2.5 sm:h-3 sm:w-3"></i> 8/12</span></div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="space-y-3 sm:space-y-6">
+          <section class="rounded-xl sm:rounded-2xl border border-border/30 bg-card p-3 sm:p-6">
+            <div class="flex items-center justify-between mb-3 sm:mb-5">
+              <h2 class="text-sm sm:text-lg font-semibold text-foreground flex items-center gap-1.5 sm:gap-2"><i data-lucide="medal" class="h-4 w-4 sm:h-5 sm:w-5 text-amber-400"></i> Conquistas</h2>
+            </div>
+            <div class="grid grid-cols-2 gap-2 sm:gap-3">
+              {% set achievements = [{'icon':'rocket','title':'Primeiro Curso','color':'from-orange-500 to-red-500'},{'icon':'flame','title':'Streak 7 dias','color':'from-orange-400 to-yellow-500'},{'icon':'lightbulb','title':'Idealizador','color':'from-yellow-400 to-amber-500'},{'icon':'target','title':'Desafiante','color':'from-pink-500 to-purple-500'}] %}
+              {% for badge in achievements %}
+              <div class="p-2 sm:p-4 rounded-lg sm:rounded-xl bg-secondary/5 border border-secondary/10 text-center hover:border-secondary/30 transition-all cursor-pointer group hover:scale-[1.02]">
+                <div class="h-8 w-8 sm:h-12 sm:w-12 rounded-lg sm:rounded-xl bg-gradient-to-br {{ badge.color }} flex items-center justify-center mx-auto mb-1.5 sm:mb-2 shadow-lg"><i data-lucide="{{ badge.icon }}" class="h-4 w-4 sm:h-6 sm:w-6 text-white"></i></div>
+                <p class="font-medium text-foreground text-[10px] sm:text-sm truncate">{{ badge.title }}</p>
+              </div>
+              {% endfor %}
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- Skills Section -->
+      <section class="rounded-xl sm:rounded-2xl border border-border/30 bg-card/50 backdrop-blur-sm p-3 sm:p-6 mb-6 mt-6">
+        <div class="flex items-center justify-between mb-3 sm:mb-6">
+          <h2 class="text-sm sm:text-lg font-semibold text-foreground flex items-center gap-1.5 sm:gap-2">
+            <i data-lucide="sparkles" class="h-4 w-4 sm:h-5 sm:w-5 text-secondary"></i>
+            Habilidades
+          </h2>
+          <span class="text-[10px] sm:text-xs text-foreground bg-secondary/15 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-medium">6 skills</span>
+        </div>
+        <div class="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
+          {% set skills = [
+            {'name':'Growth Marketing', 'level': 7, 'color':'text-emerald-400', 'bg':'bg-emerald-400', 'icon':'trending-up', 'pct': '70%'},
+            {'name':'Vendas B2B', 'level': 5, 'color':'text-blue-400', 'bg':'bg-blue-400', 'icon':'bar-chart-3', 'pct': '50%'},
+            {'name':'Copywriting', 'level': 6, 'color':'text-purple-400', 'bg':'bg-purple-400', 'icon':'pen-tool', 'pct': '60%'}
+          ] %}
+          {% for skill in skills %}
+          <div class="p-2 sm:p-3 rounded-lg bg-background/60 border border-border/30">
+            <div class="flex items-center justify-between mb-1.5 sm:mb-2">
+              <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                <div class="h-6 w-6 sm:h-8 sm:w-8 rounded-md sm:rounded-lg bg-secondary/10 flex items-center justify-center flex-shrink-0 {{ skill.color }}"><i data-lucide="{{ skill.icon }}" class="h-3 w-3 sm:h-4 sm:w-4"></i></div>
+                <span class="text-[11px] sm:text-xs font-medium text-foreground truncate">{{ skill.name }}</span>
+              </div>
+              <span class="text-[10px] sm:text-xs font-bold {{ skill.color }} flex-shrink-0">{{ skill.level }}</span>
+            </div>
+            <div class="h-1 sm:h-1.5 rounded-full bg-secondary/10 overflow-hidden"><div class="h-full rounded-full {{ skill.bg }}" style="width: {{ skill.pct }};"></div></div>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+      
+      <!-- Networking Section -->
+      <section class="rounded-xl sm:rounded-2xl border border-border/30 bg-card p-3 sm:p-6 mb-6">
+        <div class="flex items-center justify-between mb-3 sm:mb-6">
+          <h2 class="text-sm sm:text-lg font-semibold text-foreground flex items-center gap-1.5 sm:gap-2"><i data-lucide="users" class="h-4 w-4 sm:h-5 sm:w-5 text-secondary"></i> Networking</h2>
+        </div>
+        <div class="grid md:grid-cols-2 gap-3 sm:gap-6">
+          <div class="space-y-2 sm:space-y-4">
+            <h3 class="text-xs sm:text-sm font-medium text-foreground flex items-center gap-1.5 sm:gap-2"><i data-lucide="sparkles" class="h-3 w-3 sm:h-4 sm:w-4 text-amber-400"></i> Conexões Recentes</h3>
+            <div class="space-y-1.5 sm:space-y-3">
+              <div class="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg sm:rounded-xl bg-secondary/5 border border-border/20 hover:border-secondary/40 transition-all cursor-pointer group">
+                <div class="h-8 w-8 sm:h-11 sm:w-11 rounded-lg sm:rounded-xl flex items-center justify-center text-[10px] sm:text-sm font-bold text-white bg-gradient-to-br flex-shrink-0 from-primary to-secondary">AM</div>
+                <div class="flex-1 min-w-0"><p class="font-medium text-foreground text-xs sm:text-sm truncate">Ana Martins</p><p class="text-[10px] sm:text-xs text-foreground-muted truncate">Head of Growth</p></div>
+              </div>
+              <div class="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg sm:rounded-xl bg-secondary/5 border border-border/20 hover:border-secondary/40 transition-all cursor-pointer group">
+                <div class="h-8 w-8 sm:h-11 sm:w-11 rounded-lg sm:rounded-xl flex items-center justify-center text-[10px] sm:text-sm font-bold text-white bg-gradient-to-br flex-shrink-0 from-purple-500 to-pink-500">PC</div>
+                <div class="flex-1 min-w-0"><p class="font-medium text-foreground text-xs sm:text-sm truncate">Pedro Costa</p><p class="text-[10px] sm:text-xs text-foreground-muted truncate">Founder</p></div>
+              </div>
+            </div>
+          </div>
+          <div class="space-y-2 sm:space-y-4">
+            <h3 class="text-xs sm:text-sm font-medium text-foreground flex items-center gap-1.5 sm:gap-2"><i data-lucide="user-plus" class="h-3 w-3 sm:h-4 sm:w-4 text-secondary"></i> Sugestões</h3>
+            <div class="space-y-1.5 sm:space-y-3">
+              <div class="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-secondary/5 to-background border border-border/20 hover:border-secondary/40 transition-all">
+                <div class="flex items-center gap-2 sm:gap-3">
+                  <div class="h-8 w-8 sm:h-11 sm:w-11 rounded-lg sm:rounded-xl flex items-center justify-center text-[10px] sm:text-sm font-bold text-white bg-gradient-to-br flex-shrink-0 from-blue-500 to-cyan-500">MO</div>
+                  <div class="flex-1 min-w-0"><p class="font-medium text-foreground text-xs sm:text-sm truncate">Mariana Oliveira</p><p class="text-[10px] sm:text-xs text-foreground-muted truncate">CMO</p></div>
+                  <button class="px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium flex items-center gap-1 bg-secondary/15 text-secondary"><i data-lucide="user-plus" class="h-3 w-3"></i></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Certificados Section -->
+      <section class="rounded-xl sm:rounded-2xl border border-border/30 bg-card p-3 sm:p-6 mb-6">
+        <div class="flex items-center justify-between gap-2 mb-3 sm:mb-5">
+          <h2 class="text-sm sm:text-lg font-semibold text-foreground flex items-center gap-1.5 sm:gap-2">
+            <i data-lucide="file-check" class="h-4 w-4 sm:h-5 sm:w-5 text-secondary"></i> Certificados
+          </h2>
+        </div>
+        <h3 class="text-xs sm:text-sm font-medium text-foreground-muted mb-2 sm:mb-3 flex items-center gap-1.5 sm:gap-2">
+          <i data-lucide="book-open" class="h-3 w-3 sm:h-4 sm:w-4"></i> Cursos Concluídos
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
+          {% set certificates = [{'title': 'Growth Marketing Fundamentals', 'issuer': 'MUNDU Academy', 'date': 'Dez 2024', 'hours': 12}, {'title': 'Vendas B2B', 'issuer': 'MUNDU x G4 Educação', 'date': 'Nov 2024', 'hours': 8}] %}
+          {% for cert in certificates %}
+          <div class="p-2.5 sm:p-4 rounded-lg sm:rounded-xl border border-secondary/20 bg-gradient-to-br from-secondary/5 to-primary/5 hover:border-secondary/40 transition-all">
+            <div class="flex items-start justify-between mb-2 sm:mb-3">
+              <div class="flex items-center gap-2">
+                <div class="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0"><i data-lucide="award" class="h-4 w-4 sm:h-5 sm:w-5 text-white"></i></div>
+                <div class="min-w-0"><h3 class="text-xs sm:text-sm font-semibold text-foreground truncate">{{ cert.title }}</h3><p class="text-[10px] sm:text-xs text-foreground-muted truncate">{{ cert.issuer }}</p></div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3 text-[10px] sm:text-xs text-foreground-muted">
+              <span class="flex items-center gap-1"><i data-lucide="calendar" class="h-2.5 w-2.5 sm:h-3 sm:w-3"></i> {{ cert.date }}</span>
+              <span class="flex items-center gap-1"><i data-lucide="clock" class="h-2.5 w-2.5 sm:h-3 sm:w-3"></i> {{ cert.hours }}h</span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+
+    <!-- Progresso Tab -->
+    <div id="tab-progresso" class="hidden space-y-4 sm:space-y-6">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+        <div class="border border-border/50 bg-card/50 backdrop-blur-sm shadow-sm rounded-xl p-4">
+          <div class="flex items-start justify-between"><div class="p-2 rounded-lg bg-warning/10"><i data-lucide="flame" class="h-4 w-4 text-warning"></i></div></div>
+          <div class="mt-3"><p class="text-xl font-bold text-foreground">12 dias</p><p class="text-xs text-foreground-muted mt-0.5">Ofensiva</p></div>
+        </div>
+        <div class="border border-border/50 bg-card/50 backdrop-blur-sm shadow-sm rounded-xl p-4">
+          <div class="flex items-start justify-between"><div class="p-2 rounded-lg bg-primary/10"><i data-lucide="clock" class="h-4 w-4 text-primary"></i></div></div>
+          <div class="mt-3"><p class="text-xl font-bold text-foreground">48h 32min</p><p class="text-xs text-foreground-muted mt-0.5">Tempo Total</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function switchTab(tabName) {
+    document.getElementById('tab-perfil').classList.add('hidden');
+    document.getElementById('tab-progresso').classList.add('hidden');
+    document.getElementById('btn-tab-perfil').classList.remove('bg-primary', 'text-primary-foreground');
+    document.getElementById('btn-tab-perfil').classList.add('text-foreground-muted');
+    document.getElementById('btn-tab-progresso').classList.remove('bg-primary', 'text-primary-foreground');
+    document.getElementById('btn-tab-progresso').classList.add('text-foreground-muted');
+    
+    document.getElementById('tab-' + tabName).classList.remove('hidden');
+    document.getElementById('btn-tab-' + tabName).classList.remove('text-foreground-muted');
+    document.getElementById('btn-tab-' + tabName).classList.add('bg-primary', 'text-primary-foreground');
+  }
+</script>
+{% endblock %}

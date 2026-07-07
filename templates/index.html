@@ -1,0 +1,544 @@
+{% extends "base.html" %}
+
+{% block title %}Mundu Academy - Início{% endblock %}
+{% block page_title %}Início{% endblock %}
+
+{% block content %}
+
+<!-- ============ DROPS / STORIES ============ -->
+<section class="drops-section">
+  <div class="drops-header">
+    <h2>Drops</h2>
+    <span>• +5 XP cada</span>
+  </div>
+  <div class="drops-list scrollbar-none">
+    <button class="drop-item" onclick="toggleChatbot()">
+      <div class="drop-ring special">
+        <div class="drop-ring-inner">
+          <div class="drop-icon-circle">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+          </div>
+        </div>
+      </div>
+      <span class="drop-label">Salomão IA</span>
+    </button>
+    <button class="drop-item">
+      <div class="drop-ring">
+        <div class="drop-ring-inner">
+          <div class="drop-icon-circle">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+          </div>
+        </div>
+      </div>
+      <span class="drop-label">Novidades</span>
+    </button>
+    <button class="drop-item">
+      <div class="drop-ring">
+        <div class="drop-ring-inner">
+          <div class="drop-icon-circle">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.4"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.4"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/></svg>
+          </div>
+        </div>
+      </div>
+      <span class="drop-label">Live Hoje</span>
+    </button>
+    <button class="drop-item viewed">
+      <div class="drop-ring viewed">
+        <div class="drop-ring-inner">
+          <div class="drop-icon-circle">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          </div>
+        </div>
+      </div>
+      <span class="drop-label">Desafio</span>
+    </button>
+    <button class="drop-item viewed">
+      <div class="drop-ring viewed">
+        <div class="drop-ring-inner">
+          <div class="drop-icon-circle">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </div>
+        </div>
+      </div>
+      <span class="drop-label">Collab</span>
+    </button>
+    <button class="drop-item viewed">
+      <div class="drop-ring viewed">
+        <div class="drop-ring-inner">
+          <div class="drop-icon-circle">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          </div>
+        </div>
+      </div>
+      <span class="drop-label">Trending</span>
+    </button>
+  </div>
+</section>
+
+<!-- ============ LAYOUT 2 COLUNAS ============ -->
+<div class="social-feed-layout">
+
+  <main class="social-feed-main">
+
+    <!-- ============ COMPOSER ============ -->
+    <section class="social-composer">
+      <div class="composer-row">
+        <div class="composer-avatar">{{ current_user.perfil.iniciais }}</div>
+        <div class="composer-input-wrap">
+          <input
+            type="text"
+            id="socialComposerInput"
+            class="composer-input-shell"
+            placeholder="Bom dia, {{ current_user.nome.split()[0] if ' ' in current_user.nome else current_user.nome }} — o que aprendeu hoje?"
+            onclick="openSocialComposer()"
+            readonly>
+        </div>
+      </div>
+      <div class="composer-types">
+        <button class="composer-type-btn" onclick="openSocialComposer('note')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          Nota
+        </button>
+        <button class="composer-type-btn" onclick="openSocialComposer('question')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+          Pergunta
+        </button>
+        <button class="composer-type-btn disabled" title="Em breve">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect width="15" height="14" x="1" y="5" rx="2" ry="2"/></svg>
+          Vídeo
+        </button>
+        <button class="composer-type-btn disabled" title="Em breve">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          Link
+        </button>
+      </div>
+    </section>
+
+    <!-- ============ SORT TABS ============ -->
+    <nav class="social-feed-tabs">
+      <a href="?sort=for-you" class="social-tab {% if sort == 'for-you' %}active{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Para você
+      </a>
+      <a href="?sort=following" class="social-tab {% if sort == 'following' %}active{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
+        Seguindo
+        <span class="social-tab-count">{{ followed_count }}</span>
+      </a>
+      <a href="?sort=popular" class="social-tab {% if sort == 'popular' %}active{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+        Popular
+      </a>
+      <a href="?sort=community" class="social-tab {% if sort == 'community' %}active{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Guild
+      </a>
+    </nav>
+
+    <!-- ============ FEED ============ -->
+    <section class="social-feed-stream">
+      {% for it in feed %}
+
+      {% if it.kind == 'thread' %}
+      <article class="social-card social-card-thread animate-fade-in-up" data-delay="{{ loop.index0 * 0.03 }}">
+        <header class="social-card-head">
+          <a href="/u/{{ it.actor_handle }}" class="social-actor">
+            <span class="social-actor-avatar">{{ it.actor.iniciais }}</span>
+            <div class="social-actor-info">
+              <div class="social-actor-row">
+                <strong>{{ it.actor.nome_completo }}</strong>
+                <span class="social-verb">postou em</span>
+                <a href="/g/{{ it.payload.community_slug }}" class="social-community-pill">r/{{ it.payload.community_slug }}</a>
+              </div>
+              <div class="social-actor-meta">
+                <span>{{ it.actor.role }}</span>
+                <span class="meta-dot">·</span>
+                <span>{{ it.time_ago }}</span>
+              </div>
+            </div>
+          </a>
+          <span class="redd-post-tag thread-tag-{{ it.payload.tag }}">{{ it.payload.tag }}</span>
+        </header>
+
+        <a href="/g/{{ it.payload.community_slug }}/post/{{ it.payload.slug }}" class="social-thread-body">
+          <h3 class="social-thread-title">{{ it.payload.title }}</h3>
+          <p class="social-thread-preview">{{ it.payload.preview }}</p>
+        </a>
+
+        <footer class="social-card-actions">
+          <button class="social-action">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+            <span>{{ it.engagement.upvotes }}</span>
+          </button>
+          <a href="/g/{{ it.payload.community_slug }}/post/{{ it.payload.slug }}" class="social-action">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>{{ it.engagement.comments }} respostas</span>
+          </a>
+          <button class="social-action">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
+            Compartilhar
+          </button>
+        </footer>
+      </article>
+      {% endif %}
+
+      {% if it.kind == 'public_note' %}
+      <article class="social-card social-card-note animate-fade-in-up" data-delay="{{ loop.index0 * 0.03 }}">
+        <header class="social-card-head">
+          <a href="/u/{{ it.actor_handle }}" class="social-actor">
+            <span class="social-actor-avatar">{{ it.actor.iniciais }}</span>
+            <div class="social-actor-info">
+              <div class="social-actor-row">
+                <strong>{{ it.actor.nome_completo }}</strong>
+                <span class="social-verb">{{ it.verb }}</span>
+              </div>
+              <div class="social-actor-meta">
+                <span>{{ it.actor.role }}</span>
+                <span class="meta-dot">·</span>
+                <span>{{ it.time_ago }}</span>
+              </div>
+            </div>
+          </a>
+          <span class="social-card-pill social-pill-brain">
+            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4.5 4.5 0 0 0-4.5 4.5c0 .56.1 1.1.28 1.6A4.5 4.5 0 0 0 5 12.5c0 1.18.46 2.27 1.21 3.07A4.5 4.5 0 0 0 7.5 22h9a4.5 4.5 0 0 0 1.29-6.43A4.49 4.49 0 0 0 19 12.5a4.5 4.5 0 0 0-2.78-4.4c.18-.5.28-1.04.28-1.6A4.5 4.5 0 0 0 12 2z"/></svg>
+            My Brain
+          </span>
+        </header>
+
+        <div class="social-note-body">
+          <h3 class="social-note-title">{{ it.payload.title }}</h3>
+          <p class="social-note-content">{{ it.payload.body }}</p>
+          {% if it.payload.source_label %}
+          <div class="social-note-source">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            <span>{{ it.payload.source_label }}</span>
+            {% if it.payload.source_handle %}
+            · <a href="/u/{{ it.payload.source_handle }}" class="author-link">u/{{ it.payload.source_handle }}</a>
+            {% endif %}
+          </div>
+          {% endif %}
+          <div class="social-note-tags">
+            {% for tag in it.payload.tags %}
+            <span class="social-note-tag">#{{ tag }}</span>
+            {% endfor %}
+          </div>
+        </div>
+
+        <footer class="social-card-actions">
+          <button class="social-action">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg>
+            <span>{{ it.engagement.likes }}</span>
+          </button>
+          <button class="social-action">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>{{ it.engagement.comments }}</span>
+          </button>
+          <button class="social-action">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+            <span>{{ it.engagement.saves }}</span>
+          </button>
+        </footer>
+      </article>
+      {% endif %}
+
+      {% if it.kind == 'framework' %}
+      <article class="social-card social-card-framework animate-fade-in-up" data-delay="{{ loop.index0 * 0.03 }}">
+        <header class="social-card-head">
+          <div class="social-actor">
+            <span class="social-actor-avatar social-actor-avatar-mundu">M</span>
+            <div class="social-actor-info">
+              <div class="social-actor-row">
+                <strong>Mundu Academy</strong>
+                <span class="social-verb-badge">✓ Curadoria</span>
+                <span class="social-verb">{{ it.verb }}</span>
+              </div>
+              <div class="social-actor-meta">
+                <span>{{ it.time_ago }}</span>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <a href="/library" class="social-framework-body framework-{{ it.payload.color }}">
+          <div class="social-framework-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          </div>
+          <div class="social-framework-info">
+            <span class="social-framework-format">{{ it.payload.format }}</span>
+            <h3 class="social-framework-title">{{ it.payload.title }}</h3>
+            <p class="social-framework-desc">{{ it.payload.description }}</p>
+          </div>
+          <span class="social-framework-cta">Abrir →</span>
+        </a>
+
+        <footer class="social-card-actions">
+          <button class="social-action">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+            <span>{{ it.engagement.saves }} salvos</span>
+          </button>
+          <button class="social-action">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
+            Compartilhar
+          </button>
+        </footer>
+      </article>
+      {% endif %}
+
+      {% endfor %}
+
+      {% if not feed %}
+      <div class="empty-state social-empty">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/></svg>
+        <p>
+          {% if sort == 'following' %}
+          Você ainda não segue ninguém com posts recentes — <a href="?sort=for-you">veja Para você</a>.
+          {% else %}
+          Nada por aqui ainda.
+          {% endif %}
+        </p>
+      </div>
+      {% endif %}
+    </section>
+
+    <!-- Final do feed -->
+    <div class="social-feed-end">
+      <span>Você chegou no fim do feed por hoje 🎉</span>
+      <a href="/explorar" class="btn-outline btn-outline-sm">Explorar conteúdo curado</a>
+    </div>
+
+  </main>
+
+  <!-- ============ SIDEBAR DIREITA ============ -->
+  <aside class="social-sidebar">
+
+    <!-- Sua jornada (streak + XP) -->
+    <div class="sidebar-card sidebar-journey">
+      <h3 class="sidebar-card-title">Sua jornada</h3>
+      <div class="sidebar-journey-row">
+        <div class="sidebar-journey-stat">
+          <span class="sidebar-journey-icon fire">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+          </span>
+          <div>
+            <strong>{{ current_user.perfil.streak }}</strong>
+            <span>dias de streak</span>
+          </div>
+        </div>
+        <div class="sidebar-journey-stat">
+          <span class="sidebar-journey-icon xp">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </span>
+          <div>
+            <strong>{{ current_user.perfil.xp_total }} XP</strong>
+            <span>nível {{ current_user.perfil.nivel }} · {{ current_user.perfil.nome_nivel }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="sidebar-journey-bar">
+        <div class="sidebar-journey-bar-fill" data-pct="{{ current_user.perfil.xp_percentual }}"></div>
+      </div>
+      <p class="sidebar-journey-hint">Faltam <strong>{{ current_user.perfil.xp_proximo_nivel - current_user.perfil.xp_total }} XP</strong> para subir de nível</p>
+      <button class="sidebar-card-cta primary" onclick="openQuickNote('Nota livre', 'Captura espontânea')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        Capturar uma ideia (+10 XP)
+      </button>
+    </div>
+
+    <!-- Quem seguir -->
+    <div class="sidebar-card">
+      <h3 class="sidebar-card-title">Quem seguir</h3>
+      <ul class="sidebar-suggest-list">
+        {% for u in who_to_follow %}
+        <li class="sidebar-suggest-item">
+          <a href="/u/{{ u.handle }}" class="sidebar-suggest-link">
+            <span class="sidebar-suggest-avatar">{{ u.iniciais }}</span>
+            <div class="sidebar-suggest-info">
+              <strong>{{ u.nome_completo }}</strong>
+              <span>{{ u.role }}</span>
+            </div>
+          </a>
+          <button class="sidebar-suggest-follow" data-handle="{{ u.handle }}" data-following="false" onclick="toggleFollow(this)">
+            <span class="follow-state-out">+ Seguir</span>
+            <span class="follow-state-in">✓</span>
+          </button>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Trending -->
+    <div class="sidebar-card">
+      <h3 class="sidebar-card-title">Trending na Mundu</h3>
+      <ul class="sidebar-trending-list">
+        {% for t in trending_topics %}
+        <li class="sidebar-trending-item">
+          <span class="sidebar-trending-num">{{ loop.index }}</span>
+          <div class="sidebar-trending-info">
+            <strong>{{ t.label }}</strong>
+            <span>{{ t.posts }} posts · <em>{{ t.trend }}</em></span>
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="sidebar-card sidebar-explore-cta">
+      <h3 class="sidebar-card-title">Conteúdo curado</h3>
+      <p>Continue assistindo, masterclasses, cases e collabs estão na aba Explorar.</p>
+      <a href="/explorar" class="sidebar-card-cta">
+        Ir para Explorar →
+      </a>
+    </div>
+  </aside>
+
+</div>
+
+<!-- ============ COMPOSER MODAL ============ -->
+<div class="composer-backdrop" id="socialComposerBackdrop" onclick="closeSocialComposer(event)">
+  <div class="composer-modal" onclick="event.stopPropagation()">
+    <div class="composer-header">
+      <div>
+        <div class="composer-eyebrow" id="socialComposerEyebrow">Compartilhe com a Mundu</div>
+        <h3 class="composer-title" id="socialComposerTitle">O que você aprendeu hoje, {{ current_user.nome.split()[0] if ' ' in current_user.nome else current_user.nome }}?</h3>
+      </div>
+      <button class="composer-close" onclick="closeSocialComposer()" aria-label="Fechar">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="composer-tabs">
+      <button class="composer-tab active" data-type="note" onclick="setSocialComposerType('note')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        Nota
+      </button>
+      <button class="composer-tab" data-type="question" onclick="setSocialComposerType('question')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/></svg>
+        Pergunta
+      </button>
+      <button class="composer-tab disabled" title="Em breve">Vídeo</button>
+      <button class="composer-tab disabled" title="Em breve">Link</button>
+    </div>
+
+    <div class="composer-body">
+      <input type="text" id="socialComposerTitleField" class="composer-input" placeholder="Título" maxlength="280">
+      <textarea id="socialComposerBody" class="composer-textarea" rows="6" placeholder="Destile a ideia em 2-3 linhas. Como você aplicaria isso amanhã?"></textarea>
+    </div>
+
+    <div class="composer-footer">
+      <span class="composer-hint">+10 XP por publicação · Markdown básico aceito</span>
+      <div class="composer-footer-actions">
+        <button class="btn-outline" onclick="closeSocialComposer()">Cancelar</button>
+        <button class="btn-primary" onclick="submitSocialPost()">Publicar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Aplica thumbnails em data-bg
+  document.querySelectorAll('.social-video-thumb[data-bg]').forEach(function(el){
+    el.style.backgroundImage = "url('" + el.dataset.bg + "')";
+  });
+
+  // Composer social
+  var socialComposerType = 'note';
+
+  function openSocialComposer(type) {
+    if (type) socialComposerType = type;
+    setSocialComposerType(socialComposerType);
+    var bd = document.getElementById('socialComposerBackdrop');
+    if (!bd) return;
+    bd.classList.add('open');
+    setTimeout(function(){
+      var t = document.getElementById('socialComposerTitleField');
+      if (t) t.focus();
+    }, 220);
+  }
+  function closeSocialComposer(ev) {
+    if (ev && ev.currentTarget !== ev.target) return;
+    var bd = document.getElementById('socialComposerBackdrop');
+    if (bd) bd.classList.remove('open');
+  }
+  function setSocialComposerType(type) {
+    socialComposerType = type;
+    document.querySelectorAll('.composer-modal .composer-tab').forEach(function(t){
+      if (t.dataset && t.dataset.type) {
+        t.classList.toggle('active', t.dataset.type === type);
+      }
+    });
+    var titleEl = document.getElementById('socialComposerTitleField');
+    var bodyEl = document.getElementById('socialComposerBody');
+    var headerTitle = document.getElementById('socialComposerTitle');
+    if (type === 'question') {
+      if (titleEl) titleEl.placeholder = 'Sua pergunta (clara e específica)';
+      if (bodyEl) bodyEl.placeholder = 'Contexto: o que você já tentou? Que decisão precisa tomar?';
+      if (headerTitle) headerTitle.textContent = 'Pergunte para a comunidade';
+    } else {
+      if (titleEl) titleEl.placeholder = 'Título da nota (ex: SBI funciona quando o gatilho é claro)';
+      if (bodyEl) bodyEl.placeholder = 'Destile a ideia em 2-3 linhas. Como você aplicaria isso amanhã?';
+      if (headerTitle) headerTitle.textContent = 'Compartilhe um aprendizado';
+    }
+  }
+  function submitSocialPost() {
+    var title = (document.getElementById('socialComposerTitleField').value || '').trim();
+    var body = (document.getElementById('socialComposerBody').value || '').trim();
+    if (!title || !body) {
+      var focusEl = !title
+        ? document.getElementById('socialComposerTitleField')
+        : document.getElementById('socialComposerBody');
+      if (focusEl) focusEl.focus();
+      return;
+    }
+    var endpoint = socialComposerType === 'question' ? '/api/post' : '/api/quick-note';
+    var payload = socialComposerType === 'question'
+      ? {community_slug: 'gestao-pessoas', title: title, post_type: 'text', body: body}
+      : {title: title, content: body, source: 'Captura na home'};
+    fetch(endpoint, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(){
+      closeSocialComposer();
+      document.getElementById('socialComposerTitleField').value = '';
+      document.getElementById('socialComposerBody').value = '';
+      showToast(socialComposerType === 'question'
+        ? '🎉 Pergunta publicada na Guild'
+        : '🧠 Nota salva no seu My Brain (+10 XP)');
+    })
+    .catch(function(){ showToast('Erro ao publicar — tente de novo'); });
+  }
+  window.openSocialComposer = openSocialComposer;
+  window.closeSocialComposer = closeSocialComposer;
+  window.setSocialComposerType = setSocialComposerType;
+  window.submitSocialPost = submitSocialPost;
+
+  // Esc fecha
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') {
+      var bd = document.getElementById('socialComposerBackdrop');
+      if (bd && bd.classList.contains('open')) closeSocialComposer();
+    }
+  });
+
+  // Toggle follow (na sidebar Quem seguir)
+  function toggleFollow(btn) {
+    var handle = btn.dataset.handle;
+    var following = btn.dataset.following === 'true';
+    var next = !following;
+    btn.dataset.following = next ? 'true' : 'false';
+    btn.classList.toggle('is-following', next);
+    fetch('/api/follow/' + handle, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({following: next})
+    }).catch(function(){});
+    showToast(next ? 'Seguindo u/' + handle : 'Deixou de seguir u/' + handle);
+  }
+  window.toggleFollow = toggleFollow;
+</script>
+{% endblock %}

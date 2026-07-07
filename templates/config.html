@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Identidade - Mundu Academy{% endblock %}
+{% block page_title %}Editar Identidade{% endblock %}
+
+{% block content %}
+<div class="sticky top-[56px] z-40 bg-background/80 backdrop-blur-xl border-b border-border/30 w-full mb-6 -mt-6">
+  <div class="px-4 py-4 flex items-center justify-between max-w-6xl mx-auto">
+    <a href="/perfil" class="flex items-center gap-2 text-foreground-muted hover:text-foreground transition-colors group">
+      <div class="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+        <i data-lucide="arrow-left" class="w-4 h-4 text-primary"></i>
+      </div>
+      <span class="text-sm font-medium hidden sm:block">Voltar ao perfil</span>
+    </a>
+    <div class="flex items-center gap-3">
+      <button class="px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5">
+        <i data-lucide="save" class="h-4 w-4"></i> Salvar Alterações
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="w-full max-w-6xl mx-auto pb-20 md:pb-8">
+  <div class="mb-6 md:mb-8">
+    <h1 class="text-xl md:text-2xl lg:text-3xl font-bold text-foreground">Editar Identidade</h1>
+    <p class="text-sm md:text-base text-foreground-muted mt-1">Gerencie como você aparece para a comunidade MUNDU</p>
+  </div>
+
+  <div class="grid lg:grid-cols-[360px_1fr] xl:grid-cols-[420px_1fr] gap-6 md:gap-8">
+    <!-- Left Column - Preview -->
+    <div class="lg:sticky lg:top-36 lg:self-start space-y-4 md:space-y-6 order-2 lg:order-1">
+      <div class="flex items-center gap-2 text-xs text-foreground-muted uppercase tracking-wider font-medium">
+        <div class="h-2 w-2 rounded-full bg-primary animate-pulse"></div> Preview em tempo real
+      </div>
+      
+      <div class="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-card via-card to-primary/5">
+        <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-primary/10 to-transparent rounded-bl-full"></div>
+        <div class="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-secondary/10 to-transparent rounded-tr-full"></div>
+        <div class="h-20 bg-gradient-to-r from-primary/30 via-secondary/20 to-primary/10 relative"></div>
+        <div class="px-6 pb-6 -mt-10 relative z-10">
+          <div class="flex items-end gap-4 mb-5">
+            <div class="relative group">
+              <div class="h-20 w-20 rounded-2xl bg-gradient-to-br from-primary via-primary to-secondary flex items-center justify-center text-2xl font-bold text-white shadow-xl shadow-primary/40 border-4 border-card">JD</div>
+              <button class="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-primary flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors border-2 border-card"><i data-lucide="camera" class="h-3.5 w-3.5 text-white"></i></button>
+              <div class="absolute -top-1 -left-1 h-6 w-6 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-card flex items-center justify-center shadow-lg"><i data-lucide="star" class="h-3 w-3 text-white"></i></div>
+            </div>
+            <div class="flex-1 min-w-0 pb-1">
+              <div class="flex items-center gap-2">
+                <h2 class="text-lg font-bold text-foreground truncate">João da Silva</h2>
+                <i data-lucide="shield" class="h-4 w-4 text-primary flex-shrink-0"></i>
+              </div>
+              <p class="text-foreground-muted text-sm">@joaosilva</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2 mb-5">
+            <span class="px-3 py-1.5 rounded-lg bg-primary/15 border border-primary/25 text-primary text-xs font-semibold flex items-center gap-1.5"><i data-lucide="briefcase" class="h-3 w-3"></i> Growth Hacker</span>
+            <span class="px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs font-semibold flex items-center gap-1.5"><i data-lucide="star" class="h-3 w-3"></i> Contribuidor</span>
+          </div>
+          <div class="space-y-2.5 py-4 border-t border-border/30">
+            <div class="flex items-center gap-3 text-sm">
+              <i data-lucide="building-2" class="w-4 h-4 text-primary"></i> <span class="text-foreground-muted">Startup XYZ · São Paulo, SP</span>
+            </div>
+            <p class="text-sm text-foreground-muted leading-relaxed line-clamp-2">Apaixonado por growth marketing e vendas B2B. Sempre buscando novas formas de escalar negócios.</p>
+          </div>
+          <div class="flex gap-2 pt-4 border-t border-border/30">
+            <div class="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors cursor-pointer"><i data-lucide="mail" class="h-4 w-4 text-primary"></i></div>
+            <div class="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors cursor-pointer"><i data-lucide="linkedin" class="h-4 w-4 text-primary"></i></div>
+            <div class="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors cursor-pointer"><i data-lucide="instagram" class="h-4 w-4 text-primary"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-2xl border border-primary/20 bg-card p-5">
+        <div class="flex items-center justify-between mb-5">
+          <div class="flex items-center gap-2"><i data-lucide="award" class="h-5 w-5 text-primary"></i> <span class="text-sm font-semibold text-foreground">Nível de Reputação</span></div>
+          <span class="text-xs text-primary font-medium bg-primary/10 px-2 py-1 rounded-full">2 de 4</span>
+        </div>
+        <div class="flex items-center justify-between">
+          <div class="flex flex-col items-center flex-1">
+            <div class="flex items-center w-full"><div class="h-12 w-12 rounded-xl flex items-center justify-center transition-all border-2 bg-primary border-primary shadow-lg shadow-primary/30 mx-auto"><i data-lucide="user" class="h-5 w-5 text-white"></i></div><div class="flex-1 h-0.5 bg-primary"></div></div>
+            <span class="text-[10px] font-medium mt-2 text-center text-primary">Membro</span>
+          </div>
+          <div class="flex flex-col items-center flex-1">
+            <div class="flex items-center w-full"><div class="flex-1 h-0.5 bg-primary"></div><div class="h-12 w-12 rounded-xl flex items-center justify-center transition-all border-2 bg-primary border-primary shadow-lg shadow-primary/30 mx-auto"><i data-lucide="star" class="h-5 w-5 text-white"></i></div><div class="flex-1 h-0.5 bg-border"></div></div>
+            <span class="text-[10px] font-medium mt-2 text-center text-primary">Contribuidor</span>
+          </div>
+          <div class="flex flex-col items-center flex-1">
+            <div class="flex items-center w-full"><div class="flex-1 h-0.5 bg-border"></div><div class="h-12 w-12 rounded-xl flex items-center justify-center transition-all border-2 bg-card border-border"><i data-lucide="sparkles" class="h-5 w-5 text-muted-foreground"></i></div><div class="flex-1 h-0.5 bg-border"></div></div>
+            <span class="text-[10px] font-medium mt-2 text-center text-muted-foreground">Creator</span>
+          </div>
+          <div class="flex flex-col items-center flex-1">
+            <div class="flex items-center w-full"><div class="flex-1 h-0.5 bg-border"></div><div class="h-12 w-12 rounded-xl flex items-center justify-center transition-all border-2 bg-card border-border mx-auto"><i data-lucide="crown" class="h-5 w-5 text-muted-foreground"></i></div></div>
+            <span class="text-[10px] font-medium mt-2 text-center text-muted-foreground">Mentor</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column - Edit Forms -->
+    <div class="space-y-4 md:space-y-6 order-1 lg:order-2">
+      <!-- Identity -->
+      <section class="rounded-2xl border border-primary/20 bg-card overflow-hidden">
+        <div class="px-6 py-4 border-b border-border/30 bg-gradient-to-r from-primary/10 to-transparent">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="h-10 w-10 rounded-xl bg-primary flex items-center justify-center"><i data-lucide="user" class="h-5 w-5 text-white"></i></div>
+              <div><h3 class="font-semibold text-foreground">Identidade</h3><p class="text-xs text-foreground-muted">Informações básicas do seu perfil</p></div>
+            </div>
+            <i data-lucide="pencil" class="h-4 w-4 text-primary"></i>
+          </div>
+        </div>
+        <div class="p-6 space-y-5">
+          <div class="grid md:grid-cols-2 gap-5">
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 text-sm font-medium text-foreground"><i data-lucide="user" class="h-3.5 w-3.5 text-primary"></i> Nome completo</label>
+              <input type="text" value="João da Silva" class="w-full h-12 bg-background border border-border/50 rounded-xl px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all">
+            </div>
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 text-sm font-medium text-foreground"><i data-lucide="at-sign" class="h-3.5 w-3.5 text-primary"></i> Username</label>
+              <div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-foreground-muted text-sm">@</span><input type="text" value="joaosilva" class="w-full h-12 bg-background border border-border/50 rounded-xl pl-8 pr-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"></div>
+            </div>
+          </div>
+          <div class="grid md:grid-cols-2 gap-5">
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 text-sm font-medium text-foreground"><i data-lucide="briefcase" class="h-3.5 w-3.5 text-primary"></i> Cargo / Função</label>
+              <input type="text" value="Growth Hacker" class="w-full h-12 bg-background border border-border/50 rounded-xl px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all">
+            </div>
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 text-sm font-medium text-foreground"><i data-lucide="building-2" class="h-3.5 w-3.5 text-primary"></i> Empresa</label>
+              <input type="text" value="Startup XYZ" class="w-full h-12 bg-background border border-border/50 rounded-xl px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all">
+            </div>
+          </div>
+          <div class="space-y-2">
+            <label class="flex items-center gap-2 text-sm font-medium text-foreground"><i data-lucide="map-pin" class="h-3.5 w-3.5 text-primary"></i> Localização</label>
+            <input type="text" value="São Paulo, SP" class="w-full h-12 bg-background border border-border/50 rounded-xl px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all">
+          </div>
+        </div>
+      </section>
+
+      <!-- Bio Secton -->
+      <section class="rounded-2xl border border-primary/20 bg-card overflow-hidden">
+        <div class="px-6 py-4 border-b border-border/30 bg-gradient-to-r from-primary/10 to-transparent">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="h-10 w-10 rounded-xl bg-primary flex items-center justify-center"><i data-lucide="file-text" class="h-5 w-5 text-white"></i></div>
+              <div><h3 class="font-semibold text-foreground">Sobre você</h3><p class="text-xs text-foreground-muted">Uma breve descrição da sua trajetória</p></div>
+            </div>
+            <i data-lucide="pencil" class="h-4 w-4 text-primary"></i>
+          </div>
+        </div>
+        <div class="p-6">
+          <textarea rows="4" class="w-full bg-background border border-border/50 rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all resize-none">Apaixonado por growth marketing e vendas B2B. Sempre buscando novas formas de escalar negócios.</textarea>
+        </div>
+      </section>
+
+      <!-- Contact -->
+      <section class="rounded-2xl border border-primary/20 bg-card overflow-hidden">
+        <div class="px-6 py-4 border-b border-border/30 bg-gradient-to-r from-primary/10 to-transparent">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="h-10 w-10 rounded-xl bg-primary flex items-center justify-center"><i data-lucide="globe" class="h-5 w-5 text-white"></i></div>
+              <div><h3 class="font-semibold text-foreground">Contato e Links</h3><p class="text-xs text-foreground-muted">Formas de se conectar com você</p></div>
+            </div>
+            <i data-lucide="pencil" class="h-4 w-4 text-primary"></i>
+          </div>
+        </div>
+        <div class="p-6 space-y-4">
+          <div class="flex items-center gap-4 p-4 rounded-xl bg-background border border-border/30 hover:border-primary/30 transition-all group">
+            <div class="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/15 transition-colors"><i data-lucide="mail" class="h-5 w-5 text-primary"></i></div>
+            <div class="flex-1 min-w-0"><label class="text-xs text-foreground-muted font-medium">Email</label><input type="email" value="joao@email.com" class="w-full bg-transparent text-foreground focus:outline-none text-sm"></div>
+          </div>
+          <div class="flex items-center gap-4 p-4 rounded-xl bg-background border border-border/30 hover:border-primary/30 transition-all group">
+            <div class="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/15 transition-colors"><i data-lucide="linkedin" class="h-5 w-5 text-primary"></i></div>
+            <div class="flex-1 min-w-0"><label class="text-xs text-foreground-muted font-medium">LinkedIn</label><div class="flex items-center gap-1"><span class="text-foreground-muted text-sm">linkedin.com/in/</span><input type="text" value="joaosilva" class="flex-1 bg-transparent text-foreground focus:outline-none text-sm"></div></div>
+          </div>
+          <div class="flex items-center gap-4 p-4 rounded-xl bg-background border border-border/30 hover:border-primary/30 transition-all group">
+            <div class="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/15 transition-colors"><i data-lucide="instagram" class="h-5 w-5 text-primary"></i></div>
+            <div class="flex-1 min-w-0"><label class="text-xs text-foreground-muted font-medium">Instagram</label><div class="flex items-center gap-1"><span class="text-foreground-muted text-sm">@</span><input type="text" value="joaosilva" class="flex-1 bg-transparent text-foreground focus:outline-none text-sm"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stats -->
+      <section class="rounded-2xl border border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 overflow-hidden">
+        <div class="px-6 py-4 border-b border-border/30 bg-gradient-to-r from-primary/10 to-transparent">
+          <div class="flex items-center gap-3">
+            <div class="h-10 w-10 rounded-xl bg-primary flex items-center justify-center"><i data-lucide="trending-up" class="h-5 w-5 text-white"></i></div>
+            <div><h3 class="font-semibold text-foreground">Suas Estatísticas</h3><p class="text-xs text-foreground-muted">Seu progresso na comunidade</p></div>
+          </div>
+        </div>
+        <div class="p-6">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="p-4 rounded-xl bg-background border border-primary/20 hover:border-primary/40 transition-all group">
+              <div class="flex items-center gap-2 mb-2"><div class="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors"><i data-lucide="zap" class="h-4 w-4 text-primary"></i></div></div>
+              <p class="text-2xl font-bold text-foreground">847</p><p class="text-xs text-foreground-muted mt-1">Pontos XP</p>
+            </div>
+            <div class="p-4 rounded-xl bg-background border border-primary/20 hover:border-primary/40 transition-all group">
+              <div class="flex items-center gap-2 mb-2"><div class="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors"><i data-lucide="award" class="h-4 w-4 text-primary"></i></div></div>
+              <p class="text-2xl font-bold text-foreground">38</p><p class="text-xs text-foreground-muted mt-1">Contribuições</p>
+            </div>
+            <div class="p-4 rounded-xl bg-background border border-primary/20 hover:border-primary/40 transition-all group">
+              <div class="flex items-center gap-2 mb-2"><div class="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors"><i data-lucide="users" class="h-4 w-4 text-primary"></i></div></div>
+              <p class="text-2xl font-bold text-foreground">124</p><p class="text-xs text-foreground-muted mt-1">Conexões</p>
+            </div>
+            <div class="p-4 rounded-xl bg-background border border-primary/20 hover:border-primary/40 transition-all group">
+              <div class="flex items-center gap-2 mb-2"><div class="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors"><i data-lucide="trophy" class="h-4 w-4 text-primary"></i></div></div>
+              <p class="text-2xl font-bold text-primary">Top 15%</p><p class="text-xs text-foreground-muted mt-1">Ranking</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

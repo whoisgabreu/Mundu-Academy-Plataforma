@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Networking - Mundu Academy{% endblock %}
+{% block page_title %}Comunidade{% endblock %}
+
+{% block content %}
+<div class="px-4 md:px-8 py-4 md:py-6 pb-20 md:pb-6 w-full max-w-7xl mx-auto flex flex-col md:flex-row gap-6">
+
+  <!-- Main Feed -->
+  <div class="flex-1 w-full max-w-2xl border-r border-border md:pr-6">
+    
+    <!-- Header / Tabs -->
+    <div class="sticky top-0 z-10 w-full bg-background/95 backdrop-blur-md border-b border-border mb-4">
+      <div class="flex">
+        <button class="flex-1 border-b-2 border-primary py-3 font-medium text-sm text-foreground">Para você</button>
+        <button class="flex-1 border-b-2 border-transparent py-3 font-medium text-sm text-muted-foreground hover:text-foreground">Seguindo</button>
+      </div>
+    </div>
+
+    <!-- Create Post Box -->
+    <div class="p-4 border border-border rounded-xl bg-card mb-6 flex gap-4">
+      <div class="shrink-0">
+        <span class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
+          <img class="aspect-square h-full w-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100" />
+        </span>
+      </div>
+      <div class="flex-1">
+        <textarea class="w-full bg-transparent border-none resize-none px-0 py-2 text-foreground focus:ring-0 placeholder:text-muted-foreground min-h-[60px]" placeholder="O que você está aprendendo hoje?"></textarea>
+        <div class="flex items-center justify-between pt-2 border-t border-border/50">
+          <div class="flex gap-1 text-primary">
+            <button class="p-2 rounded-full hover:bg-primary/10 transition-colors"><i data-lucide="image" class="w-5 h-5"></i></button>
+            <button class="p-2 rounded-full hover:bg-primary/10 transition-colors"><i data-lucide="video" class="w-5 h-5"></i></button>
+            <button class="p-2 rounded-full hover:bg-primary/10 transition-colors"><i data-lucide="link" class="w-5 h-5"></i></button>
+          </div>
+          <button class="rounded-full px-4 py-1.5 text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">Publicar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Posts Feed -->
+    <div class="space-y-6">
+      {% set posts = [
+        {'id': '1', 'name': 'Marina Santos', 'user': '@marinasantos', 'avatar': 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100', 'role': 'Head de Vendas', 'ver': true, 'time': '2h', 'content': 'Acabei de concluir a trilha de Liderança Estratégica na @MunduAcademy! 🎉\n\nDica: O módulo sobre gestão de conflitos mudou completamente minha forma de lidar com situações difíceis no time.\n\n#Liderança #DesenvolvimentoPessoal', 'img': 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800', 'likes': 234, 'coms': 45, 'reps': 12},
+        {'id': '2', 'name': 'Carlos Oliveira', 'user': '@carlosoliveira', 'avatar': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100', 'role': 'Product Manager', 'ver': false, 'time': '4h', 'content': 'Alguém mais está fazendo a trilha de Metodologias Ágeis? Procurando parceiros para formar um grupo de estudo! 📚\n\nComente aqui se tiver interesse! 👇', 'img': '', 'likes': 89, 'coms': 23, 'reps': 5},
+        {'id': '3', 'name': 'Ana Beatriz', 'user': '@anabeatriz', 'avatar': 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100', 'role': 'CEO @ TechStart', 'ver': true, 'time': '6h', 'content': 'A live de ontem sobre Inteligência Emocional foi incrível! 🧠\n\nGravação disponível para quem perdeu. O Salomão trouxe insights que vão mudar como você lidera sua equipe.', 'img': 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800', 'likes': 567, 'coms': 89, 'reps': 45}
+      ] %}
+
+      {% for p in posts %}
+      <div class="p-4 border border-border rounded-xl bg-card hover:bg-muted/10 transition-colors">
+        <div class="flex gap-4">
+          <div class="shrink-0">
+            <span class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full border border-border/50">
+              <img class="aspect-square h-full w-full" src="{{ p.avatar }}" />
+            </span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <!-- Author Header -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="font-bold text-foreground hover:underline cursor-pointer">{{ p.name }}</span>
+                {% if p.ver %}<i data-lucide="check-circle-2" class="w-4 h-4 text-blue-500 fill-blue-500"></i>{% endif %}
+                <span class="text-sm text-muted-foreground">{{ p.user }}</span>
+                <span class="text-xs text-muted-foreground">· {{ p.time }}</span>
+              </div>
+              <button class="text-muted-foreground hover:text-foreground"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
+            </div>
+            {% if p.role %}
+            <div class="text-xs text-muted-foreground mb-2">{{ p.role }}</div>
+            {% endif %}
+
+            <!-- Content -->
+            <p class="text-sm text-foreground whitespace-pre-wrap mb-3">{{ p.content }}</p>
+
+            {% if p.img %}
+            <div class="rounded-xl overflow-hidden border border-border/50 mb-3 bg-secondary/20">
+              <img src="{{ p.img }}" class="w-full h-auto max-h-[400px] object-cover" />
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="flex items-center justify-between text-muted-foreground max-w-md">
+              <button class="flex items-center gap-2 hover:text-blue-500 transition-colors group">
+                <div class="p-2 rounded-full group-hover:bg-blue-500/10"><i data-lucide="message-square" class="w-4 h-4"></i></div>
+                <span class="text-xs">{{ p.coms }}</span>
+              </button>
+              <button class="flex items-center gap-2 hover:text-green-500 transition-colors group">
+                <div class="p-2 rounded-full group-hover:bg-green-500/10"><i data-lucide="repeat-2" class="w-4 h-4"></i></div>
+                <span class="text-xs">{{ p.reps }}</span>
+              </button>
+              <button class="flex items-center gap-2 hover:text-red-500 transition-colors group">
+                <div class="p-2 rounded-full group-hover:bg-red-500/10"><i data-lucide="heart" class="w-4 h-4"></i></div>
+                <span class="text-xs">{{ p.likes }}</span>
+              </button>
+              <button class="flex items-center gap-2 hover:text-primary transition-colors group">
+                <div class="p-2 rounded-full group-hover:bg-primary/10"><i data-lucide="bookmark" class="w-4 h-4"></i></div>
+              </button>
+              <button class="flex items-center gap-2 hover:text-primary transition-colors group">
+                <div class="p-2 rounded-full group-hover:bg-primary/10"><i data-lucide="share" class="w-4 h-4"></i></div>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Right Sidebar (Desktop Only) -->
+  <div class="hidden lg:block w-80 shrink-0 space-y-6">
+    
+    <!-- Search -->
+    <div class="relative">
+      <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"></i>
+      <input type="text" placeholder="Buscar no networking..." class="w-full bg-muted border-none rounded-full pl-10 h-10 text-sm focus:ring-2 focus:ring-primary focus:outline-none">
+    </div>
+
+    <!-- Who to follow -->
+    <div class="bg-card border border-border rounded-xl flex flex-col hidden md:flex">
+      <div class="p-4 border-b border-border">
+        <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="users" class="h-5 w-5 text-primary"></i> Quem seguir</h3>
+      </div>
+      <div class="flex flex-col">
+        {% set sug = [
+          {'name': 'Fernanda Lima', 'user': '@fernandalima', 'bio': 'VP de Marketing | Palestrante', 'avatar': 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100'},
+          {'name': 'Pedro Henrique', 'user': '@pedrohenrique', 'bio': 'Tech Lead | Entusiasta de IA', 'avatar': 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100'},
+          {'name': 'Camila Rodrigues', 'user': '@camilarodrigues', 'bio': 'Founder @ StartupX', 'avatar': 'https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=100'}
+        ] %}
+        {% for s in sug %}
+        <div class="p-4 hover:bg-muted/20 transition-colors flex items-center justify-between gap-2 border-b border-border last:border-b-0 cursor-pointer">
+          <div class="flex items-center gap-3 min-w-0">
+            <span class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
+              <img class="aspect-square h-full w-full" src="{{ s.avatar }}" />
+            </span>
+            <div class="flex flex-col min-w-0">
+              <span class="font-bold text-foreground text-sm truncate hover:underline">{{ s.name }}</span>
+              <span class="text-xs text-muted-foreground truncate">{{ s.user }}</span>
+            </div>
+          </div>
+          <button class="rounded-full px-4 py-1 text-xs font-bold bg-foreground text-background hover:bg-foreground/90 transition-colors shrink-0">Seguir</button>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="p-4 border-t border-border">
+        <button class="text-primary text-sm font-medium hover:underline">Mostrar mais</button>
+      </div>
+    </div>
+
+    <!-- Trending Topics -->
+    <div class="bg-card border border-border rounded-xl hidden md:flex flex-col">
+      <div class="p-4 border-b border-border">
+        <h3 class="font-bold text-lg">Assuntos do momento</h3>
+      </div>
+      <div class="flex flex-col">
+        {% set trends = [
+          {'cat': 'Tecnologia', 'tags': '#InteligenciaArtificial', 'posts': '12.5k posts'},
+          {'cat': 'Liderança', 'tags': '#GestaoDePessoas', 'posts': '8.2k posts'},
+          {'cat': 'Mundu Academy', 'tags': '#MasterclassSalomao', 'posts': '4.1k posts'}
+        ] %}
+        {% for t in trends %}
+        <div class="p-4 hover:bg-muted/20 transition-colors cursor-pointer border-b border-border last:border-b-0">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="text-xs text-muted-foreground">{{ t.cat }}</span>
+              <p class="font-bold text-foreground text-sm mt-0.5">{{ t.tags }}</p>
+              <span class="text-xs text-muted-foreground">{{ t.posts }}</span>
+            </div>
+            <button class="text-muted-foreground hover:text-foreground"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Footer Links -->
+    <div class="text-xs text-muted-foreground px-4 flex flex-wrap gap-x-3 gap-y-1">
+      <a href="#" class="hover:underline">Termos de Serviço</a>
+      <a href="#" class="hover:underline">Política de Privacidade</a>
+      <a href="#" class="hover:underline">Política de Cookies</a>
+      <a href="#" class="hover:underline">Acessibilidade</a>
+      <a href="#" class="hover:underline">Informações de anúncios</a>
+      <span>© 2024 Mundu Academy.</span>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

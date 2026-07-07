@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Mundu Academy{% endblock %}</title>
+  <meta name="description" content="Plataforma de aprendizado de alta performance">
+  <meta name="author" content="Mundu Academy">
+  <meta property="og:title" content="Mundu Academy">
+  <meta property="og:description" content="Plataforma de aprendizado de alta performance">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            border: "hsl(var(--border) / <alpha-value>)",
+            input: "hsl(var(--input) / <alpha-value>)",
+            ring: "hsl(var(--ring) / <alpha-value>)",
+            background: "hsl(var(--background) / <alpha-value>)",
+            foreground: "hsl(var(--foreground) / <alpha-value>)",
+            primary: {
+              DEFAULT: "hsl(var(--primary) / <alpha-value>)",
+              foreground: "hsl(var(--primary-foreground) / <alpha-value>)",
+            },
+            secondary: {
+              DEFAULT: "hsl(var(--secondary) / <alpha-value>)",
+              foreground: "hsl(var(--secondary-foreground) / <alpha-value>)",
+            },
+            destructive: {
+              DEFAULT: "hsl(var(--destructive) / <alpha-value>)",
+              foreground: "hsl(var(--destructive-foreground) / <alpha-value>)",
+            },
+            muted: {
+              DEFAULT: "hsl(var(--muted) / <alpha-value>)",
+              foreground: "hsl(var(--muted-foreground) / <alpha-value>)",
+            },
+            accent: {
+              DEFAULT: "hsl(var(--accent) / <alpha-value>)",
+              foreground: "hsl(var(--accent-foreground) / <alpha-value>)",
+            },
+            popover: {
+              DEFAULT: "hsl(var(--popover) / <alpha-value>)",
+              foreground: "hsl(var(--popover-foreground) / <alpha-value>)",
+            },
+            card: {
+              DEFAULT: "hsl(var(--card) / <alpha-value>)",
+              foreground: "hsl(var(--card-foreground) / <alpha-value>)",
+            },
+            warning: {
+              DEFAULT: "hsl(var(--warning) / <alpha-value>)",
+            }
+          },
+          borderRadius: {
+            lg: "var(--radius)",
+            md: "calc(var(--radius) - 2px)",
+            sm: "calc(var(--radius) - 4px)",
+          },
+        }
+      }
+    }
+  </script>
+  <!-- Script de Inicialização do Tema -->
+  <script>
+    // Inicializa o tema escuro como padrão, a não ser que o usuário tenha salvo light mode
+    if (localStorage.theme === 'light') {
+      document.documentElement.classList.remove('dark');
+    } else {
+      document.documentElement.classList.add('dark');
+    }
+
+    function toggleTheme() {
+      if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.classList.remove('dark');
+        localStorage.theme = 'light';
+      } else {
+        document.documentElement.classList.add('dark');
+        localStorage.theme = 'dark';
+      }
+      // Re-renderizar icones do lucide se necessário
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    }
+  </script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-background text-foreground transition-colors duration-300">
+
+  <!-- ============ SIDEBAR (Desktop) ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <a href="/">
+        <img src="{{ url_for('static', filename='img/mundu-logo-horizontal.webp') }}" alt="MUNDU Academy" class="logo-full">
+        <img src="{{ url_for('static', filename='img/mundu-logo-icon.png') }}" alt="MUNDU" class="logo-icon">
+      </a>
+    </div>
+
+    <nav class="sidebar-nav">
+      {# ========= NAV DOS 4 PILARES (Segundo Cérebro) ========= #}
+      <a href="/" class="sidebar-nav-link {% if request.path == '/' %}active{% endif %}">
+        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span class="nav-label">Início</span>
+      </a>
+      <a href="/explorar" class="sidebar-nav-link {% if request.path == '/explorar' %}active{% endif %}">
+        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <span class="nav-label">Explorar</span>
+      </a>
+      <a href="/conteudos" class="sidebar-nav-link {% if request.path == '/conteudos' %}active{% endif %}">
+        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+        <span class="nav-label">Cursos</span>
+      </a>
+      <a href="/library" class="sidebar-nav-link {% if request.path == '/library' %}active{% endif %}">
+        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+        <span class="nav-label">The Library</span>
+      </a>
+      <a href="/guild" class="sidebar-nav-link {% if request.path == '/guild' %}active{% endif %}">
+        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span class="nav-label">The Guild</span>
+      </a>
+      <a href="/my-brain" class="sidebar-nav-link {% if request.path == '/my-brain' %}active{% endif %}">
+        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4.5 4.5 0 0 0-4.5 4.5c0 .56.1 1.1.28 1.6A4.5 4.5 0 0 0 5 12.5c0 1.18.46 2.27 1.21 3.07A4.5 4.5 0 0 0 7.5 22h9a4.5 4.5 0 0 0 1.29-6.43A4.49 4.49 0 0 0 19 12.5a4.5 4.5 0 0 0-2.78-4.4c.18-.5.28-1.04.28-1.6A4.5 4.5 0 0 0 12 2z"/><path d="M12 8v14"/></svg>
+        <span class="nav-label">My Brain</span>
+      </a>
+
+      {# ========= ABAS LEGADAS — escondidas, manter para reuso =========
+      <a href="/conteudos" class="sidebar-nav-link {% if request.path == '/conteudos' %}active{% endif %}">
+        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+        <span class="nav-label">Conteúdos</span>
+      </a>
+      <a href="/trilhas" class="sidebar-nav-link {% if request.path == '/trilhas' %}active{% endif %}">
+        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>
+        <span class="nav-label">Trilhas</span>
+      </a>
+      <a href="/ao-vivo" class="sidebar-nav-link {% if request.path == '/ao-vivo' %}active{% endif %}">
+        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"/><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.4"/><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.4"/><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"/></svg>
+        <span class="nav-label">Ao Vivo</span>
+      </a>
+      <a href="/desafios" class="sidebar-nav-link {% if request.path == '/desafios' %}active{% endif %}">
+        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        <span class="nav-label">Desafios</span>
+      </a>
+      <a href="/insumos" class="sidebar-nav-link {% if request.path == '/insumos' %}active{% endif %}">
+        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+        <span class="nav-label">Insumos</span>
+      </a>
+      <a href="/networking" class="sidebar-nav-link {% if request.path == '/networking' %}active{% endif %}">
+        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span class="nav-label">Networking</span>
+      </a>
+      ============================================================== #}
+    </nav>
+
+    <div class="sidebar-bottom">
+      <a href="/perfil" class="sidebar-nav-link {% if request.path == '/perfil' %}active{% endif %}">
+        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span class="nav-label">Meu Perfil</span>
+      </a>
+      <a href="/config" class="sidebar-nav-link {% if request.path == '/config' %}active{% endif %}">
+        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span class="nav-label">Configurações</span>
+      </a>
+    </div>
+
+    <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+  </aside>
+
+  <!-- ============ CONTEÚDO PRINCIPAL ============ -->
+  <div class="main-wrapper" id="mainWrapper">
+    
+    <!-- Top Header -->
+    <header class="top-header">
+      <div>
+        <h1 class="top-header-title" style="display:none;">{% block page_title %}Início{% endblock %}</h1>
+        <!-- Botão voltar (mobile) -->
+        {% if request.path != '/' %}
+        <button class="notification-btn" onclick="history.back()" style="display:none;" id="backBtn">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+        </button>
+        {% endif %}
+      </div>
+
+      <div class="top-header-actions">
+        <!-- XP / Nível -->
+        <div class="xp-button hidden sm:flex">
+          <span class="xp-level-badge">LVL {{ current_user.perfil.nivel }}</span>
+          <span class="xp-level-name">{{ current_user.perfil.nome_nivel }}</span>
+          <div class="xp-bar">
+            <div class="xp-bar-fill" data-pct="{{ current_user.perfil.xp_percentual }}"></div>
+          </div>
+          <span class="xp-text">{{ current_user.perfil.xp_total }}/{{ current_user.perfil.xp_proximo_nivel }}</span>
+        </div>
+
+        <!-- Botão Toggle Theme -->
+        <button class="notification-btn" onclick="toggleTheme()" aria-label="Alternar tema">
+          <i data-lucide="moon" class="dark:hidden w-4 h-4 text-secondary"></i>
+          <i data-lucide="sun" class="hidden dark:block w-4 h-4 text-secondary"></i>
+        </button>
+
+        <!-- Notificações -->
+        <div class="notification-wrapper">
+          <button class="notification-btn" id="notifBtn" onclick="toggleNotifications(event)" aria-label="Notificações">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+            {% if unread_count > 0 %}
+            <span class="notification-badge" id="notifBadge">{{ unread_count }}</span>
+            {% endif %}
+          </button>
+
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-dropdown-header">
+              <h3>Notificações</h3>
+              {% if unread_count > 0 %}
+              <button class="notif-mark-all" onclick="markAllNotificationsRead()">Marcar todas como lidas</button>
+              {% endif %}
+            </div>
+
+            <div class="notif-list" id="notifList">
+              {% for n in notifications %}
+              <a href="{{ n.target_url }}" class="notif-item notif-type-{{ n.type }} {% if not n.is_read %}is-unread{% endif %}" data-id="{{ n.id }}" onclick="markNotificationRead(this, '{{ n.id }}')">
+                <div class="notif-avatar-wrap">
+                  {% if n.actor %}
+                  <span class="notif-avatar">{{ n.actor.iniciais }}</span>
+                  {% else %}
+                  <span class="notif-avatar notif-avatar-system">
+                    {% if n.type == 'upvote' %}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg>
+                    {% else %}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/></svg>
+                    {% endif %}
+                  </span>
+                  {% endif %}
+                  <span class="notif-type-icon notif-type-icon-{{ n.type }}" aria-hidden="true">
+                    {% if n.type == 'reply' %}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    {% elif n.type == 'follow' %}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="22" x2="16" y1="11" y2="11"/></svg>
+                    {% elif n.type == 'mention' %}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"/></svg>
+                    {% elif n.type == 'upvote' %}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+                    {% elif n.type == 'community' %}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    {% endif %}
+                  </span>
+                </div>
+
+                <div class="notif-content">
+                  <p class="notif-text">
+                    {% if n.actor %}<strong>{{ n.actor.nome_completo }}</strong>{% endif %}
+                    <span class="notif-verb">{{ n.verb }}</span>
+                    {% if n.target_title %}<strong class="notif-target">{{ n.target_title|truncate(60) }}</strong>{% endif %}
+                  </p>
+                  {% if n.snippet %}
+                  <p class="notif-snippet">{{ n.snippet }}</p>
+                  {% endif %}
+                  <span class="notif-time">{{ n.time_ago }}</span>
+                </div>
+
+                {% if not n.is_read %}<span class="notif-unread-dot"></span>{% endif %}
+              </a>
+              {% endfor %}
+
+              {% if not notifications %}
+              <div class="notif-empty">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/></svg>
+                <p>Nenhuma notificação por aqui ainda.</p>
+              </div>
+              {% endif %}
+            </div>
+
+            <div class="notif-dropdown-footer">
+              <a href="/u/{{ current_user.username }}">Ver tudo no seu perfil →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Conteúdo da Página -->
+    <main class="main-content {% block main_class %}{% endblock %}">
+      {% block content %}{% endblock %}
+    </main>
+
+    <!-- Espaçamento mobile -->
+    <div class="mobile-spacer"></div>
+  </div>
+
+  <!-- ============ BOTTOM NAV (Mobile) - 4 PILARES + INÍCIO ============ -->
+  <nav class="mobile-bottom-nav">
+    <a href="/" class="mobile-nav-link {% if request.path == '/' %}active{% endif %}">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Início</span>
+    </a>
+    <a href="/conteudos" class="mobile-nav-link {% if request.path == '/conteudos' %}active{% endif %}">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+      <span>Cursos</span>
+    </a>
+    <a href="/library" class="mobile-nav-link {% if request.path == '/library' %}active{% endif %}">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+      <span>Library</span>
+    </a>
+    <a href="/guild" class="mobile-nav-link {% if request.path == '/guild' %}active{% endif %}">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>Guild</span>
+    </a>
+    <a href="/my-brain" class="mobile-nav-link {% if request.path == '/my-brain' %}active{% endif %}">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4.5 4.5 0 0 0-4.5 4.5c0 .56.1 1.1.28 1.6A4.5 4.5 0 0 0 5 12.5c0 1.18.46 2.27 1.21 3.07A4.5 4.5 0 0 0 7.5 22h9a4.5 4.5 0 0 0 1.29-6.43A4.49 4.49 0 0 0 19 12.5a4.5 4.5 0 0 0-2.78-4.4c.18-.5.28-1.04.28-1.6A4.5 4.5 0 0 0 12 2z"/><path d="M12 8v14"/></svg>
+      <span>My Brain</span>
+    </a>
+  </nav>
+
+  <!-- ============ SALOMÃO IA (Chatbot) ============ -->
+  <button class="chatbot-fab" id="chatbotFab" onclick="toggleChatbot()">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+  </button>
+
+  <div class="chatbot-window" id="chatbotWindow">
+    <div class="chatbot-header">
+      <div class="chatbot-header-info">
+        <div class="chatbot-avatar">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+        </div>
+        <div>
+          <div class="chatbot-title">Salomão IA</div>
+          <div class="chatbot-subtitle">Online e pronto para ajudar</div>
+        </div>
+      </div>
+      <button class="chatbot-close" onclick="toggleChatbot()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+    <div class="chatbot-messages" id="chatbotMessages">
+      <div class="chat-message bot animate-fade-in-up">
+        Olá! Eu sou o Salomão, seu assistente de IA na Mundu Academy. Como posso ajudar com seus estudos hoje?
+      </div>
+    </div>
+    <div class="chatbot-input-area">
+      <input type="text" class="chatbot-input" id="chatbotInput" placeholder="Digite sua pergunta..." onkeypress="handleChatKeypress(event)">
+      <button class="chatbot-send" onclick="sendChatMessage()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ============ QUICK NOTE MODAL (Segundo Cérebro) ============ -->
+  <div class="quicknote-backdrop" id="quicknoteBackdrop" onclick="closeQuickNote(event)">
+    <div class="quicknote-modal" onclick="event.stopPropagation()">
+      <div class="quicknote-header">
+        <div>
+          <div class="quicknote-eyebrow">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4.5 4.5 0 0 0-4.5 4.5c0 .56.1 1.1.28 1.6A4.5 4.5 0 0 0 5 12.5c0 1.18.46 2.27 1.21 3.07A4.5 4.5 0 0 0 7.5 22h9a4.5 4.5 0 0 0 1.29-6.43A4.49 4.49 0 0 0 19 12.5a4.5 4.5 0 0 0-2.78-4.4c.18-.5.28-1.04.28-1.6A4.5 4.5 0 0 0 12 2z"/></svg>
+            <span>Quick Note · Segundo Cérebro</span>
+          </div>
+          <h3 class="quicknote-title">Capture o que aprendeu agora</h3>
+          <p class="quicknote-source" id="quicknoteSource">Fonte: <span id="quicknoteSourceText">—</span></p>
+        </div>
+        <button class="quicknote-close" onclick="closeQuickNote()" aria-label="Fechar">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="quicknote-body">
+        <input type="text" id="quicknoteTitle" class="quicknote-input" placeholder="Título da nota (ex.: SBI funciona quando o gatilho é claro)">
+        <textarea id="quicknoteContent" class="quicknote-textarea" rows="6" placeholder="Destile a ideia em 2-3 linhas. Como você aplicaria isso amanhã?"></textarea>
+        <div class="quicknote-meta">
+          <span class="quicknote-xp">+10 XP ao salvar</span>
+          <span class="quicknote-hint">Atalho: Ctrl + Enter</span>
+        </div>
+      </div>
+      <div class="quicknote-footer">
+        <button class="btn-outline" onclick="closeQuickNote()">Cancelar</button>
+        <button class="btn-primary" onclick="saveQuickNote()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Salvar no My Brain
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TOAST ============ -->
+  <div class="mundu-toast" id="munduToast"></div>
+
+  <!-- JavaScript -->
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+
+    // Aplica data-pct -> width e data-delay -> animation-delay
+    // (mantemos os valores em data-attrs em vez de inline style para evitar
+    // que o linter de CSS tente interpretar Jinja dentro do atributo style)
+    document.querySelectorAll('[data-pct]').forEach(function(el){
+      el.style.width = el.dataset.pct + '%';
+    });
+    document.querySelectorAll('[data-delay]').forEach(function(el){
+      el.style.animationDelay = el.dataset.delay + 's';
+    });
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

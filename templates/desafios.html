@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}Desafios & Gamificação - Mundu Academy{% endblock %}
+{% block page_title %}Desafios & Gamificação{% endblock %}
+
+{% block content %}
+<div class="px-4 md:px-8 py-4 md:py-6 space-y-8 pb-20 md:pb-6 w-full max-w-7xl mx-auto">
+
+  <!-- Header com Streak -->
+  <div class="relative overflow-hidden rounded-xl bg-gradient-to-r from-primary/20 via-card to-accent/20 border border-primary/30 p-4 md:p-5">
+    <div class="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+    <div class="absolute bottom-0 left-0 w-32 h-32 bg-accent/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+    <div class="relative flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <div class="relative">
+          <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-primary via-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/40">
+            <i data-lucide="flame" class="h-8 w-8 md:h-10 md:w-10 text-primary-foreground"></i>
+          </div>
+          <div class="absolute -top-1 -right-1 w-6 h-6 md:w-7 md:h-7 bg-secondary rounded-full flex items-center justify-center border-2 border-background">
+            <i data-lucide="check-circle" class="h-3 w-3 md:h-4 md:w-4 text-secondary-foreground"></i>
+          </div>
+        </div>
+        <div class="text-center md:text-left">
+          <div class="flex items-baseline gap-1.5 justify-center md:justify-start">
+            <span class="text-3xl md:text-4xl font-bold text-foreground">12</span>
+            <span class="text-base text-muted-foreground">dias</span>
+          </div>
+          <p class="text-sm text-muted-foreground">de sequência ativa</p>
+          <div class="flex items-center gap-2 mt-2 justify-center md:justify-start flex-wrap">
+            <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold bg-accent text-accent-foreground border-transparent">1.5x XP</span>
+            <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold bg-primary/20 text-primary border-primary/30">+300 XP hoje</span>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-col items-center md:items-end gap-1.5 w-full md:w-auto mt-4 md:mt-0">
+        <p class="text-xs text-muted-foreground">Próximo bônus em</p>
+        <div class="flex items-center gap-1.5">
+          <span class="text-2xl font-bold text-primary">2</span>
+          <span class="text-sm text-muted-foreground">dias</span>
+        </div>
+        <div class="w-full md:w-32 h-2 rounded-full bg-muted overflow-hidden">
+          <div class="bg-primary h-full transition-all" style="width: 85%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Desafios Diários -->
+  <section class="space-y-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="p-2 rounded-lg bg-primary/20"><i data-lucide="rocket" class="h-5 w-5 text-primary"></i></div>
+        <div>
+          <h2 class="text-lg font-bold text-foreground">Desafios Diários</h2>
+          <p class="text-sm text-muted-foreground">Renova em 6h 42min</p>
+        </div>
+      </div>
+      <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold gap-1 text-foreground border-border bg-card">
+        <i data-lucide="check-circle" class="h-3 w-3"></i> 1/3
+      </span>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+      {% for d in daily %}
+      <div class="rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden border-border/50 hover:border-primary/30 transition-all bg-card/80">
+        <div class="p-4">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 {% if d.comp %}bg-primary/20{% else %}bg-muted/50{% endif %}">
+              <i data-lucide="{{ d.icon }}" class="h-6 w-6 {% if d.comp %}text-primary{% else %}text-muted-foreground{% endif %}"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2">
+                    <h3 class="font-semibold text-foreground text-sm truncate">{{ d.titulo }}</h3>
+                    {% if d.comp %}<i data-lucide="check-circle" class="h-3.5 w-3.5 text-primary shrink-0"></i>{% endif %}
+                  </div>
+                  <p class="text-xs text-muted-foreground mt-0.5 truncate">{{ d.desc }}</p>
+                </div>
+                <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold shrink-0 {% if d.comp %}bg-primary text-primary-foreground border-transparent{% else %}bg-primary/20 text-primary border-transparent{% endif %}">+{{ d.xp }}</span>
+              </div>
+              <div class="mt-3">
+                <div class="h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div class="h-full bg-gradient-to-r from-primary to-secondary rounded-full" style="width: {% if d.comp %}100{% else %}0{% endif %}%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Desafios Semanais -->
+  <section class="space-y-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="p-2 rounded-lg bg-secondary/20"><i data-lucide="target" class="h-5 w-5 text-secondary"></i></div>
+        <div>
+          <h2 class="text-lg font-bold text-foreground">Desafios Semanais</h2>
+          <p class="text-sm text-muted-foreground">Renova em 4 dias</p>
+        </div>
+      </div>
+      <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold gap-1 text-foreground border-border bg-card">
+        <i data-lucide="check-circle" class="h-3 w-3"></i> 1/4
+      </span>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
+      {% for w in weekly %}
+      <div class="rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden border-border/50 hover:border-secondary/30 transition-all bg-card/80">
+        <div class="p-4">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 {% if w.comp %}bg-secondary/20{% else %}bg-muted/50{% endif %}">
+              <i data-lucide="{{ w.icon }}" class="h-6 w-6 {% if w.comp %}text-secondary{% else %}text-muted-foreground{% endif %}"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2">
+                    <h3 class="font-semibold text-foreground text-sm truncate">{{ w.titulo }}</h3>
+                    {% if w.comp %}<i data-lucide="check-circle" class="h-3.5 w-3.5 text-secondary shrink-0"></i>{% endif %}
+                  </div>
+                  <p class="text-xs text-muted-foreground mt-0.5 truncate">{{ w.desc }}</p>
+                </div>
+                <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold shrink-0 {% if w.comp %}bg-secondary text-secondary-foreground border-transparent{% else %}bg-secondary/20 text-secondary border-transparent{% endif %}">+{{ w.xp }}</span>
+              </div>
+              <div class="mt-3 flex items-center gap-2">
+                <div class="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                  <div class="h-full bg-gradient-to-r from-secondary to-primary rounded-full transition-all" style="width: {{(w.prog / w.meta) * 100}}%"></div>
+                </div>
+                <span class="text-xs text-muted-foreground shrink-0">{{ w.prog }}/{{ w.meta }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Conquistas Grid -->
+  <section class="space-y-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="p-2 rounded-lg bg-accent/20"><i data-lucide="trophy" class="h-5 w-5 text-accent"></i></div>
+        <div>
+          <h2 class="text-lg font-bold text-foreground">Conquistas</h2>
+          <p class="text-sm text-muted-foreground">2 de 6 desbloqueadas</p>
+        </div>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      {% set conquistas = [
+        {'titulo': 'Primeira Aula', 'dif': 'fácil', 'bg': 'from-emerald-500/20 to-emerald-800/20 border-emerald-500/40', 'glow': 'shadow-emerald-500/30', 'icon': 'graduation-cap', 'unlocked': true, 'prog': 1, 'meta': 1, 'prog_color': ''},
+        {'titulo': 'Streak de 7 Dias', 'dif': 'fácil', 'bg': 'from-emerald-500/20 to-emerald-800/20 border-emerald-500/40', 'glow': 'shadow-emerald-500/30', 'icon': 'flame', 'unlocked': true, 'prog': 1, 'meta': 1, 'prog_color': ''},
+        {'titulo': 'Mestre do Conhecimento', 'dif': 'difícil', 'bg': 'from-red-500/20 to-red-800/20 border-red-500/40', 'glow': '', 'icon': 'trophy', 'unlocked': false, 'prog': 42, 'meta': 100, 'prog_color': 'from-red-500 to-red-400'},
+        {'titulo': 'Lendário Aprendiz', 'dif': 'difícil', 'bg': 'from-red-500/20 to-red-800/20 border-red-500/40', 'glow': '', 'icon': 'crown', 'unlocked': false, 'prog': 12, 'meta': 50, 'prog_color': 'from-red-500 to-red-400'},
+        {'titulo': 'Social Butterfly', 'dif': 'médio', 'bg': 'from-violet-500/20 to-violet-800/20 border-violet-500/40', 'glow': '', 'icon': 'heart', 'unlocked': false, 'prog': 8, 'meta': 25, 'prog_color': 'from-violet-500 to-violet-400'},
+        {'titulo': 'Trilheiro Master', 'dif': 'médio', 'bg': 'from-violet-500/20 to-violet-800/20 border-violet-500/40', 'glow': '', 'icon': 'mountain', 'unlocked': false, 'prog': 1, 'meta': 5, 'prog_color': 'from-violet-500 to-violet-400'}
+      ] %}
+      {% for c in conquistas %}
+      <div class="rounded-xl border bg-card text-card-foreground shadow-sm h-full bg-gradient-to-br {{ c.bg }} overflow-hidden {% if not c.unlocked %}opacity-60{% else %}shadow-lg {{ c.glow }}{% endif %} cursor-pointer hover:scale-105 transition-transform">
+        <div class="p-4 flex flex-col items-center text-center">
+          <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-3 {% if c.unlocked %}bg-gradient-to-br from-background/80 to-background/40{% else %}bg-muted/50{% endif %}">
+            {% if c.unlocked %}
+            <i data-lucide="{{ c.icon }}" class="h-8 w-8 text-foreground"></i>
+            {% else %}
+            <i data-lucide="lock" class="h-6 w-6 text-muted-foreground"></i>
+            {% endif %}
+          </div>
+          <h3 class="font-bold text-foreground text-xs leading-tight mb-2">{{ c.titulo }}</h3>
+          
+          <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold capitalize {% if c.dif == 'fácil' %}bg-emerald-500 text-white border-emerald-400{% elif c.dif == 'médio' %}bg-violet-500 text-white border-violet-400{% else %}bg-red-500 text-white border-red-400{% endif %}">
+            {{ c.dif }}
+          </span>
+
+          {% if not c.unlocked %}
+          <div class="w-full mt-2">
+            <div class="h-1.5 bg-background/50 rounded-full overflow-hidden">
+              <div class="h-full bg-gradient-to-r {{ c.prog_color }} rounded-full" style="width: {{(c.prog / c.meta) * 100}}%"></div>
+            </div>
+            <p class="text-[10px] text-muted-foreground mt-1">{{ c.prog }}/{{ c.meta }}</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- Desbloqueáveis -->
+  <section class="space-y-4">
+    <div class="flex items-center gap-3">
+      <div class="p-2 rounded-lg bg-primary/20"><i data-lucide="gift" class="h-5 w-5 text-primary"></i></div>
+      <div><h2 class="text-lg font-bold text-foreground">Próximos Desbloqueáveis</h2><p class="text-sm text-muted-foreground">Recompensas exclusivas</p></div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="rounded-xl border text-card-foreground shadow-sm bg-gradient-to-r from-card via-card to-primary/5 border-border/50 hover:border-primary/30 transition-all">
+        <div class="p-4 flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center"><i data-lucide="gem" class="h-7 w-7 text-primary"></i></div>
+          <div class="flex-1">
+            <h3 class="font-bold text-foreground">Avatar Mestre</h3><p class="text-sm text-muted-foreground">Avatar exclusivo</p>
+            <div class="mt-2">
+              <div class="flex justify-between text-xs mb-1"><span class="text-muted-foreground">42/50</span><span class="text-primary font-medium">84%</span></div>
+              <div class="h-2 bg-muted rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-primary to-accent rounded-full" style="width: 84%;"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="rounded-xl border text-card-foreground shadow-sm bg-gradient-to-r from-card via-card to-primary/5 border-border/50 hover:border-primary/30 transition-all">
+        <div class="p-4 flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center"><i data-lucide="sparkles" class="h-7 w-7 text-primary"></i></div>
+          <div class="flex-1">
+            <h3 class="font-bold text-foreground">Tema Dark Gold</h3><p class="text-sm text-muted-foreground">Tema premium</p>
+            <div class="mt-2">
+              <div class="flex justify-between text-xs mb-1"><span class="text-muted-foreground">12/30</span><span class="text-primary font-medium">40%</span></div>
+              <div class="h-2 bg-muted rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-primary to-accent rounded-full" style="width: 40%;"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+{% endblock %}

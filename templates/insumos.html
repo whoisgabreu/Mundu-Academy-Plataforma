@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}Biblioteca de Insumos - Mundu Academy{% endblock %}
+{% block page_title %}Biblioteca de Insumos{% endblock %}
+
+{% block content %}
+<div class="px-4 md:px-8 py-4 md:py-6 space-y-6 pb-20 md:pb-6 w-full max-w-7xl mx-auto">
+  
+  <!-- Header & Search -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="p-2 rounded-lg bg-primary/20">
+        <i data-lucide="folder-open" class="h-6 w-6 text-primary"></i>
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold text-foreground">Biblioteca de Insumos</h1>
+        <p class="text-muted-foreground text-sm">Templates, manuais e ferramentas prontas</p>
+      </div>
+    </div>
+    
+    <div class="flex items-center gap-2">
+      <div class="relative w-full md:w-64">
+        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"></i>
+        <input type="text" placeholder="Buscar insumos..." class="flex h-10 w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-9 bg-card border-secondary/40">
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="w-full">
+    <div class="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground w-full md:w-auto bg-card/50 border border-border/50">
+      <button onclick="switchTab('descobrir')" id="tab-btn-descobrir" class="tab-btn inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-background text-foreground shadow min-w-[120px]">
+        <i data-lucide="sparkles" class="h-4 w-4 mr-2"></i> Descobrir
+      </button>
+      <button onclick="switchTab('meus-insumos')" id="tab-btn-meus-insumos" class="tab-btn inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-w-[120px]">
+        <i data-lucide="bookmark" class="h-4 w-4 mr-2"></i> Meus Insumos
+      </button>
+    </div>
+
+    <!-- Tab Content: Descobrir -->
+    <div id="tab-content-descobrir" class="tab-content mt-6 space-y-8">
+      
+      <!-- Categories -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+        {% set cats = ['Todos', 'Marketing', 'Vendas', 'Produto', 'Finanças', 'Design', 'IA & Automação'] %}
+        {% for cat in cats %}
+        <button class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border bg-transparent hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3 shrink-0 rounded-full {% if loop.first %}border-primary bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary{% else %}border-secondary/40 bg-card hover:border-primary/50 text-muted-foreground hover:text-foreground{% endif %}">
+          {{ cat }}
+        </button>
+        {% endfor %}
+      </div>
+
+      {% set insumos = [
+        {'id': '1', 'title': 'Checklist de Lançamento de Produto', 'desc': 'Template completo com todas as etapas para um lançamento de sucesso', 'meta': '2k views', 'author': 'Thiago Nigro', 'thumb': 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&q=80', 'new': false, 'trend': true, 'prem': false, 'fmt': 'PDF'},
+        {'id': '2', 'title': 'Planilha de Controle Financeiro', 'desc': 'Modelo para gestão de fluxo de caixa e projeções', 'meta': '5k views', 'author': 'Ana Lima', 'thumb': 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=400&q=80', 'new': false, 'trend': false, 'prem': true, 'fmt': 'Planilha'},
+        {'id': '3', 'title': 'Gerador de Títulos para Ads', 'desc': 'Prompt otimizado para criar títulos que convertem', 'meta': '1k views', 'author': 'Pedro Mendes', 'thumb': 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&q=80', 'new': true, 'trend': false, 'prem': false, 'fmt': 'Prompt'},
+        {'id': '4', 'title': 'Script de Cold Call B2B', 'desc': 'Roteiro para ligações de prospecção corporativa', 'meta': '3k views', 'author': 'Carlos Oliveira', 'thumb': 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=400&q=80', 'new': false, 'trend': false, 'prem': false, 'fmt': 'PDF'},
+        {'id': '5', 'title': 'Calculadora CAC e LTV', 'desc': 'Planilha para métricas de marketing', 'meta': '4k views', 'author': 'Rafael Costa', 'thumb': 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&q=80', 'new': false, 'trend': false, 'prem': true, 'fmt': 'Planilha'}
+      ] %}
+
+      <!-- Em Alta -->
+      <div class="space-y-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="flame" class="w-5 h-5 text-orange-500"></i>
+          <div>
+            <h2 class="text-base font-semibold text-foreground">Em Alta</h2>
+            <p class="text-xs text-muted-foreground">Os mais baixados e acessados na última semana</p>
+          </div>
+        </div>
+        <div class="flex gap-4 overflow-x-auto scrollbar-none pb-1 -mx-4 px-4">
+          {% for i in insumos %}
+          <div class="w-[260px] shrink-0 group cursor-pointer">
+            <div class="rounded-xl border text-card-foreground shadow-sm overflow-hidden border-secondary/40 bg-card hover:border-primary/50 transition-all h-full">
+              <div class="relative h-[140px] overflow-hidden">
+                <img src="{{ i.thumb }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+                <div class="absolute top-2 left-2 flex items-center gap-1.5">
+                  {% if i.new %}
+                  <span class="inline-flex items-center rounded-full px-2 py-0.5 font-medium bg-emerald-500 text-white border-0 text-[10px]">Novo</span>
+                  {% endif %}
+                  {% if i.trend %}
+                  <span class="inline-flex items-center rounded-full px-2 py-0.5 font-medium bg-orange-500 text-white border-0 text-[10px]"><i data-lucide="flame" class="w-3 h-3 mr-0.5"></i> Em alta</span>
+                  {% endif %}
+                  {% if i.prem %}
+                  <span class="inline-flex items-center rounded-full px-2 py-0.5 font-medium bg-amber-500 text-black border-0 text-[10px]"><i data-lucide="crown" class="w-3 h-3 mr-0.5"></i> Premium</span>
+                  {% endif %}
+                </div>
+                <span class="absolute top-2 right-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-black/80 text-white border-0 text-[10px]">{{ i.fmt }}</span>
+                <button class="absolute bottom-2 right-2 p-1.5 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <i data-lucide="heart" class="w-4 h-4 text-white"></i>
+                </button>
+                <div class="absolute bottom-2 left-2 flex items-center gap-1.5">
+                  <span class="w-5 h-5 rounded-full border border-white/30 object-cover bg-primary/20 flex items-center justify-center text-[10px] text-white font-bold">{{ i.author[0] }}</span>
+                  <span class="text-[11px] text-white font-medium">{{ i.author }}</span>
+                </div>
+              </div>
+              <div class="p-3 space-y-2">
+                <h3 class="font-medium text-sm text-foreground line-clamp-1 group-hover:text-primary transition-colors">{{ i.title }}</h3>
+                <p class="text-xs text-muted-foreground line-clamp-1">{{ i.desc }}</p>
+                <div class="flex items-center justify-between pt-1">
+                  <div class="flex items-center gap-3 text-[11px] text-muted-foreground">
+                    <span class="flex items-center gap-1"><i data-lucide="eye" class="w-3 h-3"></i> {{ i.meta }}</span>
+                  </div>
+                  <div class="flex items-center gap-0.5">
+                    <i data-lucide="star" class="w-3.5 h-3.5 fill-yellow-400 text-yellow-400"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      
+      <!-- Explorar Todos -->
+      <div class="space-y-4">
+        <div class="flex items-center gap-2">
+          <i data-lucide="layout-grid" class="w-5 h-5 text-primary"></i>
+          <div>
+            <h2 class="text-base font-semibold text-foreground">Explorar Todos</h2>
+            <p class="text-xs text-muted-foreground">Encontre todos os materiais disponíveis</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {% for i in insumos %}
+          <div class="w-full shrink-0 group cursor-pointer">
+            <div class="rounded-xl border text-card-foreground shadow-sm overflow-hidden border-secondary/40 bg-card hover:border-primary/50 transition-all h-full">
+              <div class="relative h-[140px] overflow-hidden">
+                <img src="{{ i.thumb }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+                <button class="absolute bottom-2 right-2 p-1.5 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <i data-lucide="heart" class="w-4 h-4 text-white"></i>
+                </button>
+              </div>
+              <div class="p-3 space-y-2">
+                <h3 class="font-medium text-sm text-foreground line-clamp-1 group-hover:text-primary transition-colors">{{ i.title }}</h3>
+                <p class="text-xs text-muted-foreground line-clamp-1">{{ i.desc }}</p>
+                <div class="flex items-center justify-between pt-1">
+                  <div class="flex items-center gap-3 text-[11px] text-muted-foreground">
+                    <span class="flex items-center gap-1">{{ i.author }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Tab Content: Meus Insumos -->
+    <div id="tab-content-meus-insumos" class="tab-content mt-6 space-y-8 hidden">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="heart" class="w-5 h-5 text-red-500 fill-red-500"></i>
+          <div>
+            <h2 class="text-base font-semibold text-foreground">Favoritos</h2>
+            <p class="text-xs text-muted-foreground">Seus insumos marcados com coração</p>
+          </div>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {% for i in insumos %}
+        {% if loop.index < 3 %}
+        <div class="w-full shrink-0 group cursor-pointer">
+            <div class="rounded-xl border text-card-foreground shadow-sm overflow-hidden border-secondary/40 bg-card hover:border-primary/50 transition-all h-full">
+              <div class="relative h-[140px] overflow-hidden">
+                <img src="{{ i.thumb }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+                <button class="absolute bottom-2 right-2 p-1.5 rounded-full bg-black/60 transition-opacity">
+                  <i data-lucide="heart" class="w-4 h-4 text-red-500 fill-red-500"></i>
+                </button>
+              </div>
+              <div class="p-3 space-y-2">
+                <h3 class="font-medium text-sm text-foreground line-clamp-1 group-hover:text-primary transition-colors">{{ i.title }}</h3>
+                <p class="text-xs text-muted-foreground line-clamp-1">{{ i.desc }}</p>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function switchTab(tabId) {
+    // Hide all contents
+    document.querySelectorAll('.tab-content').forEach(function(el) {
+      el.classList.add('hidden');
+    });
+    // Remove active styles from buttons
+    document.querySelectorAll('.tab-btn').forEach(function(el) {
+      el.classList.remove('bg-background', 'text-foreground', 'shadow');
+    });
+    // Add active styles to clicked button
+    document.getElementById('tab-btn-' + tabId).classList.add('bg-background', 'text-foreground', 'shadow');
+    // Show selected content
+    document.getElementById('tab-content-' + tabId).classList.remove('hidden');
+  }
+</script>
+<style>
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+</style>
+{% endblock %}

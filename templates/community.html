@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+
+{% block title %}r/{{ community.slug }} - Mundu Guild{% endblock %}
+{% block page_title %}r/{{ community.slug }}{% endblock %}
+
+{% block content %}
+
+<!-- ============ COMMUNITY HEADER ============ -->
+<section class="community-header community-banner-{{ community.color }}">
+  <div class="community-banner"></div>
+  <div class="community-header-row">
+    <div class="community-icon-large">
+      <i data-lucide="{{ community.icon }}"></i>
+    </div>
+    <div class="community-header-info">
+      <h1 class="community-title">
+        <span class="community-prefix">r/</span>{{ community.slug }}
+      </h1>
+      <p class="community-headline">{{ community.name }} · {{ community.description }}</p>
+      <div class="community-meta">
+        <span><strong>{{ community.members }}</strong> membros</span>
+        <span class="meta-dot">·</span>
+        <span class="online-dot-meta"><span class="community-pulse"></span><strong>{{ community.online_now }}</strong> online</span>
+        <span class="meta-dot">·</span>
+        <span>desde {{ community.created_at }}</span>
+      </div>
+    </div>
+    <div class="community-header-actions">
+      <button class="community-join-btn" id="joinBtn" data-slug="{{ community.slug }}" data-joined="false" onclick="toggleJoin(this)">
+        <span class="join-state-out">+ Entrar</span>
+        <span class="join-state-in">✓ Membro</span>
+      </button>
+      <button class="community-create-btn" onclick="openComposer('{{ community.slug }}')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+        Criar post
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LAYOUT 2 COLUNAS ============ -->
+<div class="community-layout">
+  <main class="community-main">
+
+    <!-- Sort tabs -->
+    <div class="community-sort-bar">
+      <a href="?sort=hot" class="sort-tab {% if sort == 'hot' %}active{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+        Hot
+      </a>
+      <a href="?sort=new" class="sort-tab {% if sort == 'new' %}active{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Novos
+      </a>
+      <a href="?sort=top" class="sort-tab {% if sort == 'top' %}active{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        Top
+      </a>
+      <a href="?sort=rising" class="sort-tab {% if sort == 'rising' %}active{% endif %}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        Em alta
+      </a>
+    </div>
+
+    <!-- Posts list -->
+    <div class="community-posts-list">
+      {% for p in posts %}
+      <article class="redd-post-card animate-fade-in-up" data-delay="{{ loop.index0 * 0.04 }}">
+        <div class="redd-vote-col">
+          <button class="redd-vote-btn" data-post="{{ p.id }}" data-dir="up" onclick="votePost(this)" aria-label="Upvote">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+          </button>
+          <span class="redd-vote-score" id="score-{{ p.id }}">{{ p.upvotes }}</span>
+          <button class="redd-vote-btn" data-post="{{ p.id }}" data-dir="down" onclick="votePost(this)" aria-label="Downvote">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+        </div>
+
+        <div class="redd-post-body">
+          <div class="redd-post-meta">
+            <span>por</span>
+            <a href="/u/{{ p.author }}" class="redd-post-author author-link"><strong>u/{{ p.author }}</strong></a>
+            <span class="meta-dot">·</span>
+            <span>{{ p.time_ago }}</span>
+            <span class="redd-post-tag thread-tag-{{ p.tag }}">{{ p.tag }}</span>
+          </div>
+          <a href="/g/{{ p.community_slug }}/post/{{ p.slug }}" class="redd-post-titlelink">
+            <h2 class="redd-post-title">{{ p.title }}</h2>
+            <p class="redd-post-preview">{{ p.preview }}</p>
+          </a>
+          <div class="redd-post-footer">
+            <a href="/g/{{ p.community_slug }}/post/{{ p.slug }}" class="redd-post-action">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              {{ p.replies }} comentários
+            </a>
+            <span class="redd-post-action">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+              Salvar
+            </span>
+            <span class="redd-post-action">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
+              Compartilhar
+            </span>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+
+      {% if not posts %}
+      <div class="empty-state">
+        <p>Nenhum post nesta ordenação ainda. <a href="?sort=hot">Voltar pro Hot</a>.</p>
+      </div>
+      {% endif %}
+    </div>
+
+  </main>
+
+  <!-- ============ SIDEBAR DA COMUNIDADE ============ -->
+  <aside class="community-sidebar">
+    <div class="sidebar-card">
+      <h3 class="sidebar-card-title">Sobre r/{{ community.slug }}</h3>
+      <p class="sidebar-card-text">{{ community.description_long }}</p>
+      <div class="sidebar-card-stats">
+        <div>
+          <strong>{{ community.members }}</strong>
+          <span>Membros</span>
+        </div>
+        <div>
+          <strong>{{ community.online_now }}</strong>
+          <span class="online-dot-meta"><span class="community-pulse"></span>Online</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-card">
+      <h3 class="sidebar-card-title">Regras</h3>
+      <ol class="sidebar-rules">
+        {% for r in community.rules %}
+        <li><span class="rule-num">{{ loop.index }}</span><span class="rule-text">{{ r }}</span></li>
+        {% endfor %}
+      </ol>
+    </div>
+
+    <div class="sidebar-card">
+      <h3 class="sidebar-card-title">Moderadores</h3>
+      <ul class="sidebar-mods">
+        {% for m in moderators %}
+        <li>
+          <a href="/u/{{ m.handle }}" class="mod-pill">
+            <span class="mod-avatar">{{ m.iniciais }}</span>
+            <span>u/{{ m.handle }}</span>
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    {% if related %}
+    <div class="sidebar-card">
+      <h3 class="sidebar-card-title">Comunidades relacionadas</h3>
+      <ul class="sidebar-related">
+        {% for r in related %}
+        <li>
+          <a href="/g/{{ r.slug }}" class="related-pill">
+            <i data-lucide="{{ r.icon }}"></i>
+            <div>
+              <div class="related-name">r/{{ r.slug }}</div>
+              <div class="related-members">{{ r.members }} membros</div>
+            </div>
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+  </aside>
+</div>
+
+<!-- ============ COMPOSER MODAL ============ -->
+<div class="composer-backdrop" id="composerBackdrop" onclick="closeComposer(event)">
+  <div class="composer-modal" onclick="event.stopPropagation()">
+    <div class="composer-header">
+      <div>
+        <div class="composer-eyebrow">Novo post em <strong id="composerCommunity">r/{{ community.slug }}</strong></div>
+        <h3 class="composer-title">O que você quer trazer pra discussão?</h3>
+      </div>
+      <button class="composer-close" onclick="closeComposer()" aria-label="Fechar">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="composer-tabs">
+      <button class="composer-tab active" data-type="text" onclick="setComposerType('text')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="14" y1="18" y2="18"/></svg>
+        Texto
+      </button>
+      <button class="composer-tab" data-type="link" onclick="setComposerType('link')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Link
+      </button>
+      <button class="composer-tab disabled" title="Em breve">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+        Imagem
+      </button>
+      <button class="composer-tab disabled" title="Em breve">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.4 9.4a2 2 0 1 1-2.83-2.82"/><path d="M14 14a4 4 0 1 1-5.66-5.65"/></svg>
+        Enquete
+      </button>
+    </div>
+
+    <div class="composer-body">
+      <input type="text" id="composerTitle" class="composer-input" placeholder="Título do post (claro e específico)" maxlength="280">
+      <textarea id="composerBody" class="composer-textarea" rows="8" placeholder="Caso, pergunta ou framework — o que vai gerar boa discussão?"></textarea>
+      <input type="url" id="composerUrl" class="composer-input composer-url" placeholder="https://..." style="display:none">
+    </div>
+
+    <div class="composer-footer">
+      <span class="composer-hint">Markdown básico: **negrito**, *itálico*, [link](url)</span>
+      <div class="composer-footer-actions">
+        <button class="btn-outline" onclick="closeComposer()">Cancelar</button>
+        <button class="btn-primary" onclick="submitPost()">Publicar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // === Join / Leave comunidade ===
+  function toggleJoin(btn) {
+    var slug = btn.dataset.slug;
+    var joined = btn.dataset.joined === 'true';
+    var newJoined = !joined;
+    btn.dataset.joined = newJoined ? 'true' : 'false';
+    btn.classList.toggle('is-joined', newJoined);
+    fetch('/api/community/' + slug + '/join', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({joined: newJoined})
+    }).catch(function(){});
+    showToast(newJoined ? 'Você entrou em r/' + slug : 'Você saiu de r/' + slug);
+  }
+
+  // === Vote em post ===
+  // Estado local: {postId: 'up'|'down'|null}
+  var voteState = {};
+  function votePost(btn) {
+    var postId = btn.dataset.post;
+    var dir = btn.dataset.dir;
+    var current = voteState[postId] || null;
+    var next = (current === dir) ? null : dir;
+    voteState[postId] = next;
+
+    // Atualiza visual dos 2 botões do mesmo post
+    var card = btn.closest('.redd-post-card');
+    if (card) {
+      card.querySelectorAll('.redd-vote-btn').forEach(function(b){
+        b.classList.remove('voted-up', 'voted-down');
+      });
+      if (next === 'up') btn.classList.add('voted-up');
+      if (next === 'down') btn.classList.add('voted-down');
+    }
+
+    // Atualiza contagem visual (delta = transição current→next)
+    var scoreEl = document.getElementById('score-' + postId);
+    if (scoreEl) {
+      var delta = 0;
+      if (current === 'up') delta -= 1;
+      if (current === 'down') delta += 1;
+      if (next === 'up') delta += 1;
+      if (next === 'down') delta -= 1;
+      var n = parseInt(scoreEl.textContent, 10) + delta;
+      scoreEl.textContent = n;
+    }
+
+    fetch('/api/post/' + postId + '/vote', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({direction: next})
+    }).catch(function(){});
+  }
+  // Expor pra o card body (que tem onclick inline acessar via window)
+  window.votePost = votePost;
+  window.toggleJoin = toggleJoin;
+
+  // === Composer ===
+  var composerType = 'text';
+
+  function openComposer(slug) {
+    var bd = document.getElementById('composerBackdrop');
+    if (!bd) return;
+    bd.classList.add('open');
+    setTimeout(function(){
+      var t = document.getElementById('composerTitle');
+      if (t) t.focus();
+    }, 220);
+  }
+  function closeComposer(ev) {
+    if (ev && ev.currentTarget !== ev.target) return;
+    var bd = document.getElementById('composerBackdrop');
+    if (bd) bd.classList.remove('open');
+  }
+  function setComposerType(type) {
+    composerType = type;
+    document.querySelectorAll('.composer-tab').forEach(function(t){
+      t.classList.toggle('active', t.dataset.type === type);
+    });
+    var url = document.getElementById('composerUrl');
+    var body = document.getElementById('composerBody');
+    if (type === 'link') {
+      if (url) url.style.display = '';
+      if (body) body.placeholder = 'Comentário (opcional) sobre o link';
+    } else {
+      if (url) url.style.display = 'none';
+      if (body) body.placeholder = 'Caso, pergunta ou framework — o que vai gerar boa discussão?';
+    }
+  }
+  function submitPost() {
+    var titleEl = document.getElementById('composerTitle');
+    var bodyEl = document.getElementById('composerBody');
+    var urlEl = document.getElementById('composerUrl');
+    var title = (titleEl && titleEl.value || '').trim();
+    var body = (bodyEl && bodyEl.value || '').trim();
+    var url = (urlEl && urlEl.value || '').trim();
+
+    if (!title) {
+      if (titleEl) titleEl.focus();
+      return;
+    }
+    if (composerType === 'link' && !url) {
+      if (urlEl) urlEl.focus();
+      return;
+    }
+
+    fetch('/api/post', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        community_slug: '{{ community.slug }}',
+        title: title,
+        post_type: composerType,
+        body: body,
+        url: url,
+      })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      closeComposer();
+      showToast('🎉 Post publicado em r/{{ community.slug }}');
+      if (titleEl) titleEl.value = '';
+      if (bodyEl) bodyEl.value = '';
+      if (urlEl) urlEl.value = '';
+    })
+    .catch(function(){
+      showToast('Erro ao publicar — tente novamente');
+    });
+  }
+  window.openComposer = openComposer;
+  window.closeComposer = closeComposer;
+  window.setComposerType = setComposerType;
+  window.submitPost = submitPost;
+
+  // Esc fecha composer
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') {
+      var bd = document.getElementById('composerBackdrop');
+      if (bd && bd.classList.contains('open')) closeComposer();
+    }
+  });
+</script>
+{% endblock %}

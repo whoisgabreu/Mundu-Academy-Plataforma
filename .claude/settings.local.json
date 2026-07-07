@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(.venv/Scripts/pip install:*)",
+      "Bash(.venv/Scripts/python manage.py check)",
+      "Bash(.venv/Scripts/python manage.py makemigrations cursos)",
+      "Bash(.venv/Scripts/python manage.py migrate)",
+      "Bash(.venv/Scripts/python manage.py migrate --fake cursos)",
+      "Bash(.venv/Scripts/python manage.py runserver 8000)",
+      "Bash(curl -s http://localhost:8000/)",
+      "Bash(.venv/Scripts/python manage.py makemigrations)",
+      "Bash(.venv/Scripts/python manage.py makemigrations usuarios)",
+      "Bash(.venv/Scripts/python manage.py seed_db)",
+      "Bash(.venv/Scripts/python manage.py shell)",
+      "Bash(.venv/Scripts/python manage.py runserver 8001)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8001/login)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8001/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8001/conteudos)",
+      "Bash(.venv/Scripts/python manage.py runserver 8002)",
+      "Bash(curl -s -o /dev/null -w \"login: %{http_code}\\\\n\" http://localhost:8002/login)",
+      "Bash(curl -s -o /dev/null -w \"home sem auth: %{http_code}\\\\n\" http://localhost:8002/)",
+      "Bash(curl -s -o /dev/null -w \"registro: %{http_code}\\\\n\" http://localhost:8002/registro)",
+      "Bash(.venv/Scripts/python -c \"from PIL import Image; print\\('ok'\\)\")",
+      "Bash(.venv/Scripts/python -)",
+      "Bash(python -c ' *)",
+      "Bash(dir /b /a:-d)",
+      "Bash(dir /b /a:d)",
+      "Bash(.venv\\\\Scripts\\\\pip.exe install *)"
+    ]
+  }
+}

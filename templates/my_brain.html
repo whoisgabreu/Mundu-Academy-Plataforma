@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+
+{% block title %}Mundu Academy - My Brain{% endblock %}
+{% block page_title %}My Brain{% endblock %}
+
+{% block content %}
+
+<!-- ============ PILAR HEADER ============ -->
+<section class="pillar-header">
+  <div class="pillar-header-content">
+    <div class="pillar-eyebrow">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4.5 4.5 0 0 0-4.5 4.5c0 .56.1 1.1.28 1.6A4.5 4.5 0 0 0 5 12.5c0 1.18.46 2.27 1.21 3.07A4.5 4.5 0 0 0 7.5 22h9a4.5 4.5 0 0 0 1.29-6.43A4.49 4.49 0 0 0 19 12.5a4.5 4.5 0 0 0-2.78-4.4c.18-.5.28-1.04.28-1.6A4.5 4.5 0 0 0 12 2z"/></svg>
+      <span>My Brain</span>
+    </div>
+    <h1 class="pillar-title">Olá, {{ current_user.nome }} 👋</h1>
+    <p class="pillar-subtitle">Seu Segundo Cérebro na Mundu — privadas, públicas, forks. Liderança é hábito, não evento.</p>
+  </div>
+  <div class="pillar-header-stats">
+    <div class="pillar-stat">
+      <span class="pillar-stat-value">{{ notes|length }}</span>
+      <span class="pillar-stat-label">notas</span>
+    </div>
+    <div class="pillar-stat">
+      <span class="pillar-stat-value">{{ public_notes_count }}</span>
+      <span class="pillar-stat-label">públicas</span>
+    </div>
+    <div class="pillar-stat">
+      <span class="pillar-stat-value">{{ brain_karma }}</span>
+      <span class="pillar-stat-label">karma do Brain</span>
+    </div>
+    <div class="pillar-stat">
+      <span class="pillar-stat-value">{{ followers|length }}</span>
+      <span class="pillar-stat-label">seguidores</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DASHBOARD: STREAK + LEVEL ============ -->
+<section class="brain-dashboard">
+  <div class="brain-streak-card animate-fade-in-up">
+    <div class="brain-streak-header">
+      <div>
+        <div class="brain-streak-eyebrow">🔥 Streak diário</div>
+        <h3 class="brain-streak-value">{{ current_user.perfil.streak }} dias</h3>
+        <p class="brain-streak-hint">Liderança é hábito. Mantenha a chama acesa.</p>
+      </div>
+      <div class="brain-streak-fire">
+        <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+      </div>
+    </div>
+    <div class="brain-streak-week">
+      {% for d in streak %}
+      <div class="brain-streak-day {% if d.active %}active{% endif %}">
+        <span class="brain-streak-day-label">{{ d.day }}</span>
+        <div class="brain-streak-day-dot"></div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="brain-level-card animate-fade-in-up">
+    <div class="brain-level-header">
+      <div>
+        <div class="brain-level-eyebrow">⚡ Nível {{ current_user.perfil.nivel }}</div>
+        <h3 class="brain-level-name">{{ current_user.perfil.nome_nivel }}</h3>
+      </div>
+      <span class="brain-level-xp">{{ current_user.perfil.xp_total }} / {{ current_user.perfil.xp_proximo_nivel }} XP</span>
+    </div>
+    <div class="brain-level-bar">
+      <div class="brain-level-bar-fill" data-pct="{{ current_user.perfil.xp_percentual }}"></div>
+    </div>
+    <p class="brain-level-hint">Faltam {{ current_user.perfil.xp_proximo_nivel - current_user.perfil.xp_total }} XP para o próximo nível.</p>
+    <div class="brain-level-actions">
+      <span class="brain-level-tag">Pilar favorito: {{ current_user.perfil.pilar_favorito }}</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ QUICK NOTE FAB / CTA ============ -->
+<section class="brain-quicknote-cta animate-fade-in-up">
+  <div>
+    <h3>📝 Capture uma ideia agora</h3>
+    <p>Aprendeu algo no Feed, Library ou Guild? 30 segundos pra destilar — depois você revisita.</p>
+  </div>
+  <button class="btn-primary" onclick="openQuickNote('Nota livre', 'Captura espontânea')">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+    Nova Quick Note
+  </button>
+</section>
+
+<!-- ============ TABS ============ -->
+<nav class="profile-tabs brain-tabs">
+  <a href="?tab=private" class="profile-tab {% if tab == 'private' %}active{% endif %}">
+    🔒 Privadas <span class="tab-count">{{ notes|length - public_notes_count }}</span>
+  </a>
+  <a href="?tab=public" class="profile-tab {% if tab == 'public' %}active{% endif %}">
+    🌐 Públicas <span class="tab-count">{{ public_notes_count }}</span>
+  </a>
+  <a href="?tab=saved" class="profile-tab {% if tab == 'saved' %}active{% endif %}">
+    📌 Salvos <span class="tab-count">{{ saved_items|length }}</span>
+  </a>
+  <a href="?tab=forks" class="profile-tab {% if tab == 'forks' %}active{% endif %}">
+    🍴 Forks <span class="tab-count">{{ forks|length }}</span>
+  </a>
+  <a href="?tab=followers" class="profile-tab {% if tab == 'followers' %}active{% endif %}">
+    👥 Seguidores <span class="tab-count">{{ followers|length }}</span>
+  </a>
+</nav>
+
+<!-- ============ TAB CONTENT ============ -->
+<section class="profile-content">
+
+  {% if tab == 'private' or tab == 'public' %}
+    {% set filtered_notes = notes if tab == 'private' else notes %}
+    <div class="notes-grid">
+      {% for n in notes %}
+        {% if (tab == 'private' and not n.is_public) or (tab == 'public' and n.is_public) %}
+        <article class="note-card animate-fade-in-up" data-delay="{{ loop.index0 * 0.05 }}">
+          <div class="note-card-header">
+            <span class="note-card-source-type note-source-{{ n.source_type }}">{{ n.source_type }}</span>
+            <span class="note-card-date">{{ n.date }}</span>
+          </div>
+          <h3 class="note-card-title">{{ n.title }}</h3>
+          <p class="note-card-content">{{ n.content }}</p>
+          <p class="note-card-source">📎 {{ n.source }}</p>
+          <div class="note-card-tags">
+            {% for tagx in n.tags %}
+            <span class="note-card-tag">#{{ tagx }}</span>
+            {% endfor %}
+          </div>
+
+          <!-- Public/private toggle e engagement -->
+          <div class="note-card-bottom">
+            {% if n.is_public %}
+            <div class="note-engagement">
+              <span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg> {{ n.likes }}</span>
+              <span><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> {{ n.comments_count }}</span>
+            </div>
+            {% endif %}
+            <label class="note-public-toggle" title="Tornar {% if n.is_public %}privada{% else %}pública{% endif %}">
+              <input type="checkbox" class="toggle-input" data-note="{{ n.id }}" {% if n.is_public %}checked{% endif %} onchange="toggleNotePublic(this)">
+              <span class="toggle-track">
+                <span class="toggle-thumb"></span>
+              </span>
+              <span class="toggle-label">{% if n.is_public %}Pública{% else %}Privada{% endif %}</span>
+            </label>
+          </div>
+        </article>
+        {% endif %}
+      {% endfor %}
+
+      {% if (tab == 'private' and (notes|length - public_notes_count) == 0) or (tab == 'public' and public_notes_count == 0) %}
+      <div class="empty-state">
+        {% if tab == 'public' %}
+        <p>Você não tem notas públicas ainda. Toggle uma nota privada para começar a expressar para a comunidade.</p>
+        {% else %}
+        <p>Todas as suas notas estão públicas. Vire o switch em qualquer uma para deixar privada.</p>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {% if tab == 'saved' %}
+  <div class="saved-list">
+    {% for item in saved_items %}
+    <div class="saved-item animate-fade-in-up" data-delay="{{ loop.index0 * 0.04 }}">
+      <div class="saved-item-icon saved-{{ item.type }}">
+        {% if item.type == 'framework' %}
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        {% else %}
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+        {% endif %}
+      </div>
+      <div class="saved-item-body">
+        <div class="saved-item-type">{{ item.type }}</div>
+        <h4 class="saved-item-title">{{ item.title }}</h4>
+      </div>
+      <button class="saved-item-action" aria-label="Abrir">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if tab == 'forks' %}
+  <div class="forks-list">
+    {% for f in forks %}
+    <article class="fork-card animate-fade-in-up" data-delay="{{ loop.index0 * 0.05 }}">
+      <div class="fork-card-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="18" cy="6" r="3"/><path d="M18 9v1a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9"/><path d="M12 12v3"/></svg>
+      </div>
+      <div class="fork-card-body">
+        <div class="fork-card-meta">
+          <span class="fork-card-original">forkado de</span>
+          <a href="/library/framework/{{ f.framework_slug }}" class="author-link">{{ f.framework_title }}</a>
+          <span class="meta-dot">·</span>
+          <span>{{ f.forked_at }}</span>
+        </div>
+        <h3 class="fork-card-title">{{ f.my_version_label }}</h3>
+        <p class="fork-card-note">"{{ f.note }}"</p>
+        <div class="fork-card-stats">
+          <span>{{ f.uses_my_version }} vezes usado por você</span>
+        </div>
+      </div>
+      <button class="btn-outline btn-outline-sm">Abrir</button>
+    </article>
+    {% endfor %}
+    {% if not forks %}
+    <div class="empty-state">
+      <p>Você ainda não forkou nenhum framework. <a href="/library">Explorar a Library →</a></p>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if tab == 'followers' %}
+  <div class="followers-list">
+    {% for f in followers %}
+    <article class="follower-card animate-fade-in-up" data-delay="{{ loop.index0 * 0.05 }}">
+      <a href="/u/{{ f.handle }}" class="follower-link">
+        <span class="follower-avatar">{{ f.iniciais }}</span>
+        <div class="follower-info">
+          <strong>{{ f.nome_completo }}</strong>
+          <span>{{ f.role }}</span>
+          <span class="follower-since">Segue você desde {{ f.since }}</span>
+        </div>
+      </a>
+      <button class="btn-outline btn-outline-sm">Mensagem</button>
+    </article>
+    {% endfor %}
+    {% if not followers %}
+    <div class="empty-state">
+      <p>Ninguém segue seu Brain ainda. Comece tornando algumas notas públicas — quando outros se identificam, eles seguem.</p>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function toggleNotePublic(input) {
+    var noteId = input.dataset.note;
+    var newState = input.checked;
+    // Atualiza label imediatamente (otimista)
+    var label = input.closest('.note-public-toggle').querySelector('.toggle-label');
+    if (label) label.textContent = newState ? 'Pública' : 'Privada';
+    fetch('/api/note/' + noteId + '/toggle-public', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({is_public: newState})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(){
+      showToast(newState
+        ? '🌐 Nota agora é pública — visível no seu perfil'
+        : '🔒 Nota voltou a ser privada');
+    })
+    .catch(function(){
+      // Reverte em caso de erro
+      input.checked = !newState;
+      if (label) label.textContent = !newState ? 'Pública' : 'Privada';
+      showToast('Erro ao atualizar visibilidade');
+    });
+  }
+  window.toggleNotePublic = toggleNotePublic;
+</script>
+{% endblock %}

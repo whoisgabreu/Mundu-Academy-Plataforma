@@ -1,0 +1,41 @@
+# Regras de exclusao para o projeto Mundu Academy
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+*.egg
+dist/
+build/
+*.whl
+
+# Virtual env
+.venv/
+venv/
+
+# Banco de dados local
+*.db
+*.sqlite3
+
+# Variáveis de ambiente
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Static collected
+staticfiles/
+
+# Media uploads
+media/

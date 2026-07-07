@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+{% block title %}Mundu Academy - Explorar{% endblock %}
+{% block page_title %}Explorar{% endblock %}
+
+{% block content %}
+
+<!-- ============ PILAR HEADER ============ -->
+<section class="pillar-header">
+  <div class="pillar-header-content">
+    <div class="pillar-eyebrow">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <span>Explorar</span>
+    </div>
+    <h1 class="pillar-title">Conteúdo curado pela Mundu</h1>
+    <p class="pillar-subtitle">Hero cinemáticos, masterclasses, cases premiados e collabs exclusivas — tudo o que era a "estante de cursos", agora num lugar só pra quando você quer descobrir.</p>
+  </div>
+</section>
+
+<!-- ============ HERO CARROSSEL ============ -->
+<section class="hero-section" id="heroSection">
+  <div class="hero-slide" id="heroSlide">
+    <div class="hero-bg" id="heroBg">
+      <img src="" alt="Hero" id="heroImg">
+      <div class="hero-overlay-lr"></div>
+      <div class="hero-overlay-bt"></div>
+      <div class="hero-overlay-accent"></div>
+    </div>
+    <div class="hero-content animate-fade-in-up" id="heroContent">
+      <div class="hero-badge" id="heroBadge">
+        <span class="badge-dot"></span>
+        <span id="heroBadgeText"></span>
+      </div>
+      <h1 class="hero-title" id="heroTitle"></h1>
+      <p class="hero-description" id="heroDesc"></p>
+      <div class="hero-stats" id="heroStats">
+        <div class="hero-stat">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span id="heroDuration"></span>
+        </div>
+        <div class="hero-stat">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          <span id="heroXp"></span>
+        </div>
+        <div class="hero-stat">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span id="heroStudents"></span>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <button class="btn-primary" id="heroCta">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <span id="heroCtaText"></span>
+        </button>
+        <button class="btn-outline">
+          Ver Detalhes
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <button class="hero-nav-btn prev" onclick="heroGo(-1)">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <button class="hero-nav-btn next" onclick="heroGo(1)">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+
+  <div class="hero-dots" id="heroDots"></div>
+</section>
+
+<!-- ============ CONTINUE ASSISTINDO ============ -->
+<section class="carousel-section">
+  <div class="carousel-header">
+    <div>
+      <h2>Continue Assistindo</h2>
+      <p>Retome de onde parou</p>
+    </div>
+    <div class="carousel-nav-btns">
+      <button class="carousel-nav-btn" onclick="scrollCarousel('continueTrack', -320)">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="carousel-nav-btn" onclick="scrollCarousel('continueTrack', 320)">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="carousel-track scrollbar-none" id="continueTrack">
+    {% for item in continue_watching %}
+    <div class="content-card animate-fade-in-up" data-delay="{{ loop.index0 * 0.05 }}">
+      <div class="card-thumbnail">
+        <img src="{{ item.thumbnail }}" alt="{{ item.title }}">
+        <div class="card-thumbnail-overlay"></div>
+        <div class="card-play-overlay"><div class="card-play-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></div></div>
+        <span class="card-type-badge {{ item.type }}">{{ item.type }}</span>
+        {% if item.duration %}
+        <div class="card-duration">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          {{ item.duration }}
+        </div>
+        {% endif %}
+        {% if item.progress is defined %}
+        <div class="card-progress"><div class="card-progress-fill" data-pct="{{ item.progress }}"></div></div>
+        {% endif %}
+      </div>
+      <div class="card-body">
+        <h3 class="card-title">{{ item.title }}</h3>
+        <p class="card-subtitle">{{ item.subtitle }}</p>
+        <div class="card-footer">
+          <div class="card-xp">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            +{{ item.xp }}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ============ RECOMENDADO ============ -->
+<section class="carousel-section">
+  <div class="carousel-header">
+    <div>
+      <h2>Recomendado para Você</h2>
+      <p>Baseado no seu perfil e interesses</p>
+    </div>
+    <div class="carousel-nav-btns">
+      <button class="carousel-nav-btn" onclick="scrollCarousel('recommendedTrack', -320)">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="carousel-nav-btn" onclick="scrollCarousel('recommendedTrack', 320)">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="carousel-track scrollbar-none" id="recommendedTrack">
+    {% for item in recommended %}
+    <div class="content-card animate-fade-in-up" data-delay="{{ loop.index0 * 0.05 }}">
+      <div class="card-thumbnail">
+        <img src="{{ item.thumbnail }}" alt="{{ item.title }}">
+        <div class="card-thumbnail-overlay"></div>
+        <div class="card-play-overlay"><div class="card-play-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></div></div>
+        <span class="card-type-badge {{ item.type }}">{{ item.type }}</span>
+        {% if item.duration %}
+        <div class="card-duration">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          {{ item.duration }}
+        </div>
+        {% endif %}
+      </div>
+      <div class="card-body">
+        <h3 class="card-title">{{ item.title }}</h3>
+        <p class="card-subtitle">{{ item.subtitle }}</p>
+        <div class="card-footer">
+          <div class="card-xp">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            +{{ item.xp }}
+          </div>
+          {% if item.participants %}
+          <div class="card-participants">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            {{ item.participants }}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ============ DESAFIOS ============ -->
+<section class="challenges-section">
+  <h2>Desafios da Semana</h2>
+  <p class="section-subtitle">Complete desafios e evolua mais rápido</p>
+  <div class="challenges-grid">
+    {% for challenge in challenges %}
+    <div class="challenge-card animate-fade-in-up" data-delay="{{ loop.index0 * 0.1 }}">
+      <div class="challenge-card-header">
+        <span class="challenge-type-badge {{ challenge.type }}">{{ challenge.label }}</span>
+        <span class="challenge-xp">+{{ challenge.xp }} XP</span>
+      </div>
+      <h3 class="challenge-title">{{ challenge.title }}</h3>
+      <p class="challenge-description">{{ challenge.description }}</p>
+      <div class="challenge-progress-bar">
+        <div class="challenge-progress-fill" data-pct="{{ challenge.progress }}"></div>
+      </div>
+      <span class="challenge-progress-text">{{ challenge.progress_text }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ============ COLLABS ============ -->
+<section class="carousel-section">
+  <div class="carousel-header">
+    <div>
+      <h2>Collabs da Semana</h2>
+      <p>Conteúdos exclusivos com parceiros estratégicos</p>
+    </div>
+    <div class="carousel-nav-btns">
+      <button class="carousel-nav-btn" onclick="scrollCarousel('collabsTrack', -320)">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="carousel-nav-btn" onclick="scrollCarousel('collabsTrack', 320)">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="carousel-track scrollbar-none" id="collabsTrack">
+    {% for item in collabs %}
+    <div class="content-card animate-fade-in-up" data-delay="{{ loop.index0 * 0.05 }}">
+      <div class="card-thumbnail">
+        <img src="{{ item.thumbnail }}" alt="{{ item.title }}">
+        <div class="card-thumbnail-overlay"></div>
+        <div class="card-play-overlay"><div class="card-play-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></div></div>
+        <span class="card-type-badge {{ item.type }}">{{ item.type }}</span>
+        {% if item.duration %}
+        <div class="card-duration">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          {{ item.duration }}
+        </div>
+        {% endif %}
+      </div>
+      <div class="card-body">
+        <h3 class="card-title">{{ item.title }}</h3>
+        <p class="card-subtitle">{{ item.subtitle }}</p>
+        <div class="card-footer">
+          <div class="card-xp">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            +{{ item.xp }}
+          </div>
+          {% if item.badge %}
+          <div class="card-badge-info">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 9 7 12 7s5-3 7.5-3a2.5 2.5 0 0 1 0 5H18"/></svg>
+            {{ item.badge }}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ============ WIDGET IA ============ -->
+<section class="ai-widget animate-fade-in-up">
+  <div class="ai-widget-content">
+    <h3>🧠 Salomão IA - Seu Assistente Inteligente</h3>
+    <p>Receba recomendações personalizadas, tire dúvidas sobre os conteúdos e acelere seu aprendizado com inteligência artificial.</p>
+  </div>
+  <button class="ai-widget-btn" onclick="toggleChatbot()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+    Falar com Salomão
+  </button>
+</section>
+
+<!-- ============ CASES DA COMUNIDADE ============ -->
+<section class="carousel-section">
+  <div class="carousel-header">
+    <div>
+      <h2>Cases da Comunidade</h2>
+      <p>Aprenda com quem está fazendo acontecer</p>
+    </div>
+    <div class="carousel-nav-btns">
+      <button class="carousel-nav-btn" onclick="scrollCarousel('casesTrack', -320)">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <button class="carousel-nav-btn" onclick="scrollCarousel('casesTrack', 320)">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="carousel-track scrollbar-none" id="casesTrack">
+    {% for item in cases %}
+    <div class="content-card animate-fade-in-up" data-delay="{{ loop.index0 * 0.05 }}">
+      <div class="card-thumbnail">
+        <img src="{{ item.thumbnail }}" alt="{{ item.title }}">
+        <div class="card-thumbnail-overlay"></div>
+        <div class="card-play-overlay"><div class="card-play-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></div></div>
+        <span class="card-type-badge {{ item.type }}">{{ item.type }}</span>
+      </div>
+      <div class="card-body">
+        <h3 class="card-title">{{ item.title }}</h3>
+        <p class="card-subtitle">{{ item.subtitle }}</p>
+        <div class="card-footer">
+          <div class="card-xp">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            +{{ item.xp }}
+          </div>
+          {% if item.badge %}
+          <div class="card-badge-info">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 9 7 12 7s5-3 7.5-3a2.5 2.5 0 0 1 0 5H18"/></svg>
+            {{ item.badge }}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+{% endblock %}
