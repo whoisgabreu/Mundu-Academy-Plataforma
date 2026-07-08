@@ -39,19 +39,11 @@
 
     <!-- Posts Feed -->
     <div class="space-y-6">
-      {% set posts = [
-        {'id': '1', 'name': 'Marina Santos', 'user': '@marinasantos', 'avatar': 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100', 'role': 'Head de Vendas', 'ver': true, 'time': '2h', 'content': 'Acabei de concluir a trilha de Liderança Estratégica na @MunduAcademy! 🎉\n\nDica: O módulo sobre gestão de conflitos mudou completamente minha forma de lidar com situações difíceis no time.\n\n#Liderança #DesenvolvimentoPessoal', 'img': 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800', 'likes': 234, 'coms': 45, 'reps': 12},
-        {'id': '2', 'name': 'Carlos Oliveira', 'user': '@carlosoliveira', 'avatar': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100', 'role': 'Product Manager', 'ver': false, 'time': '4h', 'content': 'Alguém mais está fazendo a trilha de Metodologias Ágeis? Procurando parceiros para formar um grupo de estudo! 📚\n\nComente aqui se tiver interesse! 👇', 'img': '', 'likes': 89, 'coms': 23, 'reps': 5},
-        {'id': '3', 'name': 'Ana Beatriz', 'user': '@anabeatriz', 'avatar': 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100', 'role': 'CEO @ TechStart', 'ver': true, 'time': '6h', 'content': 'A live de ontem sobre Inteligência Emocional foi incrível! 🧠\n\nGravação disponível para quem perdeu. O Salomão trouxe insights que vão mudar como você lidera sua equipe.', 'img': 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800', 'likes': 567, 'coms': 89, 'reps': 45}
-      ] %}
-
       {% for p in posts %}
       <div class="p-4 border border-border rounded-xl bg-card hover:bg-muted/10 transition-colors">
         <div class="flex gap-4">
           <div class="shrink-0">
-            <span class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full border border-border/50">
-              <img class="aspect-square h-full w-full" src="{{ p.avatar }}" />
-            </span>
+            <div class="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-sm font-bold text-white">{{ p.iniciais }}</div>
           </div>
           <div class="flex-1 min-w-0">
             <!-- Author Header -->
@@ -101,6 +93,12 @@
           </div>
         </div>
       </div>
+      {% else %}
+      <div class="text-center py-12 text-muted-foreground">
+        <i data-lucide="message-circle" class="h-12 w-12 mx-auto mb-4 opacity-30"></i>
+        <p>Nenhum post no feed ainda.</p>
+        <p class="text-xs mt-1">Participe das comunidades para aparecer aqui!</p>
+      </div>
       {% endfor %}
     </div>
   </div>
@@ -120,24 +118,19 @@
         <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="users" class="h-5 w-5 text-primary"></i> Quem seguir</h3>
       </div>
       <div class="flex flex-col">
-        {% set sug = [
-          {'name': 'Fernanda Lima', 'user': '@fernandalima', 'bio': 'VP de Marketing | Palestrante', 'avatar': 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100'},
-          {'name': 'Pedro Henrique', 'user': '@pedrohenrique', 'bio': 'Tech Lead | Entusiasta de IA', 'avatar': 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100'},
-          {'name': 'Camila Rodrigues', 'user': '@camilarodrigues', 'bio': 'Founder @ StartupX', 'avatar': 'https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=100'}
-        ] %}
         {% for s in sug %}
         <div class="p-4 hover:bg-muted/20 transition-colors flex items-center justify-between gap-2 border-b border-border last:border-b-0 cursor-pointer">
           <div class="flex items-center gap-3 min-w-0">
-            <span class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
-              <img class="aspect-square h-full w-full" src="{{ s.avatar }}" />
-            </span>
+            <div class="h-10 w-10 rounded-full bg-gradient-to-br from-primary via-primary to-secondary flex items-center justify-center text-sm font-bold text-white flex-shrink-0">{{ s.iniciais }}</div>
             <div class="flex flex-col min-w-0">
               <span class="font-bold text-foreground text-sm truncate hover:underline">{{ s.name }}</span>
               <span class="text-xs text-muted-foreground truncate">{{ s.user }}</span>
             </div>
           </div>
-          <button class="rounded-full px-4 py-1 text-xs font-bold bg-foreground text-background hover:bg-foreground/90 transition-colors shrink-0">Seguir</button>
+          <a href="/u/{{ s.user[1:] }}" class="rounded-full px-4 py-1 text-xs font-bold bg-foreground text-background hover:bg-foreground/90 transition-colors shrink-0">Seguir</a>
         </div>
+        {% else %}
+        <div class="p-4 text-center text-muted-foreground text-sm">Nenhuma sugestão no momento.</div>
         {% endfor %}
       </div>
       <div class="p-4 border-t border-border">
@@ -151,11 +144,6 @@
         <h3 class="font-bold text-lg">Assuntos do momento</h3>
       </div>
       <div class="flex flex-col">
-        {% set trends = [
-          {'cat': 'Tecnologia', 'tags': '#InteligenciaArtificial', 'posts': '12.5k posts'},
-          {'cat': 'Liderança', 'tags': '#GestaoDePessoas', 'posts': '8.2k posts'},
-          {'cat': 'Mundu Academy', 'tags': '#MasterclassSalomao', 'posts': '4.1k posts'}
-        ] %}
         {% for t in trends %}
         <div class="p-4 hover:bg-muted/20 transition-colors cursor-pointer border-b border-border last:border-b-0">
           <div class="flex justify-between items-start">
@@ -167,6 +155,8 @@
             <button class="text-muted-foreground hover:text-foreground"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
           </div>
         </div>
+        {% else %}
+        <div class="p-4 text-center text-muted-foreground text-sm">Nenhum tópico em alta.</div>
         {% endfor %}
       </div>
     </div>

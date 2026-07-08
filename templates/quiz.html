@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}{{ quiz.titulo }} - Mundu Academy{% endblock %}
+{% block page_title %}{{ quiz.titulo }}{% endblock %}
+
+{% block content %}
+<div class="px-4 md:px-8 py-4 md:py-6 space-y-6 pb-20 md:pb-6 w-full max-w-4xl mx-auto">
+  <div class="flex items-center justify-between">
+    <div>
+      <p class="text-sm text-muted-foreground">{{ quiz.modulo.titulo }}</p>
+      <h1 class="text-2xl font-bold text-foreground">{{ quiz.titulo }}</h1>
+      {% if quiz.descricao %}<p class="text-sm text-muted-foreground mt-1">{{ quiz.descricao }}</p>{% endif %}
+    </div>
+    <div class="text-right">
+      <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold bg-primary/20 text-primary border-primary/30">+{{ quiz.xp_total }} XP</span>
+      <p class="text-xs text-muted-foreground mt-1">Nota mínima: {{ quiz.aprovacao_percentual }}%</p>
+    </div>
+  </div>
+
+  {% if tentativa %}
+  <div class="rounded-xl border p-4 {% if tentativa.aprovado %}bg-emerald-500/10 border-emerald-500/30{% else %}bg-red-500/10 border-red-500/30{% endif %}">
+    <div class="flex items-center gap-3">
+      <i data-lucide="{% if tentativa.aprovado %}check-circle{% else %}x-circle{% endif %}" class="h-6 w-6 {% if tentativa.aprovado %}text-emerald-400{% else %}text-red-400{% endif %}"></i>
+      <div class="flex-1">
+        <p class="font-bold text-foreground">{% if tentativa.aprovado %}Aprovado!{% else %}Não foi dessa vez{% endif %}</p>
+        <p class="text-sm text-muted-foreground">{{ tentativa.pontuacao }}/{{ tentativa.total_questoes }} acertos ({{ tentativa.percentual }}%)</p>
+      </div>
+      <a href="/quiz/{{ quiz.id }}/resultado" class="inline-flex items-center rounded-lg bg-primary text-primary-foreground px-3 py-1.5 text-xs font-medium hover:bg-primary/90 transition-colors">
+        Ver Resultado
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
+  <form id="quiz-form" class="space-y-6">
+    {{ csrf_input }}
+    {% for q in questoes %}
+    <div class="rounded-xl border border-border/50 bg-card p-4 space-y-3">
+      <div class="flex items-start gap-3">
+        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-primary/20 text-primary text-sm font-bold shrink-0">{{ loop.index }}</span>
+        <div>
+          <p class="font-medium text-foreground">{{ q.enunciado }}</p>
+          {% if q.tipo == 'verdadeiro_falso' %}<span class="text-xs text-muted-foreground">Verdadeiro ou Falso</span>{% endif %}
+        </div>
+      </div>
+      <div class="space-y-2 ml-10">
+        {% for a in q.alternativas %}
+        <label class="flex items-center gap-3 p-3 rounded-lg border border-border/30 hover:border-primary/40 cursor-pointer transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+          <input type="radio" name="q_{{ q.id }}" value="{{ a.id }}" class="accent-primary" required>
+          <span class="text-sm text-foreground">{{ a.texto }}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+
+    {% if not tentativa or not tentativa.aprovado %}
+    <button type="submit" class="inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground px-6 py-3 font-medium hover:bg-primary/90 transition-colors w-full">
+      Enviar Respostas
+    </button>
+    {% endif %}
+  </form>
+</div>
+
+<script>
+function getCookie(name) {
+  const val = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+  return val ? decodeURIComponent(val.pop()) : '';
+}
+document.getElementById('quiz-form')?.addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const respostas = {};
+  this.querySelectorAll('input[type="radio"]:checked').forEach(r => {
+    const name = r.name.replace('q_', '');
+    respostas[name] = r.value;
+  });
+  const btn = this.querySelector('button[type="submit"]');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  try {
+    const res = await fetch('/api/quiz/{{ quiz.id }}/submit', {
+      method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+      body: JSON.stringify({respostas}),
+    });
+    const data = await res.json();
+    window.location.href = '/quiz/{{ quiz.id }}/resultado';
+  } catch(e) {
+    alert('Erro ao enviar. Tente novamente.');
+    btn.disabled = false; btn.textContent = 'Enviar Respostas';
+  }
+});
+</script>
+{% endblock %}

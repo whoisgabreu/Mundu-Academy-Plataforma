@@ -151,6 +151,127 @@ class Aula(models.Model):
         return f'{self.modulo.titulo} — {self.titulo}'
 
 
+class Certificate(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='certificados')
+    modulo = models.ForeignKey(Modulo, on_delete=models.SET_NULL, null=True, blank=True)
+    trilha = models.ForeignKey(Trilha, on_delete=models.SET_NULL, null=True, blank=True)
+    codigo = models.CharField(max_length=32, unique=True)
+    emitido_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Certificado'
+        verbose_name_plural = 'Certificados'
+        ordering = ['-emitido_em']
+
+    def __str__(self):
+        return f'{self.usuario.username} — {self.modulo or self.trilha}'
+
+
+class FeaturedContent(models.Model):
+    TIPOS = [
+        ('recommended', 'Recomendado'),
+        ('collab', 'Collab'),
+        ('case', 'Case'),
+    ]
+
+    tipo = models.CharField(max_length=20, choices=TIPOS)
+    titulo = models.CharField(max_length=200)
+    subtitulo = models.CharField(max_length=300, blank=True)
+    thumbnail = models.URLField(blank=True)
+    duracao = models.CharField(max_length=50, blank=True, help_text="Ex: 2h 15min")
+    xp = models.IntegerField(default=0)
+    participantes = models.IntegerField(default=0)
+    badge = models.CharField(max_length=100, blank=True, help_text="Ex: Exclusivo, Novo")
+    ordem = models.IntegerField(default=0)
+    ativo = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Conteúdo em Destaque'
+        verbose_name_plural = 'Conteúdos em Destaque'
+        ordering = ['tipo', 'ordem']
+
+    def __str__(self):
+        return f'[{self.get_tipo_display()}] {self.titulo}'
+
+
+class Quiz(models.Model):
+    modulo = models.ForeignKey(Modulo, on_delete=models.CASCADE, related_name='quizzes')
+    titulo = models.CharField(max_length=200)
+    descricao = models.TextField(blank=True)
+    ordem = models.IntegerField(default=0)
+    xp_total = models.IntegerField(default=50, help_text="XP concedido ao passar")
+    aprovacao_percentual = models.IntegerField(default=70, help_text="% mínima para aprovação")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Quiz'
+        verbose_name_plural = 'Quizzes'
+        ordering = ['modulo', 'ordem']
+        unique_together = ('modulo', 'ordem')
+
+    def __str__(self):
+        return f'{self.modulo.titulo} — {self.titulo}'
+
+
+class Questao(models.Model):
+    TIPOS = [
+        ('multipla_escolha', 'Múltipla Escolha'),
+        ('verdadeiro_falso', 'Verdadeiro ou Falso'),
+    ]
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questoes')
+    enunciado = models.TextField()
+    tipo = models.CharField(max_length=20, choices=TIPOS, default='multipla_escolha')
+    ordem = models.IntegerField(default=0)
+
+    class Meta:
+        verbose_name = 'Questão'
+        verbose_name_plural = 'Questões'
+        ordering = ['ordem']
+
+    def __str__(self):
+        return f'{self.quiz.titulo} — Q{self.ordem}'
+
+
+class Alternativa(models.Model):
+    questao = models.ForeignKey(Questao, on_delete=models.CASCADE, related_name='alternativas')
+    texto = models.CharField(max_length=300)
+    correta = models.BooleanField(default=False)
+    ordem = models.IntegerField(default=0)
+
+    class Meta:
+        verbose_name = 'Alternativa'
+        verbose_name_plural = 'Alternativas'
+        ordering = ['ordem']
+
+    def __str__(self):
+        return f'{self.questao.enunciado[:40]} → {self.texto[:30]}'
+
+
+class TentativaQuiz(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tentativas_quiz')
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='tentativas')
+    pontuacao = models.IntegerField(default=0)
+    total_questoes = models.IntegerField(default=0)
+    aprovado = models.BooleanField(default=False)
+    respostas = models.JSONField(default=dict, blank=True)
+    concluido_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Tentativa de Quiz'
+        verbose_name_plural = 'Tentativas de Quiz'
+        ordering = ['-concluido_em']
+
+    @property
+    def percentual(self):
+        if self.total_questoes == 0:
+            return 0
+        return int(self.pontuacao / self.total_questoes * 100)
+
+    def __str__(self):
+        return f'{self.usuario.username} → {self.quiz.titulo} ({self.pontuacao}/{self.total_questoes})'
+
+
 class Curso(models.Model):
     titulo = models.CharField(max_length=200)
     instrutor = models.CharField(max_length=100)

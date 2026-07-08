@@ -40,6 +40,9 @@ TENANT_APPS = [
     'guild',
     'library',
     'brain',
+    'live',
+    'social',
+    'resources',
 ]
 
 INSTALLED_APPS = list(SHARED_APPS) + [
@@ -62,6 +65,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'usuarios.middleware.StreakMiddleware',
 ]
 
 ROOT_URLCONF = 'mundu.urls'

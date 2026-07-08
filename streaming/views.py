@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
 from core.utils import render
-from cursos.models import Aula, Modulo
+from cursos.models import Aula, Modulo, Quiz, TentativaQuiz
 
 
 @login_required(login_url='/login')
@@ -11,7 +11,15 @@ def player_aula(request, modulo_slug, ordem):
     aulas_modulo = Aula.objects.filter(
         modulo=aula.modulo
     ).order_by('ordem')
+    quiz = Quiz.objects.filter(modulo=aula.modulo).first()
+    quiz_feito = False
+    if quiz:
+        quiz_feito = TentativaQuiz.objects.filter(
+            usuario=request.user, quiz=quiz, aprovado=True
+        ).exists()
     return render(request, 'streaming/player.html', {
         'aula': aula,
         'aulas_modulo': aulas_modulo,
+        'quiz': quiz,
+        'quiz_feito': quiz_feito,
     })

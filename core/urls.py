@@ -13,4 +13,6 @@ urlpatterns = [
     path('insumos', views.insumos, name='insumos'),
     path('networking', views.networking, name='networking'),
     path('u/<slug:handle>', views.user_profile, name='user_profile'),
+    path('quiz/<int:quiz_id>', views.quiz_view, name='quiz_view'),
+    path('quiz/<int:quiz_id>/resultado', views.quiz_resultado, name='quiz_resultado'),
 ]

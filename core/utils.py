@@ -1,33 +1,6 @@
 from django.shortcuts import render as django_render
 
 
-NOTIFICATIONS = [
-    {"id": "no1", "type": "reply", "actor_handle": "diego-almeida", "verb": "respondeu seu comentário em", "target_title": "Como vocês conduzem 1:1 com alguém que não confia em você ainda?", "target_url": "/g/gestao-pessoas/post/1-1-com-alguem-que-nao-confia", "snippet": "3 meses é a média que eu vejo na coachada.", "time_ago": "há 12min", "is_read": False},
-    {"id": "no2", "type": "follow", "actor_handle": "camila-faria", "verb": "começou a seguir você", "target_title": None, "target_url": "/u/camila-faria", "snippet": None, "time_ago": "há 2h", "is_read": False},
-    {"id": "no3", "type": "mention", "actor_handle": "mariana-reis", "verb": "mencionou você em", "target_title": "Stand-up de 9 min funciona pra time de 12?", "target_url": "/g/tech-produto/post/standup-9min-time-de-12", "snippet": "@gabriel já tinha falado disso no comentário do video da semana passada...", "time_ago": "há 5h", "is_read": False},
-    {"id": "no4", "type": "upvote", "actor_handle": None, "verb": "47 pessoas curtiram seu comentário em", "target_title": "Como vocês conduzem 1:1...", "target_url": "/g/gestao-pessoas/post/1-1-com-alguem-que-nao-confia", "snippet": None, "time_ago": "ontem", "is_read": True, "count": 47},
-    {"id": "no5", "type": "community", "actor_handle": "bruno-tavares", "verb": "publicou em r/carreira-inicial", "target_title": "Aplicando o framework WRAP para escolher entre 2 ofertas", "target_url": "/g/carreira-inicial/post/wrap-em-2-ofertas-funcionou", "snippet": None, "time_ago": "ontem", "is_read": True},
-    {"id": "no6", "type": "follow", "actor_handle": "lucas-pestana", "verb": "começou a seguir você", "target_title": None, "target_url": "/u/lucas-pestana", "snippet": None, "time_ago": "2 dias atrás", "is_read": True},
-]
-
-_USERS = {
-    "gabriel": {"handle": "gabriel", "nome_completo": "Gabriel Lasaro", "iniciais": "GL"},
-    "camila-faria": {"handle": "camila-faria", "nome_completo": "Camila Faria", "iniciais": "CF"},
-    "mariana-reis": {"handle": "mariana-reis", "nome_completo": "Mariana Reis", "iniciais": "MR"},
-    "diego-almeida": {"handle": "diego-almeida", "nome_completo": "Diego Almeida", "iniciais": "DA"},
-    "bruno-tavares": {"handle": "bruno-tavares", "nome_completo": "Bruno Tavares", "iniciais": "BT"},
-    "lucas-pestana": {"handle": "lucas-pestana", "nome_completo": "Lucas Pestana", "iniciais": "LP"},
-}
-
-
-def _get_user(handle):
-    return _USERS.get(handle, {
-        "handle": handle,
-        "nome_completo": handle.replace("-", " ").title(),
-        "iniciais": (handle[:2] if handle else "?").upper(),
-    })
-
-
 def _get_current_user(request):
     if request.user.is_authenticated:
         perfil = getattr(request.user, 'perfil', None)
@@ -36,6 +9,15 @@ def _get_current_user(request):
                 'nome': request.user.get_full_name() or request.user.username,
                 'nome_completo': request.user.get_full_name() or request.user.username,
                 'username': request.user.username,
+                'email': request.user.email,
+                'role': perfil.role,
+                'cargo': perfil.cargo,
+                'empresa': perfil.empresa,
+                'bio': perfil.bio,
+                'localizacao': perfil.localizacao,
+                'linkedin': perfil.linkedin,
+                'instagram': perfil.instagram,
+                'joined_at': perfil.data_criacao,
                 'perfil': {
                     'nivel': perfil.nivel,
                     'nome_nivel': perfil.nome_nivel,
@@ -52,6 +34,14 @@ def _get_current_user(request):
             'nome': request.user.get_full_name() or request.user.username,
             'nome_completo': request.user.get_full_name() or request.user.username,
             'username': request.user.username,
+            'email': request.user.email,
+            'role': 'Membro Mundu',
+            'cargo': '',
+            'empresa': '',
+            'bio': '',
+            'localizacao': '',
+            'linkedin': '',
+            'instagram': '',
             'perfil': {
                 'nivel': 1, 'nome_nivel': 'Iniciante', 'xp_total': 0,
                 'xp_proximo_nivel': 500, 'xp_percentual': 0, 'streak': 0,
@@ -63,6 +53,9 @@ def _get_current_user(request):
     return {
         'nome': 'Visitante', 'nome_completo': 'Visitante',
         'username': 'visitante',
+        'role': 'Visitante',
+        'cargo': '', 'empresa': '', 'bio': '', 'localizacao': '',
+        'linkedin': '', 'instagram': '',
         'perfil': {
             'nivel': 0, 'nome_nivel': 'Iniciante', 'xp_total': 0,
             'xp_proximo_nivel': 500, 'xp_percentual': 0, 'streak': 0,
@@ -72,20 +65,97 @@ def _get_current_user(request):
 
 
 def _get_notifications():
+    from social.models import Notification
+    from django.contrib.auth.models import User
+    user = getattr(Notification, '_request_user', None)
+    if user is None:
+        return []
     enriched = []
-    for n in NOTIFICATIONS:
+    for n in Notification.objects.filter(usuario=user)[:20]:
+        actor = None
+        if n.tipo in ('follow', 'reply', 'mention', 'community'):
+            try:
+                u = User.objects.get(username=n.mensagem.split()[-1] if n.mensagem else '')
+                p = u.perfil
+                actor = {
+                    'handle': u.username,
+                    'iniciais': p.iniciais,
+                    'nome_completo': u.get_full_name() or u.username,
+                }
+            except (User.DoesNotExist, IndexError):
+                pass
         enriched.append({
-            **n,
-            "actor": _get_user(n["actor_handle"]) if n.get("actor_handle") else None,
+            'id': str(n.id),
+            'type': n.tipo,
+            'actor_handle': n.mensagem.split()[-1] if n.mensagem else '',
+            'actor': actor,
+            'verb': n.tipo,
+            'target_title': n.mensagem,
+            'target_url': n.link,
+            'snippet': None,
+            'time_ago': _time_ago(n.created_at) if n.created_at else '',
+            'is_read': n.lida,
         })
     return enriched
+
+
+def _time_ago(dt):
+    from django.utils import timezone
+    now = timezone.now()
+    diff = now - dt
+    if diff.days == 0:
+        mins = diff.seconds // 60
+        if mins < 1:
+            return 'agora'
+        if mins < 60:
+            return f'há {mins}min'
+        hours = mins // 60
+        return f'há {hours}h' if hours < 24 else 'ontem'
+    if diff.days == 1:
+        return 'ontem'
+    return f'há {diff.days} dias'
 
 
 def render(request, template, context=None, **kwargs):
     if context is None:
         context = {}
     context.setdefault('current_user', _get_current_user(request))
-    context.setdefault('notifications', _get_notifications())
-    context.setdefault('unread_count', sum(1 for n in NOTIFICATIONS if not n.get("is_read")))
+    ctx_user = context.get('current_user', {})
+    if ctx_user.get('username') and ctx_user['username'] != 'visitante':
+        from social.models import Notification
+        notif_qs = Notification.objects.filter(usuario__username=ctx_user['username'])
+        notifs = []
+        for n in notif_qs[:20]:
+            actor = None
+            if n.tipo in ('follow', 'reply', 'mention', 'community'):
+                from django.contrib.auth.models import User
+                try:
+                    actor_handle = n.mensagem.split()[-1] if n.mensagem else ''
+                    u = User.objects.get(username=actor_handle)
+                    p = u.perfil
+                    actor = {
+                        'handle': u.username,
+                        'iniciais': p.iniciais,
+                        'nome_completo': u.get_full_name() or u.username,
+                    }
+                except (User.DoesNotExist, IndexError):
+                    pass
+            notifs.append({
+                'id': str(n.id),
+                'type': n.tipo,
+                'actor_handle': n.mensagem.split()[-1] if n.mensagem else '',
+                'actor': actor,
+                'verb': n.tipo,
+                'target_title': n.mensagem,
+                'target_url': n.link,
+                'snippet': None,
+                'time_ago': _time_ago(n.created_at) if n.created_at else '',
+                'is_read': n.lida,
+            })
+        context.setdefault('notifications', notifs)
+        context.setdefault('unread_count', sum(1 for n in notifs if not n.get('is_read')))
+    else:
+        context.setdefault('notifications', [])
+        context.setdefault('unread_count', 0)
     context.setdefault('request', request)
     return django_render(request, template, context, **kwargs)

@@ -13,7 +13,7 @@
       <span class="text-sm font-medium hidden sm:block">Voltar ao perfil</span>
     </a>
     <div class="flex items-center gap-3">
-      <button class="px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5">
+      <button type="submit" form="config-form" class="px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5">
         <i data-lucide="save" class="h-4 w-4"></i> Salvar Alterações
       </button>
     </div>
@@ -40,27 +40,27 @@
         <div class="px-6 pb-6 -mt-10 relative z-10">
           <div class="flex items-end gap-4 mb-5">
             <div class="relative group">
-              <div class="h-20 w-20 rounded-2xl bg-gradient-to-br from-primary via-primary to-secondary flex items-center justify-center text-2xl font-bold text-white shadow-xl shadow-primary/40 border-4 border-card">JD</div>
+              <div class="h-20 w-20 rounded-2xl bg-gradient-to-br from-primary via-primary to-secondary flex items-center justify-center text-2xl font-bold text-white shadow-xl shadow-primary/40 border-4 border-card">{{ current_user.perfil.iniciais }}</div>
               <button class="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-primary flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors border-2 border-card"><i data-lucide="camera" class="h-3.5 w-3.5 text-white"></i></button>
               <div class="absolute -top-1 -left-1 h-6 w-6 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-card flex items-center justify-center shadow-lg"><i data-lucide="star" class="h-3 w-3 text-white"></i></div>
             </div>
             <div class="flex-1 min-w-0 pb-1">
               <div class="flex items-center gap-2">
-                <h2 class="text-lg font-bold text-foreground truncate">João da Silva</h2>
+                <h2 class="text-lg font-bold text-foreground truncate">{{ current_user.nome_completo }}</h2>
                 <i data-lucide="shield" class="h-4 w-4 text-primary flex-shrink-0"></i>
               </div>
-              <p class="text-foreground-muted text-sm">@joaosilva</p>
+              <p class="text-foreground-muted text-sm">@{{ current_user.username }}</p>
             </div>
           </div>
           <div class="flex flex-wrap gap-2 mb-5">
-            <span class="px-3 py-1.5 rounded-lg bg-primary/15 border border-primary/25 text-primary text-xs font-semibold flex items-center gap-1.5"><i data-lucide="briefcase" class="h-3 w-3"></i> Growth Hacker</span>
-            <span class="px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs font-semibold flex items-center gap-1.5"><i data-lucide="star" class="h-3 w-3"></i> Contribuidor</span>
+            <span class="px-3 py-1.5 rounded-lg bg-primary/15 border border-primary/25 text-primary text-xs font-semibold flex items-center gap-1.5"><i data-lucide="briefcase" class="h-3 w-3"></i> {{ current_user.cargo or 'Sem cargo' }}</span>
+            <span class="px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs font-semibold flex items-center gap-1.5"><i data-lucide="star" class="h-3 w-3"></i> Nível {{ current_user.perfil.nivel }}</span>
           </div>
           <div class="space-y-2.5 py-4 border-t border-border/30">
             <div class="flex items-center gap-3 text-sm">
-              <i data-lucide="building-2" class="w-4 h-4 text-primary"></i> <span class="text-foreground-muted">Startup XYZ · São Paulo, SP</span>
+              <i data-lucide="building-2" class="w-4 h-4 text-primary"></i> <span class="text-foreground-muted">{{ current_user.empresa }}{% if current_user.localizacao %} · {{ current_user.localizacao }}{% endif %}</span>
             </div>
-            <p class="text-sm text-foreground-muted leading-relaxed line-clamp-2">Apaixonado por growth marketing e vendas B2B. Sempre buscando novas formas de escalar negócios.</p>
+            <p class="text-sm text-foreground-muted leading-relaxed line-clamp-2">{{ current_user.bio or 'Nenhuma bio definida.' }}</p>
           </div>
           <div class="flex gap-2 pt-4 border-t border-border/30">
             <div class="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors cursor-pointer"><i data-lucide="mail" class="h-4 w-4 text-primary"></i></div>
@@ -92,12 +92,14 @@
             <div class="flex items-center w-full"><div class="flex-1 h-0.5 bg-border"></div><div class="h-12 w-12 rounded-xl flex items-center justify-center transition-all border-2 bg-card border-border mx-auto"><i data-lucide="crown" class="h-5 w-5 text-muted-foreground"></i></div></div>
             <span class="text-[10px] font-medium mt-2 text-center text-muted-foreground">Mentor</span>
           </div>
-        </div>
-      </div>
-    </div>
+    </form>
+  </div>
+</div>
 
     <!-- Right Column - Edit Forms -->
-    <div class="space-y-4 md:space-y-6 order-1 lg:order-2">
+    <form id="config-form" method="POST" class="space-y-4 md:space-y-6 order-1 lg:order-2">
+      {{ csrf_input }}
+      
       <!-- Identity -->
       <section class="rounded-2xl border border-primary/20 bg-card overflow-hidden">
         <div class="px-6 py-4 border-b border-border/30 bg-gradient-to-r from-primary/10 to-transparent">
@@ -112,27 +114,33 @@
         <div class="p-6 space-y-5">
           <div class="grid md:grid-cols-2 gap-5">
             <div class="space-y-2">
-              <label class="flex items-center gap-2 text-sm font-medium text-foreground"><i data-lucide="user" class="h-3.5 w-3.5 text-primary"></i> Nome completo</label>
-              <input type="text" value="João da Silva" class="w-full h-12 bg-background border border-border/50 rounded-xl px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all">
+              <label class="flex items-center gap-2 text-sm font-medium text-foreground"><i data-lucide="user" class="h-3.5 w-3.5 text-primary"></i> Nome</label>
+              <input type="text" name="first_name" value="{{ form.first_name.value() or '' }}" class="w-full h-12 bg-background border border-border/50 rounded-xl px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all">
             </div>
             <div class="space-y-2">
-              <label class="flex items-center gap-2 text-sm font-medium text-foreground"><i data-lucide="at-sign" class="h-3.5 w-3.5 text-primary"></i> Username</label>
-              <div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-foreground-muted text-sm">@</span><input type="text" value="joaosilva" class="w-full h-12 bg-background border border-border/50 rounded-xl pl-8 pr-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"></div>
+              <label class="flex items-center gap-2 text-sm font-medium text-foreground"><i data-lucide="user" class="h-3.5 w-3.5 text-primary"></i> Sobrenome</label>
+              <input type="text" name="last_name" value="{{ form.last_name.value() or '' }}" class="w-full h-12 bg-background border border-border/50 rounded-xl px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all">
             </div>
           </div>
           <div class="grid md:grid-cols-2 gap-5">
             <div class="space-y-2">
-              <label class="flex items-center gap-2 text-sm font-medium text-foreground"><i data-lucide="briefcase" class="h-3.5 w-3.5 text-primary"></i> Cargo / Função</label>
-              <input type="text" value="Growth Hacker" class="w-full h-12 bg-background border border-border/50 rounded-xl px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all">
+              <label class="flex items-center gap-2 text-sm font-medium text-foreground"><i data-lucide="at-sign" class="h-3.5 w-3.5 text-primary"></i> Username</label>
+              <div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-foreground-muted text-sm">@</span><input type="text" value="{{ current_user.username }}" disabled class="w-full h-12 bg-background/50 border border-border/50 rounded-xl pl-8 pr-4 text-foreground/60 cursor-not-allowed"></div>
             </div>
             <div class="space-y-2">
-              <label class="flex items-center gap-2 text-sm font-medium text-foreground"><i data-lucide="building-2" class="h-3.5 w-3.5 text-primary"></i> Empresa</label>
-              <input type="text" value="Startup XYZ" class="w-full h-12 bg-background border border-border/50 rounded-xl px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all">
+              <label class="flex items-center gap-2 text-sm font-medium text-foreground"><i data-lucide="briefcase" class="h-3.5 w-3.5 text-primary"></i> Cargo / Função</label>
+              <input type="text" name="cargo" value="{{ form.cargo.value or '' }}" class="w-full h-12 bg-background border border-border/50 rounded-xl px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all">
             </div>
           </div>
-          <div class="space-y-2">
-            <label class="flex items-center gap-2 text-sm font-medium text-foreground"><i data-lucide="map-pin" class="h-3.5 w-3.5 text-primary"></i> Localização</label>
-            <input type="text" value="São Paulo, SP" class="w-full h-12 bg-background border border-border/50 rounded-xl px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all">
+          <div class="grid md:grid-cols-2 gap-5">
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 text-sm font-medium text-foreground"><i data-lucide="building-2" class="h-3.5 w-3.5 text-primary"></i> Empresa</label>
+              <input type="text" name="empresa" value="{{ form.empresa.value or '' }}" class="w-full h-12 bg-background border border-border/50 rounded-xl px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all">
+            </div>
+            <div class="space-y-2">
+              <label class="flex items-center gap-2 text-sm font-medium text-foreground"><i data-lucide="map-pin" class="h-3.5 w-3.5 text-primary"></i> Localização</label>
+              <input type="text" name="localizacao" value="{{ form.localizacao.value or '' }}" class="w-full h-12 bg-background border border-border/50 rounded-xl px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all">
+            </div>
           </div>
         </div>
       </section>
@@ -149,7 +157,7 @@
           </div>
         </div>
         <div class="p-6">
-          <textarea rows="4" class="w-full bg-background border border-border/50 rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all resize-none">Apaixonado por growth marketing e vendas B2B. Sempre buscando novas formas de escalar negócios.</textarea>
+          <textarea name="bio" rows="4" class="w-full bg-background border border-border/50 rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all resize-none">{{ form.bio.value or '' }}</textarea>
         </div>
       </section>
 
@@ -167,15 +175,15 @@
         <div class="p-6 space-y-4">
           <div class="flex items-center gap-4 p-4 rounded-xl bg-background border border-border/30 hover:border-primary/30 transition-all group">
             <div class="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/15 transition-colors"><i data-lucide="mail" class="h-5 w-5 text-primary"></i></div>
-            <div class="flex-1 min-w-0"><label class="text-xs text-foreground-muted font-medium">Email</label><input type="email" value="joao@email.com" class="w-full bg-transparent text-foreground focus:outline-none text-sm"></div>
+            <div class="flex-1 min-w-0"><label class="text-xs text-foreground-muted font-medium">Email</label><input type="email" value="{{ current_user.email }}" disabled class="w-full bg-transparent text-foreground/60 focus:outline-none text-sm cursor-not-allowed"></div>
           </div>
           <div class="flex items-center gap-4 p-4 rounded-xl bg-background border border-border/30 hover:border-primary/30 transition-all group">
             <div class="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/15 transition-colors"><i data-lucide="linkedin" class="h-5 w-5 text-primary"></i></div>
-            <div class="flex-1 min-w-0"><label class="text-xs text-foreground-muted font-medium">LinkedIn</label><div class="flex items-center gap-1"><span class="text-foreground-muted text-sm">linkedin.com/in/</span><input type="text" value="joaosilva" class="flex-1 bg-transparent text-foreground focus:outline-none text-sm"></div></div>
+            <div class="flex-1 min-w-0"><label class="text-xs text-foreground-muted font-medium">LinkedIn</label><div class="flex items-center gap-1"><span class="text-foreground-muted text-sm">linkedin.com/in/</span><input type="text" name="linkedin" value="{{ form.linkedin.value or '' }}" class="flex-1 bg-transparent text-foreground focus:outline-none text-sm"></div></div>
           </div>
           <div class="flex items-center gap-4 p-4 rounded-xl bg-background border border-border/30 hover:border-primary/30 transition-all group">
             <div class="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/15 transition-colors"><i data-lucide="instagram" class="h-5 w-5 text-primary"></i></div>
-            <div class="flex-1 min-w-0"><label class="text-xs text-foreground-muted font-medium">Instagram</label><div class="flex items-center gap-1"><span class="text-foreground-muted text-sm">@</span><input type="text" value="joaosilva" class="flex-1 bg-transparent text-foreground focus:outline-none text-sm"></div></div>
+            <div class="flex-1 min-w-0"><label class="text-xs text-foreground-muted font-medium">Instagram</label><div class="flex items-center gap-1"><span class="text-foreground-muted text-sm">@</span><input type="text" name="instagram" value="{{ form.instagram.value or '' }}" class="flex-1 bg-transparent text-foreground focus:outline-none text-sm"></div></div>
           </div>
         </div>
       </section>
@@ -192,19 +200,19 @@
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div class="p-4 rounded-xl bg-background border border-primary/20 hover:border-primary/40 transition-all group">
               <div class="flex items-center gap-2 mb-2"><div class="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors"><i data-lucide="zap" class="h-4 w-4 text-primary"></i></div></div>
-              <p class="text-2xl font-bold text-foreground">847</p><p class="text-xs text-foreground-muted mt-1">Pontos XP</p>
+              <p class="text-2xl font-bold text-foreground">{{ "{:,}".format(current_user.perfil.xp_total).replace(',', '.') }}</p><p class="text-xs text-foreground-muted mt-1">Pontos XP</p>
             </div>
             <div class="p-4 rounded-xl bg-background border border-primary/20 hover:border-primary/40 transition-all group">
               <div class="flex items-center gap-2 mb-2"><div class="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors"><i data-lucide="award" class="h-4 w-4 text-primary"></i></div></div>
-              <p class="text-2xl font-bold text-foreground">38</p><p class="text-xs text-foreground-muted mt-1">Contribuições</p>
+              <p class="text-2xl font-bold text-foreground">{{ cert_count or 0 }}</p><p class="text-xs text-foreground-muted mt-1">Certificados</p>
             </div>
             <div class="p-4 rounded-xl bg-background border border-primary/20 hover:border-primary/40 transition-all group">
               <div class="flex items-center gap-2 mb-2"><div class="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors"><i data-lucide="users" class="h-4 w-4 text-primary"></i></div></div>
-              <p class="text-2xl font-bold text-foreground">124</p><p class="text-xs text-foreground-muted mt-1">Conexões</p>
+              <p class="text-2xl font-bold text-foreground">{{ followers_count or 0 }}</p><p class="text-xs text-foreground-muted mt-1">Seguidores</p>
             </div>
             <div class="p-4 rounded-xl bg-background border border-primary/20 hover:border-primary/40 transition-all group">
               <div class="flex items-center gap-2 mb-2"><div class="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors"><i data-lucide="trophy" class="h-4 w-4 text-primary"></i></div></div>
-              <p class="text-2xl font-bold text-primary">Top 15%</p><p class="text-xs text-foreground-muted mt-1">Ranking</p>
+              <p class="text-2xl font-bold text-primary">Top {{ top_percent or 50 }}%</p><p class="text-xs text-foreground-muted mt-1">Ranking</p>
             </div>
           </div>
         </div>

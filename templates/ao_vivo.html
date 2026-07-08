@@ -42,23 +42,33 @@
           <div class="rounded-xl border bg-card text-card-foreground shadow bg-card/50 border-border/50 overflow-hidden">
             <!-- Mock Player -->
             <div class="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 relative">
+              {% if live_now %}
               <div class="absolute inset-0 flex items-center justify-center">
+                {% if live_now.url_embed %}
+                <iframe src="{{ live_now.url_embed }}" class="w-full h-full" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                {% else %}
                 <div class="text-center space-y-4">
                   <div class="w-20 h-20 rounded-full bg-live/20 flex items-center justify-center mx-auto animate-pulse">
                     <i data-lucide="radio" class="h-10 w-10 text-live"></i>
                   </div>
-                  <p class="text-muted-foreground">Transmissão em andamento</p>
+                  <p class="text-muted-foreground">{{ live_now.titulo }}</p>
                 </div>
+                {% endif %}
               </div>
               <div class="absolute top-4 left-4 flex items-center gap-2">
                 <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-live text-live-foreground gap-1.5 animate-pulse border-transparent"><span class="w-2 h-2 rounded-full bg-live-foreground"></span> AO VIVO</span>
-                <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-secondary text-secondary-foreground gap-1 border-transparent"><i data-lucide="users" class="h-3 w-3"></i> 234</span>
               </div>
-              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                <div class="h-1 w-full bg-secondary/20 rounded-full overflow-hidden">
-                  <div class="h-full bg-primary transition-all" style="width: 45%;"></div>
+              {% else %}
+              <div class="absolute inset-0 flex items-center justify-center">
+                <div class="text-center space-y-4">
+                  <div class="w-20 h-20 rounded-full bg-muted/20 flex items-center justify-center mx-auto">
+                    <i data-lucide="radio" class="h-10 w-10 text-muted-foreground"></i>
+                  </div>
+                  <p class="text-muted-foreground">Nenhuma live no momento</p>
+                  <p class="text-xs text-muted-foreground">Verifique a aba Agenda para as próximas transmissões</p>
                 </div>
               </div>
+              {% endif %}
             </div>
 
             <!-- Header Info -->
@@ -69,12 +79,18 @@
                     <img class="aspect-square h-full w-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop" />
                   </span>
                   <div>
-                    <h2 class="text-lg font-bold text-foreground">Masterclass: Liderança em Tempos de Mudança</h2>
-                    <p class="text-muted-foreground text-sm">Carlos Silva</p>
+                    <h2 class="text-lg font-bold text-foreground">{{ live_now.titulo if live_now else 'Nenhuma transmissão ativa' }}</h2>
+                    {% if live_now %}
+                    <p class="text-muted-foreground text-sm">{{ live_now.descricao }}</p>
                     <div class="flex items-center gap-3 mt-1">
-                      <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-foreground text-xs">Liderança</span>
-                      <span class="text-xs text-muted-foreground flex items-center gap-1"><i data-lucide="clock" class="h-3 w-3"></i> Iniciou às 14:30</span>
+                      {% if live_now.modulo %}
+                      <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-foreground text-xs">{{ live_now.modulo.titulo }}</span>
+                      {% endif %}
+                      {% if live_now.data_inicio %}
+                      <span class="text-xs text-muted-foreground flex items-center gap-1"><i data-lucide="clock" class="h-3 w-3"></i> Iniciou às {{ live_now.data_inicio.strftime('%H:%M') }}</span>
+                      {% endif %}
                     </div>
+                    {% endif %}
                   </div>
                 </div>
                 <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs bg-primary/20 text-primary border-primary/30 border-transparent">+150 XP</span>
@@ -106,26 +122,27 @@
           </div>
 
           <!-- Enquete -->
+          {% if active_poll %}
           <div class="rounded-xl border bg-card text-card-foreground shadow bg-card/50 border-border/50">
             <div class="p-4 space-y-4">
               <div class="flex items-center gap-2">
                 <i data-lucide="bar-chart-3" class="h-5 w-5 text-primary"></i>
                 <h3 class="font-semibold text-foreground">Enquete Ativa</h3>
-                <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold bg-secondary text-secondary-foreground text-xs border-transparent">120 votos</span>
               </div>
-              <p class="text-foreground font-medium">Qual seu maior desafio como líder?</p>
+              <p class="text-foreground font-medium">{{ active_poll.pergunta }}</p>
               <div class="space-y-2">
-                {% set opcoes = [{'t': 'Comunicação', 'v': 38}, {'t': 'Delegação', 'v': 27}, {'t': 'Motivação da equipe', 'v': 23}, {'t': 'Gestão de conflitos', 'v': 12}] %}
-                {% for o in opcoes %}
+                {% for o in active_poll.opcoes %}
                 <button class="w-full relative overflow-hidden rounded-lg border transition-all border-border/50 bg-muted/30 hover:border-border cursor-pointer">
                   <div class="relative p-3 flex items-center justify-between z-10">
-                    <span class="text-sm font-medium text-foreground">{{ o.t }}</span>
+                    <span class="text-sm font-medium text-foreground">{{ o.text }}</span>
+                    <span class="text-xs text-muted-foreground">{{ o.votos }} votos</span>
                   </div>
                 </button>
                 {% endfor %}
               </div>
             </div>
           </div>
+          {% endif %}
         </div>
 
         <!-- Sidebar Chat -->
@@ -139,24 +156,24 @@
             <div class="mt-4 rounded-xl border bg-card text-card-foreground shadow bg-card/50 border-border/50 h-[500px] flex flex-col">
               <div class="flex-1 p-4 overflow-y-auto">
                 <div class="space-y-3">
-                  {% set msgs = [
-                    {'avatar': 'JM', 'user': 'João M.', 'time': '14:35', 'msg': 'Excelente conteúdo!'},
-                    {'avatar': 'ML', 'user': 'Maria L.', 'time': '14:37', 'msg': 'Como aplicar isso em equipes remotas?'},
-                    {'avatar': 'PS', 'user': 'Pedro S.', 'time': '14:38', 'msg': '👏👏👏'},
-                    {'avatar': 'AC', 'user': 'Ana C.', 'time': '14:40', 'msg': 'Alguém tem o material de apoio?'}
-                  ] %}
-                  {% for m in msgs %}
+                  {% if chat_messages %}
+                  {% for m in chat_messages %}
                   <div class="flex items-start gap-2">
-                    <span class="relative flex shrink-0 overflow-hidden rounded-full h-8 w-8 text-xs bg-primary/20 text-primary items-center justify-center font-bold">{{ m.avatar }}</span>
+                    <span class="relative flex shrink-0 overflow-hidden rounded-full h-8 w-8 text-xs bg-primary/20 text-primary items-center justify-center font-bold">{{ m.usuario.username[:2].upper() }}</span>
                     <div class="flex-1">
                       <div class="flex items-center gap-2">
-                        <span class="text-sm font-medium text-foreground">{{ m.user }}</span>
-                        <span class="text-xs text-muted-foreground">{{ m.time }}</span>
+                        <span class="text-sm font-medium text-foreground">{{ m.usuario.username }}</span>
+                        <span class="text-xs text-muted-foreground">{{ m.created_at.strftime('%H:%M') }}</span>
                       </div>
-                      <p class="text-sm text-muted-foreground">{{ m.msg }}</p>
+                      <p class="text-sm text-muted-foreground">{{ m.mensagem }}</p>
                     </div>
                   </div>
                   {% endfor %}
+                  {% else %}
+                  <div class="text-center py-8">
+                    <p class="text-sm text-muted-foreground">Nenhuma mensagem ainda. Seja o primeiro!</p>
+                  </div>
+                  {% endif %}
                 </div>
               </div>
               <div class="p-3 border-t border-border/50 space-y-3">
@@ -178,40 +195,31 @@
 
     <!-- Tab Content: Agenda -->
     <div id="tab-content-agenda" class="tab-content mt-4 space-y-4 hidden">
-      {% set prox = [
-        {'dia': '25 Jan', 'hora': '10:00', 'titulo': 'Workshop: Excel Avançado para Gestão', 'instrutor': 'Ana Costa', 'cat': 'Ferramentas', 'ins': 156, 'notif': true},
-        {'dia': '26 Jan', 'hora': '15:00', 'titulo': 'Q&A: Carreira em Tecnologia', 'instrutor': 'Pedro Santos', 'cat': 'Carreira', 'ins': 89, 'notif': false},
-        {'dia': '28 Jan', 'hora': '14:00', 'titulo': 'Mentoria Coletiva: Primeiros 90 Dias', 'instrutor': 'Maria Oliveira', 'cat': 'Mentoria', 'ins': 203, 'notif': true}
-      ] %}
-      {% for p in prox %}
+      {% if upcoming %}
+      {% for p in upcoming %}
       <div class="rounded-xl border bg-card text-card-foreground shadow bg-card/50 border-border/50 hover:border-primary/30 transition-all">
         <div class="p-4">
           <div class="flex items-center gap-4">
             <div class="text-center shrink-0 w-16">
-              <div class="text-2xl font-bold text-primary">{{ p.dia.split(' ')[0] }}</div>
-              <div class="text-xs text-muted-foreground uppercase">{{ p.dia.split(' ')[1] }}</div>
-              <div class="text-sm font-medium text-foreground mt-1">{{ p.hora }}</div>
+              <div class="text-2xl font-bold text-primary">{{ p.data_agendamento.strftime('%d') }}</div>
+              <div class="text-xs text-muted-foreground uppercase">{{ p.data_agendamento.strftime('%b') }}</div>
+              <div class="text-sm font-medium text-foreground mt-1">{{ p.data_agendamento.strftime('%H:%M') }}</div>
             </div>
             <div class="w-px h-16 bg-border/50"></div>
             <div class="flex-1 min-w-0">
               <div class="flex items-start gap-3">
                 <span class="relative flex shrink-0 overflow-hidden rounded-full h-10 w-10 border border-border/50 bg-primary/20 text-primary items-center justify-center font-bold">
-                  {{ p.instrutor[0] }}
+                  {{ p.titulo[0] }}
                 </span>
                 <div class="flex-1 min-w-0">
                   <h3 class="font-semibold text-foreground truncate">{{ p.titulo }}</h3>
-                  <p class="text-sm text-muted-foreground">{{ p.instrutor }}</p>
-                  <div class="flex items-center gap-3 mt-1">
-                    <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-foreground text-xs">{{ p.cat }}</span>
-                    <span class="text-xs text-muted-foreground flex items-center gap-1"><i data-lucide="users" class="h-3 w-3"></i> {{ p.ins }} inscritos</span>
-                  </div>
+                  {% if p.descricao %}
+                  <p class="text-sm text-muted-foreground">{{ p.descricao[:100] }}</p>
+                  {% endif %}
                 </div>
               </div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
-              <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground h-10 w-10 {% if p.notif %}text-primary{% else %}text-muted-foreground{% endif %}">
-                <i data-lucide="{% if p.notif %}bell{% else %}bell-off{% endif %}" class="h-5 w-5"></i>
-              </button>
               <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors bg-secondary text-secondary-foreground hover:bg-secondary/80 h-10 px-4 py-2 gap-2">
                 <i data-lucide="calendar" class="h-4 w-4"></i> Agendar
               </button>
@@ -220,57 +228,59 @@
         </div>
       </div>
       {% endfor %}
+      {% else %}
+      <div class="text-center py-12">
+        <i data-lucide="calendar" class="h-12 w-12 text-muted-foreground mx-auto mb-3"></i>
+        <p class="text-muted-foreground">Nenhuma transmissão agendada ainda.</p>
+      </div>
+      {% endif %}
     </div>
 
     <!-- Tab Content: Replays -->
-    <div id="tab-content-replays" class="tab-content mt-4 hidden">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {% set rep = [
-          {'id':'r1','titulo': 'Fundamentos de Gestão de Projetos', 'instrutor': 'Carlos Silva', 'dia': '20 Jan', 'dur': '1h 45min', 'vis': '1,234', 'cat': 'Gestão', 'ass': true, 'prog': 100},
-          {'id':'r2','titulo': 'Comunicação Assertiva no Trabalho', 'instrutor': 'Ana Costa', 'dia': '18 Jan', 'dur': '1h 15min', 'vis': '892', 'cat': 'Soft Skills', 'ass': false, 'prog': 35},
-          {'id':'r3','titulo': 'Introdução ao Power BI', 'instrutor': 'Pedro Santos', 'dia': '15 Jan', 'dur': '2h 00min', 'vis': '2,156', 'cat': 'Ferramentas', 'ass': false, 'prog': 0}
-        ] %}
-        {% for r in rep %}
-        <div class="rounded-xl border bg-card text-card-foreground shadow bg-card/50 border-border/50 hover:border-primary/30 transition-all cursor-pointer group">
-          <div class="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 relative overflow-hidden">
-            <div class="absolute inset-0 flex items-center justify-center">
-              <div class="w-14 h-14 rounded-full bg-black/50 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <i data-lucide="play" class="h-7 w-7 text-white ml-1"></i>
+    <div id="tab-content-replays" class="tab-content mt-4 space-y-4 hidden">
+      {% if replays %}
+      {% for r in replays %}
+      <div class="rounded-xl border bg-card text-card-foreground shadow bg-card/50 border-border/50 hover:border-primary/30 transition-all cursor-pointer">
+        <div class="p-4">
+          <div class="flex items-center gap-4">
+            <div class="relative shrink-0">
+              <div class="w-40 aspect-video rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center overflow-hidden">
+                {% if r.thumbnail %}
+                <img src="{{ r.thumbnail }}" class="w-full h-full object-cover" />
+                {% else %}
+                <i data-lucide="play" class="h-8 w-8 text-primary/50"></i>
+                {% endif %}
               </div>
+              <span class="absolute bottom-1 right-1 inline-flex items-center rounded border px-1.5 py-0.5 text-xs font-semibold bg-black/70 text-white border-transparent">{{ r.titulo[:20] }}</span>
             </div>
-            <div class="absolute top-3 left-3 flex gap-2">
-              <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-secondary text-secondary-foreground border-transparent">{{ r.cat }}</span>
-              {% if r.ass %}
-              <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-primary/20 text-primary gap-1 border-transparent"><i data-lucide="check-circle" class="h-3 w-3"></i> Assistido</span>
+            <div class="flex-1 min-w-0">
+              <h3 class="font-semibold text-foreground truncate">{{ r.titulo }}</h3>
+              {% if r.descricao %}
+              <p class="text-sm text-muted-foreground truncate">{{ r.descricao[:80] }}</p>
               {% endif %}
-            </div>
-            <div class="absolute bottom-3 right-3">
-              <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-black/70 text-white border-transparent">{{ r.dur }}</span>
-            </div>
-            {% if r.prog > 0 and r.prog < 100 %}
-            <div class="absolute bottom-0 left-0 right-0">
-              <div class="h-1 w-full bg-secondary/20 rounded-none overflow-hidden">
-                <div class="h-full bg-primary transition-all" style="width: {{r.prog}}%;"></div>
+              <div class="flex items-center gap-3 mt-1">
+                {% if r.modulo %}
+                <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-foreground text-xs">{{ r.modulo.titulo }}</span>
+                {% endif %}
+                <span class="text-xs text-muted-foreground flex items-center gap-1"><i data-lucide="eye" class="h-3 w-3"></i> {{ r.visualizacoes or 0 }} visualizações</span>
+                {% if r.data_fim %}
+                <span class="text-xs text-muted-foreground">{{ r.data_fim.strftime('%d %b %Y') }}</span>
+                {% endif %}
               </div>
             </div>
-            {% endif %}
-          </div>
-          <div class="p-4">
-            <div class="flex items-start gap-3">
-              <span class="relative flex shrink-0 overflow-hidden rounded-full h-10 w-10 border border-border/50 bg-primary/20 text-primary items-center justify-center">{{ r.instrutor[0] }}</span>
-              <div class="flex-1 min-w-0">
-                <h3 class="font-semibold text-foreground text-sm line-clamp-2">{{ r.titulo }}</h3>
-                <p class="text-xs text-muted-foreground mt-1">{{ r.instrutor }}</p>
-                <div class="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                  <span class="flex items-center gap-1"><i data-lucide="eye" class="h-3 w-3"></i> {{ r.vis }}</span>
-                  <span>{{ r.dia }}</span>
-                </div>
-              </div>
-              <i data-lucide="chevron-right" class="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors"></i>
-            </div>
+            <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-6 py-2 gap-2 shrink-0">
+              <i data-lucide="play" class="h-4 w-4"></i> Assistir
+            </button>
           </div>
         </div>
-        {% endfor %}
+      </div>
+      {% endfor %}
+      {% else %}
+      <div class="text-center py-12">
+        <i data-lucide="history" class="h-12 w-12 text-muted-foreground mx-auto mb-3"></i>
+        <p class="text-muted-foreground">Nenhum replay disponível ainda.</p>
+      </div>
+      {% endif %}
       </div>
     </div> <!-- Fim de Replays -->
 

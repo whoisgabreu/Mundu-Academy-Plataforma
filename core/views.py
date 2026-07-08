@@ -1,154 +1,125 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect
-from core.utils import render, NOTIFICATIONS
+from django.contrib.auth.models import User
+from django.shortcuts import redirect, get_object_or_404
+from django.db.models import Count
+from core.utils import render
 from cursos.models import Modulo, Trilha, TrilhaModulo, Desafio, ProgressoModulo, ProgressoDesafio
+from guild.models import Community, Thread, Comment
 
 
-USERS = {
-    "gabriel": {"handle": "gabriel", "nome_completo": "Gabriel Lasaro", "iniciais": "GL", "role": "Estrategista · V4 Company", "bio": "Aprendendo liderança em público. Coleciono frameworks que sobrevivem ao mundo real.", "karma": 1420, "joined_at": "Jan 2024", "followers": 87, "following": 142, "is_self": True},
-    "mariana-reis": {"handle": "mariana-reis", "nome_completo": "Mariana Reis", "iniciais": "MR", "role": "Tech Lead · Stone", "bio": "Liderando squad de 9 devs há 2 anos.", "karma": 3890, "joined_at": "Mar 2023", "followers": 412, "following": 89},
-    "bruno-tavares": {"handle": "bruno-tavares", "nome_completo": "Bruno Tavares", "iniciais": "BT", "role": "Estagiário em transição · 24 anos", "bio": "Primeiro emprego há 8 meses.", "karma": 678, "joined_at": "Set 2024", "followers": 56, "following": 203},
-    "camila-souza": {"handle": "camila-souza", "nome_completo": "Camila Souza", "iniciais": "CS", "role": "Founder · SaaS B2B", "bio": "Levei 3 anos pra entender pricing.", "karma": 5120, "joined_at": "Jul 2022", "followers": 890, "following": 76},
-    "diego-almeida": {"handle": "diego-almeida", "nome_completo": "Diego Almeida", "iniciais": "DA", "role": "Coach Executivo", "bio": "Especialista em conversas difíceis.", "karma": 2340, "joined_at": "Mai 2023", "followers": 234, "following": 112},
-    "camila-faria": {"handle": "camila-faria", "nome_completo": "Camila Faria", "iniciais": "CF", "role": "Head de Pessoas · Ex-Nubank", "bio": "10 anos liderando times de gente.", "karma": 8920, "joined_at": "Jan 2024", "followers": 4310, "following": 56, "is_creator": True},
-    "lucas-pestana": {"handle": "lucas-pestana", "nome_completo": "Lucas Pestana", "iniciais": "LP", "role": "Founder · Vertical SaaS", "bio": "Já contratei errado mais vezes que acertei.", "karma": 5640, "joined_at": "Fev 2024", "followers": 2180, "following": 102, "is_creator": True},
-    "marina-costa": {"handle": "marina-costa", "nome_completo": "Marina Costa", "iniciais": "MC", "role": "Estrategista de Pricing", "bio": "Cobrar bem é justiça com seu produto.", "karma": 7340, "joined_at": "Jan 2024", "followers": 3870, "following": 89, "is_creator": True},
-    "pedro-mendes": {"handle": "pedro-mendes", "nome_completo": "Pedro Mendes", "iniciais": "PM", "role": "Professor Convidado · Harvard Online", "bio": "Método de caso é meu martelo.", "karma": 6180, "joined_at": "Mar 2024", "followers": 2950, "following": 23, "is_creator": True},
-    "rafael-santos": {"handle": "rafael-santos", "nome_completo": "Rafael Santos", "iniciais": "RS", "role": "Tech Lead · Stone", "bio": "Engenharia humana. Rituals de time que respiram.", "karma": 4290, "joined_at": "Fev 2024", "followers": 1620, "following": 78, "is_creator": True},
-    "ana-lima": {"handle": "ana-lima", "nome_completo": "Ana Lima", "iniciais": "AL", "role": "Coach Executiva", "bio": "Conversa difícil é minha especialidade.", "karma": 5120, "joined_at": "Jan 2024", "followers": 2410, "following": 64, "is_creator": True},
-}
+def _time_ago(dt):
+    from django.utils import timezone
+    now = timezone.now()
+    diff = now - dt
+    if diff.days == 0:
+        mins = diff.seconds // 60
+        if mins < 1:
+            return 'agora'
+        if mins < 60:
+            return f'há {mins}min'
+        hours = mins // 60
+        return f'há {hours}h' if hours < 24 else 'ontem'
+    if diff.days == 1:
+        return 'ontem'
+    return f'há {diff.days} dias'
 
-def get_user(handle):
-    return USERS.get(handle, {"handle": handle, "nome_completo": handle.replace("-", " ").title(), "iniciais": (handle[:2] if handle else "?").upper(), "role": "Membro Mundu", "bio": "", "karma": 0, "joined_at": "—", "followers": 0, "following": 0})
 
-
-guild_communities = [
-    {"id": "c1", "slug": "gestao-pessoas", "name": "Gestão de Pessoas", "members": 3420, "posts_today": 28, "online_now": 142, "icon": "users", "color": "primary", "description": "Para quem lidera gente — feedbacks, 1:1s, contratação e cultura.", "description_long": "A casa de quem lidera pessoas.", "rules": ["Casos reais > opiniões abstratas. Se não viveu, não posta.", "Anonimize nomes de empresas e pessoas envolvidas.", "Resposta com framework cita a fonte (Library, Feed, livro).", "Sem auto-promoção fora da quinta-feira de divulgação."], "moderators": ["mariana-reis", "diego-almeida"], "created_at": "Jan 2024", "related": ["soft-skills", "carreira-inicial"]},
-    {"id": "c2", "slug": "tech-produto", "name": "Tech & Produto", "members": 2780, "posts_today": 41, "online_now": 218, "icon": "cpu", "color": "secondary", "description": "Engenharia, produto, design e a interseção entre eles.", "description_long": "Para quem constrói: devs, PMs, designers e tech leads.", "rules": ["Stack-agnóstico — discuta o problema antes da ferramenta.", "Code reviews ficam em PR, não aqui.", "Mostre métricas quando for falar de impacto."], "moderators": ["pedro-vianna"], "created_at": "Fev 2024", "related": ["empreendedorismo", "vendas-growth"]},
-    {"id": "c3", "slug": "soft-skills", "name": "Soft Skills", "members": 4120, "posts_today": 19, "online_now": 88, "icon": "sparkles", "color": "accent", "description": "Comunicação, negociação, presença executiva e mindset.", "rules": ["Práticas, não filosofias. Traga o que vai usar amanhã.", "Storytelling sim, autoajuda não."], "moderators": ["diego-almeida"], "created_at": "Jan 2024", "related": ["gestao-pessoas", "carreira-inicial"]},
-    {"id": "c4", "slug": "empreendedorismo", "name": "Empreendedorismo", "members": 1980, "posts_today": 33, "online_now": 167, "icon": "rocket", "color": "primary", "description": "Founders, sócios e quem tá tirando ideia do papel.", "rules": ["Pitch de produto vai em /sextou", "Compartilhe métrica antes de pedir conselho."], "moderators": ["camila-souza"], "created_at": "Jan 2024", "related": ["vendas-growth", "tech-produto"]},
-    {"id": "c5", "slug": "carreira-inicial", "name": "Carreira Inicial", "members": 5230, "posts_today": 52, "online_now": 311, "icon": "graduation-cap", "color": "secondary", "description": "Para o time de 16-30 anos: primeiro emprego, transição e crescimento.", "rules": ["Pergunta boba é a mais respondida.", "Salário e oferta sempre podem virar thread.", "Nada de printscreen de currículo público."], "moderators": ["bruno-tavares", "mariana-reis"], "created_at": "Dez 2023", "related": ["soft-skills", "tech-produto"]},
-    {"id": "c6", "slug": "vendas-growth", "name": "Vendas & Growth", "members": 1670, "posts_today": 22, "online_now": 94, "icon": "trending-up", "color": "accent", "description": "Pipeline, prospecção, copy e tudo que faz a receita crescer.", "rules": ["Sem cold pitch para a comunidade.", "Compartilhe número (taxa, ROI) quando for case."], "moderators": ["camila-souza"], "created_at": "Fev 2024", "related": ["empreendedorismo", "tech-produto"]},
-]
-
-guild_threads = [
-    {"id": "t1", "slug": "1-1-com-alguem-que-nao-confia", "title": "Como vocês conduzem 1:1 com alguém que não confia em você ainda?", "author": "mariana-reis", "community_slug": "gestao-pessoas", "community": "Gestão de Pessoas", "time_ago": "há 2h", "replies": 34, "upvotes": 128, "tag": "discussão", "post_type": "text", "preview": "Acabei de assumir um time herdado e percebi que duas pessoas estão na defensiva.", "body": "Acabei de assumir um time herdado de 9 devs..."},
-    {"id": "t2", "slug": "wrap-em-2-ofertas-funcionou", "title": "Aplicando o framework WRAP para escolher entre 2 ofertas de emprego — funcionou", "author": "bruno-tavares", "community_slug": "carreira-inicial", "community": "Carreira Inicial", "time_ago": "há 5h", "replies": 18, "upvotes": 89, "tag": "case", "post_type": "text", "preview": "Compartilhando o caso porque o método salvou minha decisão.", "body": "Compartilhando o caso porque o método salvou minha decisão."},
-    {"id": "t3", "slug": "aumentei-30-pct-e-perdi-5", "title": "Pricing: por que aumentei 30% e perdi só 5% dos clientes", "author": "camila-souza", "community_slug": "empreendedorismo", "community": "Empreendedorismo", "time_ago": "há 8h", "replies": 47, "upvotes": 215, "tag": "case", "post_type": "text", "preview": "Inspirada no resumo da Marina Costa, refiz minha tabela de preços.", "body": "Inspirada no resumo da Marina Costa (Library), refiz minha tabela de preços."},
-    {"id": "t4", "slug": "conflict-canvas-preenchido", "title": "Alguém usa o Conflict Canvas? Compartilho o meu preenchido", "author": "diego-almeida", "community_slug": "soft-skills", "community": "Soft Skills", "time_ago": "ontem", "replies": 22, "upvotes": 76, "tag": "framework", "post_type": "text", "preview": "Tive uma conversa difícil com meu CTO essa semana.", "body": "Tive uma conversa difícil com meu CTO essa semana."},
-    {"id": "t5", "slug": "standup-9min-time-de-12", "title": "Stand-up de 9 min funciona pra time de 12? Estamos testando", "author": "pedro-vianna", "community_slug": "tech-produto", "community": "Tech & Produto", "time_ago": "ontem", "replies": 31, "upvotes": 102, "tag": "discussão", "post_type": "text", "preview": "Adaptamos o template do Rafael Santos.", "body": "Adaptamos o template do Rafael Santos (Feed) pro nosso time de 12."},
-]
-
-COMMENTS = {
-    "t1": [
-        {"id": "cm1", "author": "diego-almeida", "body": "3 meses é a média que eu vejo na coachada.", "upvotes": 47, "time_ago": "há 1h", "children": [
-            {"id": "cm1a", "author": "mariana-reis", "body": "Vou testar amanhã.", "upvotes": 12, "time_ago": "há 45min", "children": []},
-            {"id": "cm1b", "author": "pedro-vianna", "body": "Faço algo parecido.", "upvotes": 9, "time_ago": "há 30min", "children": []},
-        ]},
-        {"id": "cm2", "author": "camila-souza", "body": "Eu tive caso similar.", "upvotes": 28, "time_ago": "há 1h", "children": []},
-        {"id": "cm3", "author": "bruno-tavares", "body": "Falando do outro lado.", "upvotes": 19, "time_ago": "há 50min", "children": []},
-    ],
-    "t2": [
-        {"id": "cm4", "author": "camila-souza", "body": "Parabéns pela maturidade da decisão!", "upvotes": 34, "time_ago": "há 4h", "children": []},
-        {"id": "cm5", "author": "diego-almeida", "body": "A parte de 'Prepare to be wrong' é a mais subestimada.", "upvotes": 21, "time_ago": "há 3h", "children": []},
-    ],
-    "t3": [
-        {"id": "cm6", "author": "lucas-pestana", "body": "A âncora do Scale a R$549 é um golpe de mestre.", "upvotes": 47, "time_ago": "há 7h", "children": []},
-        {"id": "cm7", "author": "marina-costa", "body": "Fico feliz que o resumo ajudou!", "upvotes": 39, "time_ago": "há 6h", "children": []},
-    ],
-    "t4": [
-        {"id": "cm9", "author": "ana-lima", "body": "O que eu temo perder mudou minha carreira.", "upvotes": 31, "time_ago": "há 20h", "children": []},
-    ],
-    "t5": [
-        {"id": "cm10", "author": "rafael-santos", "body": "Legal que adaptaram!", "upvotes": 18, "time_ago": "há 12h", "children": []},
-        {"id": "cm11", "author": "mariana-reis", "body": "Aqui no time resolvemos abrindo a daily com 'alguém tem algo fora do radar?'.", "upvotes": 14, "time_ago": "há 10h", "children": []},
-    ],
-}
+def resolve_user(handle):
+    try:
+        u = User.objects.get(username=handle)
+        p = u.perfil
+        return {
+            'handle': u.username,
+            'nome_completo': u.get_full_name() or u.username,
+            'iniciais': p.iniciais,
+            'role': p.role,
+            'karma': p.karma,
+            'bio': p.bio,
+        }
+    except User.DoesNotExist:
+        return {
+            'handle': handle,
+            'nome_completo': handle.replace('-', ' ').title(),
+            'iniciais': handle[:2].upper(),
+            'role': 'Membro Mundu',
+            'karma': 0,
+            'bio': '',
+        }
 
 
 # ============ EXPLORAR ============
 
-_continue_watching = [
-    {"id": "1", "title": "Fundamentos de Growth Marketing", "subtitle": "Thiago Nigro • Módulo 3", "thumbnail": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80", "duration": "45:30", "xp": 50, "progress": 65, "type": "course"},
-    {"id": "2", "title": "Copywriting que Converte", "subtitle": "Ana Lima • Aula 7", "thumbnail": "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=600&q=80", "duration": "32:15", "xp": 40, "progress": 30, "type": "course"},
-    {"id": "3", "title": "Estratégias de Precificação", "subtitle": "Pedro Mendes • Aula 2", "thumbnail": "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600&q=80", "duration": "28:00", "xp": 35, "progress": 80, "type": "masterclass"},
-]
-
-_recommended = [
-    {"id": "4", "title": "Sales Machine: Vendas Previsíveis", "subtitle": "Masterclass com Aaron Ross", "thumbnail": "https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&q=80", "duration": "2h 15min", "xp": 200, "type": "masterclass", "participants": 1240},
-    {"id": "5", "title": "Liderança na Prática", "subtitle": "Curso completo • 8 módulos", "thumbnail": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&q=80", "duration": "6h", "xp": 450, "type": "course", "participants": 890},
-    {"id": "6", "title": "Branding Pessoal", "subtitle": "Construa sua marca", "thumbnail": "https://images.unsplash.com/photo-1493612276216-ee3925520721?w=600&q=80", "duration": "3h 30min", "xp": 280, "type": "course", "participants": 2100},
-]
-
-_collabs = [
-    {"id": "8", "title": "G4 Educação x MUNDU", "subtitle": "Gestão de Alta Performance", "thumbnail": "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=600&q=80", "duration": "4h", "xp": 600, "type": "collab", "badge": "Exclusivo", "participants": 3200},
-    {"id": "9", "title": "StartSe Partnership", "subtitle": "Inovação e Tecnologia", "thumbnail": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&q=80", "duration": "3h 20min", "xp": 500, "type": "collab", "badge": "Novo", "participants": 1890},
-]
-
-_cases = [
-    {"id": "11", "title": "Como cresci 300% em 6 meses", "subtitle": "por Lucas Ferreira • Case aprovado", "thumbnail": "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=600&q=80", "xp": 100, "type": "case", "badge": "Case Oficial", "participants": 456},
-    {"id": "12", "title": "Estratégia de Comunidade", "subtitle": "por Marina Costa • Case aprovado", "thumbnail": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&q=80", "xp": 100, "type": "case", "badge": "Case Oficial", "participants": 312},
-]
-
-_challenges = [
-    {"type": "weekly", "label": "Semanal", "title": "Maratona de Conteúdo", "description": "Assista 5 aulas completas esta semana e ganhe XP bônus.", "xp": 300, "progress": 60, "progress_text": "3 de 5 aulas concluídas"},
-    {"type": "daily", "label": "Diário", "title": "Reflexão do Dia", "description": "Escreva uma reflexão sobre o último conteúdo assistido.", "xp": 50, "progress": 0, "progress_text": "Não iniciado"},
-]
 
 
-
-
-library_frameworks = [
-    {"id": "fw1", "slug": "1-1-canvas", "title": "1:1 Canvas", "description": "Template editável para conduzir 1:1s memoráveis.", "uses": 4320, "color": "primary"},
-    {"id": "fw2", "slug": "feedback-sbi", "title": "Feedback SBI", "description": "Estrutura Situação · Comportamento · Impacto.", "uses": 3210, "color": "secondary"},
-    {"id": "fw3", "slug": "okr-trimestral", "title": "OKR Trimestral", "description": "Planilha + canvas para OKRs de time.", "uses": 5680, "color": "accent"},
-    {"id": "fw4", "slug": "conflict-canvas", "title": "Conflict Canvas", "description": "Mapa visual para preparar conversas difíceis.", "uses": 2104, "color": "primary"},
-    {"id": "fw5", "slug": "decision-journal", "title": "Decision Journal", "description": "Diário de decisões.", "uses": 1789, "color": "secondary"},
-    {"id": "fw6", "slug": "standup-9-minutos", "title": "Stand-up 9 minutos", "description": "Template de daily que cabe em 9 min.", "uses": 980, "color": "accent"},
-]
-
-public_notes = [
-    {"id": "pn1", "author_handle": "mariana-reis", "title": "SBI funciona melhor logo após o gatilho", "body": "Tentei deixar pra dar feedback no 1:1 da semana seguinte.", "source_label": "Vídeo: Como dar feedback que não trava o time", "likes": 156, "comments": 12, "saves": 87, "time_ago": "há 4h", "_sort": 240},
-    {"id": "pn2", "author_handle": "bruno-tavares", "title": "WRAP me poupou 6 meses de arrependimento", "body": "Listei 4 opções em vez de 2.", "source_label": "Vídeo: O método de Harvard p/ tomar decisão difícil", "likes": 234, "comments": 28, "saves": 112, "time_ago": "há 7h", "_sort": 420},
-    {"id": "pn3", "author_handle": "diego-almeida", "title": "Conflict Canvas: o quadrante 'temer perder' destrava tudo", "body": "Em 5 conversas difíceis essa semana.", "source_label": "Framework: Conflict Canvas", "likes": 312, "comments": 47, "saves": 178, "time_ago": "ontem", "_sort": 1500},
-]
-
-followed_handles = ["camila-faria", "mariana-reis", "diego-almeida", "marina-costa", "pedro-mendes", "camila-souza"]
-trending_topics = [{"label": "Pricing", "posts": 47, "trend": "+12"}, {"label": "1:1", "posts": 32, "trend": "+8"}, {"label": "Conflict Canvas", "posts": 28, "trend": "+5"}, {"label": "WRAP", "posts": 24, "trend": "+19"}, {"label": "Stand-up", "posts": 19, "trend": "+3"}]
-
-
-def _ago(minutes):
-    if minutes < 60: return f"há {minutes}min"
-    if minutes < 1440: return f"há {minutes // 60}h"
-    days = minutes // 1440
-    return "ontem" if days == 1 else f"há {days} dias"
+def get_trending_topics(limit=5):
+    qs = Thread.objects.exclude(tag='').values('tag').annotate(
+        posts=Count('id')
+    ).order_by('-posts')[:limit]
+    return [{"label": t['tag'], "posts": t['posts'], "trend": f"+{t['posts']}"} for t in qs]
 
 
 def get_who_to_follow(limit=3):
-    candidates = [u for h, u in USERS.items() if h not in followed_handles and not u.get("is_self") and h != "gabriel"]
-    candidates.sort(key=lambda u: u.get("karma", 0), reverse=True)
-    return candidates[:limit]
+    from usuarios.models import Perfil
+    qs = Perfil.objects.exclude(usuario__username='gabriel').order_by('-karma')[:limit]
+    return [{
+        'handle': p.usuario.username,
+        'nome_completo': p.usuario.get_full_name() or p.usuario.username,
+        'iniciais': p.iniciais,
+        'role': p.role,
+        'karma': p.karma,
+        'bio': p.bio,
+    } for p in qs]
 
 
 def build_unified_feed(sort="for-you"):
     items = []
-    thread_minutes = [120, 300, 480, 1440, 1500]
-    for i, t in enumerate(guild_threads):
-        author = get_user(t["author"])
-        items.append({"kind": "thread", "id": t["id"], "actor": author, "actor_handle": t["author"], "verb": "postou em r/" + t["community_slug"], "time_ago": t["time_ago"], "_sort": thread_minutes[i % len(thread_minutes)], "engagement": {"upvotes": t["upvotes"], "comments": t["replies"]}, "payload": t})
+    threads = Thread.objects.select_related('community').annotate(reply_count=Count('comments')).order_by('-created_at')[:10]
+    for t in threads:
+        author = resolve_user(t.author_handle)
+        payload = {
+            'id': t.id, 'slug': t.slug, 'title': t.title,
+            'author': t.author_handle, 'community_slug': t.community.slug,
+            'community': t.community.name, 'time_ago': _time_ago(t.created_at),
+            'replies': t.reply_count, 'upvotes': t.upvotes, 'tag': t.tag,
+            'post_type': t.post_type, 'preview': t.preview, 'body': t.body,
+            'url': t.url,
+        }
+        items.append({
+            "kind": "thread", "id": str(t.id), "actor": author, "actor_handle": t.author_handle,
+            "verb": "postou em r/" + t.community.slug,
+            "time_ago": _time_ago(t.created_at), "_sort": t.created_at.timestamp(),
+            "engagement": {"upvotes": t.upvotes, "comments": t.reply_count},
+            "payload": payload,
+        })
+    from brain.models import BrainNote
+    public_notes = BrainNote.objects.filter(is_public=True).order_by('-likes')[:5]
     for pn in public_notes:
-        items.append({"kind": "public_note", "id": pn["id"], "actor": get_user(pn["author_handle"]), "actor_handle": pn["author_handle"], "verb": "compartilhou uma nota", "time_ago": pn["time_ago"], "_sort": pn["_sort"], "engagement": {"likes": pn["likes"], "comments": pn["comments"], "saves": pn["saves"]}, "payload": pn})
-    fw_minutes = [600, 1200]
-    for i, fw in enumerate(library_frameworks[:2]):
-        items.append({"kind": "framework", "id": fw["id"], "actor": {"handle": "mundu", "nome_completo": "Mundu Academy", "iniciais": "M", "role": "Curadoria oficial"}, "actor_handle": "mundu", "verb": "lançou um novo framework", "time_ago": _ago(fw_minutes[i % len(fw_minutes)]), "_sort": fw_minutes[i % len(fw_minutes)], "engagement": {"saves": fw["uses"]}, "payload": fw})
+        author = resolve_user(pn.user.username)
+        items.append({
+            "kind": "public_note", "id": str(pn.id), "actor": author, "actor_handle": pn.user.username,
+            "verb": "compartilhou uma nota",
+            "time_ago": _time_ago(pn.date) if hasattr(pn, 'date') else 'recentemente',
+            "_sort": pn.likes * 2 + pn.comments_count,
+            "engagement": {"likes": pn.likes, "comments": pn.comments_count, "saves": 0},
+            "payload": {
+                'id': str(pn.id), 'title': pn.title, 'author_handle': pn.user.username,
+                'body': pn.content, 'source_label': pn.source,
+                'likes': pn.likes, 'comments': pn.comments_count, 'saves': 0,
+                'time_ago': _time_ago(pn.date) if hasattr(pn, 'date') else 'recentemente',
+                'tags': pn.tags,
+            },
+        })
     if sort == "following":
-        items = [it for it in items if it["actor_handle"] in followed_handles]
+        items = [it for it in items if it["actor_handle"] != "mundu"]
     elif sort == "community":
         items = [it for it in items if it["kind"] == "thread"]
     elif sort == "popular":
-        items.sort(key=lambda it: (it["engagement"].get("likes", 0) + it["engagement"].get("upvotes", 0) + it["engagement"].get("comments", 0) * 3 + it["engagement"].get("saves", 0) * 2), reverse=True)
+        items.sort(key=lambda it: (
+            it["engagement"].get("likes", 0) + it["engagement"].get("upvotes", 0) +
+            it["engagement"].get("comments", 0) * 3 + it["engagement"].get("saves", 0) * 2
+        ), reverse=True)
         return items
-    items.sort(key=lambda it: it["_sort"])
+    items.sort(key=lambda it: it["_sort"], reverse=True)
     return items
 
 
@@ -159,41 +130,266 @@ def index(request):
     if sort not in ('for-you', 'following', 'popular', 'community'):
         sort = 'for-you'
     feed = build_unified_feed(sort=sort)
+    topics = get_trending_topics(5)
+    if not topics:
+        topics = []
+    from social.models import Follow
+    followed_count = 0
+    if request.user.is_authenticated:
+        followed_count = Follow.objects.filter(seguidor=request.user).count()
     return render(request, 'index.html', {
         'feed': feed,
         'sort': sort,
-        'trending_topics': trending_topics,
+        'trending_topics': topics,
         'who_to_follow': get_who_to_follow(3),
-        'followed_count': len(followed_handles),
+        'followed_count': followed_count,
     })
 
 
 def explorar(request):
+    guild_threads_qs = Thread.objects.select_related('community').annotate(
+        reply_count=Count('comments')
+    ).order_by('-upvotes')[:3]
+    guild_hot = []
+    for t in guild_threads_qs:
+        guild_hot.append({
+            'id': str(t.id), 'slug': t.slug, 'title': t.title,
+            'author': t.author_handle, 'community_slug': t.community.slug,
+            'community': t.community.name, 'time_ago': _time_ago(t.created_at),
+            'replies': t.reply_count, 'upvotes': t.upvotes, 'tag': t.tag,
+            'post_type': t.post_type, 'preview': t.preview,
+        })
+
+    from library.models import Framework
+    frameworks_top = Framework.objects.all()[:6]
+
+    # Continue watching — módulos em progresso
+    continue_watching = []
+    if request.user.is_authenticated:
+        pms = ProgressoModulo.objects.filter(
+            usuario=request.user, progresso__gt=0, progresso__lt=100
+        ).select_related('modulo')[:3]
+        for pm in pms:
+            m = pm.modulo
+            continue_watching.append({
+                'id': str(m.id), 'title': m.titulo,
+                'subtitle': f'{m.nivel} • Módulo',
+                'thumbnail': m.thumbnail,
+                'duration': m.duracao_total or '—',
+                'xp': m.xp_total, 'progress': pm.progresso, 'type': 'course',
+            })
+
+    # Challenges — from Desafio model
+    from cursos.models import Desafio, ProgressoDesafio, FeaturedContent
+    prog_map = {}
+    if request.user.is_authenticated:
+        for pd in ProgressoDesafio.objects.filter(usuario=request.user):
+            prog_map[pd.desafio_id] = pd.progresso
+    challenges = []
+    for d in Desafio.objects.filter(ativo=True)[:2]:
+        prog = prog_map.get(d.id, 0)
+        label = {'daily': 'Diário', 'weekly': 'Semanal', 'special': 'Especial'}.get(d.tipo, 'Desafio')
+        challenges.append({
+            'type': d.tipo, 'label': label,
+            'title': d.titulo, 'description': d.descricao,
+            'xp': d.xp, 'progress': prog,
+            'progress_text': f'{prog} de {d.meta} concluído' if d.meta > 1 else ('Concluído' if prog >= d.meta else 'Não iniciado'),
+        })
+
+    # Featured content from DB
+    def _fc_dict(qs):
+        return [{
+            'id': str(fc.id),
+            'title': fc.titulo,
+            'subtitle': fc.subtitulo,
+            'thumbnail': fc.thumbnail,
+            'duration': fc.duracao,
+            'xp': fc.xp,
+            'type': fc.tipo,
+            'badge': fc.badge,
+            'participants': fc.participantes,
+        } for fc in qs]
+
+    recommended_qs = FeaturedContent.objects.filter(ativo=True, tipo='recommended').order_by('ordem')
+    collabs_qs = FeaturedContent.objects.filter(ativo=True, tipo='collab').order_by('ordem')
+    cases_qs = FeaturedContent.objects.filter(ativo=True, tipo='case').order_by('ordem')
+
     return render(request, 'explorar.html', {
-        'continue_watching': _continue_watching,
-        'recommended': _recommended,
-        'collabs': _collabs,
-        'cases': _cases,
-        'challenges': _challenges,
-        'library_frameworks_top': library_frameworks[:6],
+        'continue_watching': continue_watching,
+        'recommended': _fc_dict(recommended_qs),
+        'collabs': _fc_dict(collabs_qs),
+        'cases': _fc_dict(cases_qs),
+        'challenges': challenges,
+        'library_frameworks_top': frameworks_top,
         'library_reads': [],
-        'guild_hot': guild_threads[:3],
+        'guild_hot': guild_hot,
     })
 
 
 @login_required(login_url='/login')
 def perfil(request):
-    return render(request, 'perfil.html')
+    from cursos.models import Certificate, ProgressoModulo, ProgressoDesafio, Desafio
+    from social.models import Follow
+    from django.db.models import Count, Sum, F, Q
+
+    user = request.user
+    perfil = user.perfil
+
+    # Stats
+    cert_count = Certificate.objects.filter(usuario=user).count()
+    desafios_vencidos = ProgressoDesafio.objects.filter(
+        usuario=user, progresso__gte=F('desafio__meta')
+    ).count()
+    conexoes = Follow.objects.filter(seguidor=user).count()
+
+    stats = [
+        {'label': 'XP Total', 'value': f"{perfil.xp_total:,}".replace(',', '.'), 'icon': 'zap', 'color': 'text-yellow-400', 'bg': 'bg-yellow-400/10'},
+        {'label': 'Cursos Concluídos', 'value': str(cert_count), 'icon': 'book-open', 'color': 'text-blue-400', 'bg': 'bg-blue-400/10'},
+        {'label': 'Desafios Vencidos', 'value': str(desafios_vencidos), 'icon': 'trophy', 'color': 'text-amber-400', 'bg': 'bg-amber-400/10'},
+        {'label': 'Conexões', 'value': str(conexoes), 'icon': 'users', 'color': 'text-purple-400', 'bg': 'bg-purple-400/10'},
+    ]
+
+    # Trilhas em Progresso
+    progressos_mod = ProgressoModulo.objects.filter(
+        usuario=user, progresso__gt=0
+    ).select_related('modulo')[:5]
+    trilhas_progresso = []
+    for pm in progressos_mod:
+        trilhas_progresso.append({
+            'titulo': pm.modulo.titulo,
+            'progresso': pm.progresso,
+            'duracao': pm.modulo.duracao_total or '—',
+            'aulas_concluidas': round(pm.progresso / 100 * pm.modulo.total_aulas) if pm.modulo.total_aulas else 0,
+            'total_aulas': pm.modulo.total_aulas,
+        })
+
+    # Networking — conexoes recentes
+    recent_follows = Follow.objects.filter(seguidor=user).select_related('seguido__perfil')[:5]
+    conexoes_recentes = []
+    for f in recent_follows:
+        p = f.seguido.perfil
+        conexoes_recentes.append({
+            'iniciais': p.iniciais,
+            'nome': f.seguido.get_full_name() or f.seguido.username,
+            'role': p.role,
+            'handle': f.seguido.username,
+        })
+
+    # Sugestoes
+    seguir_ids = Follow.objects.filter(seguidor=user).values_list('seguido_id', flat=True)
+    from usuarios.models import Perfil
+    sugestoes_qs = Perfil.objects.exclude(
+        Q(usuario=user) | Q(usuario__id__in=list(seguir_ids) + [1])
+    ).order_by('-karma')[:3]
+    sugestoes = []
+    for p in sugestoes_qs:
+        sugestoes.append({
+            'iniciais': p.iniciais,
+            'nome': p.usuario.get_full_name() or p.usuario.username,
+            'role': p.role or 'Membro Mundu',
+            'handle': p.usuario.username,
+        })
+
+    # Certificados
+    certs = Certificate.objects.filter(usuario=user).select_related('modulo', 'trilha')[:6]
+    certificates = []
+    for c in certs:
+        nome = c.modulo.titulo if c.modulo else (c.trilha.titulo if c.trilha else 'Curso')
+        emissor = 'MUNDU Academy'
+        certificates.append({
+            'title': nome,
+            'issuer': emissor,
+            'date': c.emitido_em.strftime('%b %Y') if c.emitido_em else '',
+            'hours': 0,
+        })
+
+    # Progresso tab data
+    total_hours = sum(
+        (pm.progresso / 100) * (int(pm.modulo.duracao_total.split('h')[0]) if 'h' in pm.modulo.duracao_total else 0)
+        for pm in ProgressoModulo.objects.filter(usuario=user).select_related('modulo')
+    )
+
+    # Achievements — from UserAchievement
+    from usuarios.models import UserAchievement, Skill as SkillModel
+    acs = UserAchievement.objects.filter(usuario=user).select_related('achievement')
+    achievements = [{
+        'icon': ua.achievement.icone,
+        'title': ua.achievement.titulo,
+        'color': ua.achievement.cor_gradiente,
+    } for ua in acs]
+
+    # Skills
+    skill_levels = SkillModel.objects.filter(usuario=user).order_by('-nivel')[:6]
+    SKILL_COLORS = [
+        ('text-emerald-400', 'bg-emerald-400'),
+        ('text-blue-400', 'bg-blue-400'),
+        ('text-purple-400', 'bg-purple-400'),
+        ('text-amber-400', 'bg-amber-400'),
+        ('text-rose-400', 'bg-rose-400'),
+        ('text-cyan-400', 'bg-cyan-400'),
+    ]
+    skills = []
+    for i, s in enumerate(skill_levels):
+        color, bg = SKILL_COLORS[i % len(SKILL_COLORS)]
+        skills.append({
+            'name': s.nome,
+            'level': s.nivel,
+            'color': color,
+            'bg': bg,
+            'icon': s.icone,
+            'pct': f'{s.nivel}0%',
+        })
+
+    return render(request, 'perfil.html', {
+        'stats': stats,
+        'trilhas_progresso': trilhas_progresso,
+        'achievements': achievements,
+        'skills': skills,
+        'certificates': certificates,
+        'conexoes_recentes': conexoes_recentes,
+        'sugestoes': sugestoes,
+        'streak_dias': perfil.streak_dias,
+        'total_hours': f'{int(total_hours)}h {int((total_hours % 1) * 60):02d}min' if total_hours else '0h',
+        'joined_at': perfil.data_criacao.strftime('%b %Y') if perfil.data_criacao else 'Jan 2024',
+        'cargo': perfil.cargo or 'Aprendiz',
+    })
 
 
 @login_required(login_url='/login')
 def config(request):
-    return render(request, 'config.html')
+    from usuarios.forms import PerfilModelForm
+    from cursos.models import Certificate
+    from social.models import Follow
+    from usuarios.models import Perfil
+
+    if request.method == 'POST':
+        form = PerfilModelForm(request.POST, instance=request.user.perfil, user=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('/perfil')
+    else:
+        form = PerfilModelForm(instance=request.user.perfil, user=request.user)
+
+    cert_count = Certificate.objects.filter(usuario=request.user).count()
+    followers_count = Follow.objects.filter(seguido=request.user).count()
+
+    total_perfis = Perfil.objects.count()
+    user_rank = Perfil.objects.filter(xp_total__gt=request.user.perfil.xp_total).count() + 1
+    top_percent = round(user_rank / max(total_perfis, 1) * 100)
+
+    return render(request, 'config.html', {
+        'form': form,
+        'cert_count': cert_count,
+        'followers_count': followers_count,
+        'top_percent': top_percent,
+    })
 
 
 @login_required(login_url='/login')
 def conteudos(request):
     modulos_db = Modulo.objects.prefetch_related('aulas').all()
+    from cursos.models import Quiz
+    quizzes = {q.modulo_id: q for q in Quiz.objects.all()}
     progressos = {p.modulo_id: p.progresso for p in ProgressoModulo.objects.filter(usuario=request.user)}
     modules = []
     for mod in modulos_db:
@@ -205,6 +401,7 @@ def conteudos(request):
               'ordem': a.ordem}
             for a in mod.aulas.all()
         ]
+        quiz = quizzes.get(mod.id)
         modules.append({
             'id': str(mod.id), 'title': mod.titulo, 'description': mod.descricao,
             'slug': mod.slug,
@@ -214,6 +411,7 @@ def conteudos(request):
             'level': mod.nivel, 'certificate': mod.tem_certificado,
             'sections_count': mod.num_secoes,
             'aulas': aulas,
+            'quiz': {'id': quiz.id, 'titulo': quiz.titulo, 'xp_total': quiz.xp_total} if quiz else None,
         })
     return render(request, 'conteudos.html', {'modules': modules})
 
@@ -248,6 +446,7 @@ def trilhas(request):
 
 
 @login_required(login_url='/login')
+@login_required(login_url='/login')
 def desafios(request):
     prog_map = {p.desafio_id: p.progresso for p in ProgressoDesafio.objects.filter(usuario=request.user)}
     def _build(tipo):
@@ -256,43 +455,269 @@ def desafios(request):
             prog = prog_map.get(d.id, 0)
             result.append({'titulo': d.titulo, 'desc': d.descricao, 'xp': d.xp, 'prog': prog, 'meta': d.meta, 'icon': d.icon, 'comp': prog >= d.meta})
         return result
-    return render(request, 'desafios.html', {'daily': _build('daily'), 'weekly': _build('weekly')})
+
+    daily_list = _build('daily')
+    weekly_list = _build('weekly')
+    daily_done = sum(1 for d in daily_list if d['comp'])
+    weekly_done = sum(1 for w in weekly_list if w['comp'])
+
+    perfil = request.user.perfil
+    streak_dias = perfil.streak_dias
+
+    from usuarios.models import Achievement, UserAchievement
+    user_ach = {ua.achievement_id for ua in UserAchievement.objects.filter(usuario=request.user).select_related('achievement')}
+    all_achievements = Achievement.objects.all()
+    conquistas = []
+    for a in all_achievements:
+        unlocked = a.id in user_ach
+        conquistas.append({
+            'titulo': a.titulo,
+            'icon': a.icone,
+            'cor_gradiente': a.cor_gradiente,
+            'unlocked': unlocked,
+        })
+    total_achs = len(conquistas)
+    unlocked_achs = sum(1 for c in conquistas if c['unlocked'])
+
+    # Unlockables — from a simple model or static for now
+    unlockables = [
+        {'titulo': 'Avatar Mestre', 'desc': 'Avatar exclusivo', 'icon': 'gem', 'prog': 42, 'meta': 50, 'pct': 84},
+        {'titulo': 'Tema Dark Gold', 'desc': 'Tema premium', 'icon': 'sparkles', 'prog': 12, 'meta': 30, 'pct': 40},
+    ]
+
+    return render(request, 'desafios.html', {
+        'daily': daily_list,
+        'weekly': weekly_list,
+        'streak_dias': streak_dias,
+        'daily_done': daily_done,
+        'daily_total': len(daily_list),
+        'weekly_done': weekly_done,
+        'weekly_total': len(weekly_list),
+        'conquistas': conquistas,
+        'total_conquistas': total_achs,
+        'unlocked_conquistas': unlocked_achs,
+        'unlockables': unlockables,
+    })
 
 
 @login_required(login_url='/login')
 def ao_vivo(request):
-    return render(request, 'ao_vivo.html')
+    from django.utils import timezone
+    from live.models import LiveStream, LiveChatMessage, LivePoll
+
+    live_now = LiveStream.objects.filter(ao_vivo=True).first()
+    upcoming = LiveStream.objects.filter(
+        ao_vivo=False, data_agendamento__gte=timezone.now()
+    ).order_by('data_agendamento')[:10]
+    replays = LiveStream.objects.filter(
+        ao_vivo=False, data_fim__isnull=False
+    ).order_by('-data_fim')[:10]
+
+    chat_messages = []
+    active_poll = None
+    if live_now:
+        chat_messages = LiveChatMessage.objects.filter(stream=live_now)[:50]
+        active_poll = LivePoll.objects.filter(stream=live_now, ativa=True).first()
+
+    return render(request, 'ao_vivo.html', {
+        'live_now': live_now,
+        'upcoming': upcoming,
+        'replays': replays,
+        'chat_messages': chat_messages,
+        'active_poll': active_poll,
+    })
 
 
 @login_required(login_url='/login')
 def insumos(request):
-    return render(request, 'insumos.html')
+    from resources.models import Resource, ResourceCategory
+
+    cats = ['Todos'] + [c.nome for c in ResourceCategory.objects.all()]
+    qs = Resource.objects.select_related('categoria').all()
+    insumos_list = []
+    for r in qs:
+        views = r.visualizacoes
+        if views >= 1000:
+            meta = f'{views//1000}k views'
+        else:
+            meta = f'{views} views'
+        insumos_list.append({
+            'id': str(r.id), 'title': r.titulo, 'desc': r.descricao,
+            'meta': meta, 'author': r.autor, 'thumb': r.thumbnail,
+            'new': r.novo, 'trend': r.em_alta, 'prem': r.premium,
+            'fmt': r.formato,
+        })
+    return render(request, 'insumos.html', {
+        'cats': cats,
+        'insumos': insumos_list,
+    })
 
 
 @login_required(login_url='/login')
 def networking(request):
-    return render(request, 'networking.html')
+    from social.models import Follow
+    from django.contrib.auth.models import User
+
+    # Posts — recent threads as networking posts
+    threads_qs = Thread.objects.select_related('community').annotate(
+        reply_count=Count('comments')
+    ).order_by('-created_at')[:10]
+    posts = []
+    for t in threads_qs:
+        author = resolve_user(t.author_handle)
+        posts.append({
+            'id': str(t.id),
+            'name': author['nome_completo'],
+            'user': f'@{t.author_handle}',
+            'iniciais': author['iniciais'],
+            'role': author['role'],
+            'ver': author.get('karma', 0) > 5,
+            'time': _time_ago(t.created_at),
+            'content': t.body or t.title,
+            'img': '',
+            'likes': t.upvotes,
+            'coms': t.reply_count,
+            'reps': 0,
+        })
+
+    # Quem seguir
+    sug = []
+    if request.user.is_authenticated:
+        seguir_ids = Follow.objects.filter(seguidor=request.user).values_list('seguido_id', flat=True)
+        exclude_ids = list(seguir_ids) + [request.user.id]
+    else:
+        exclude_ids = [1]
+    from usuarios.models import Perfil
+    sug_qs = Perfil.objects.exclude(usuario__id__in=exclude_ids).order_by('-karma')[:3]
+    for p in sug_qs:
+        sug.append({
+            'name': p.usuario.get_full_name() or p.usuario.username,
+            'user': f'@{p.usuario.username}',
+            'iniciais': p.iniciais,
+            'bio': p.role or 'Membro Mundu',
+        })
+
+    # Trends — from Thread tags
+    trends = []
+    tag_counts = Thread.objects.exclude(tag='').values('tag').annotate(
+        total=Count('id')
+    ).order_by('-total')[:5]
+    for tc in tag_counts:
+        trends.append({
+            'cat': tc['tag'].title(),
+            'tags': f'#{tc["tag"].replace(" ", "")}',
+            'posts': f'{tc["total"]} posts',
+        })
+
+    return render(request, 'networking.html', {
+        'posts': posts,
+        'sug': sug,
+        'trends': trends,
+    })
 
 
 def user_profile(request, handle):
-    if handle not in USERS:
+    try:
+        u = User.objects.get(username=handle)
+        p = u.perfil
+    except User.DoesNotExist:
         return render(request, '404.html', {'resource': f"@{handle}"}, status=404)
-    user = USERS[handle]
-    user_posts = [
-        {**t, "author_user": user, "community_obj": next((c for c in guild_communities if c["slug"] == t["community_slug"]), None)}
-        for t in guild_threads if t["author"] == handle
-    ]
+
+    from social.models import Follow
+
+    user = {
+        'handle': u.username,
+        'nome_completo': u.get_full_name() or u.username,
+        'iniciais': p.iniciais,
+        'role': p.role,
+        'bio': p.bio,
+        'karma': p.karma,
+        'followers': Follow.objects.filter(seguido=u).count(),
+        'following': Follow.objects.filter(seguidor=u).count(),
+        'joined_at': p.data_criacao.strftime('%b %Y') if p.data_criacao else '',
+        'is_self': request.user.is_authenticated and request.user.username == handle,
+    }
+
+    threads_qs = Thread.objects.filter(author_handle=handle).select_related('community').annotate(
+        reply_count=Count('comments')
+    )
+    user_posts = []
+    for t in threads_qs:
+        user_posts.append({
+            'slug': t.slug, 'title': t.title, 'community_slug': t.community.slug,
+            'community_obj': t.community, 'tag': t.tag,
+            'time_ago': _time_ago(t.created_at), 'upvotes': t.upvotes,
+            'replies': t.reply_count, 'preview': t.preview,
+            'author_user': resolve_user(handle),
+        })
+
+    user_comments_raw = Comment.objects.filter(author_handle=handle).select_related('thread__community')
     user_comments = []
-    for post_id, comment_tree in COMMENTS.items():
-        post_obj = next((t for t in guild_threads if t["id"] == post_id), None)
-        def walk(comments):
-            for c in comments:
-                if c["author"] == handle:
-                    user_comments.append({**c, "post": post_obj})
-                walk(c.get("children", []))
-        walk(comment_tree)
+    for c in user_comments_raw:
+        user_comments.append({
+            'id': c.id, 'body': c.body, 'upvotes': c.upvotes,
+            'time_ago': _time_ago(c.created_at),
+            'post': {
+                'slug': c.thread.slug, 'title': c.thread.title,
+                'community_slug': c.thread.community.slug,
+            },
+        })
+
     tab = request.GET.get('tab', 'posts')
     return render(request, 'profile.html', {
         'user': user, 'posts': user_posts, 'comments': user_comments,
-        'tab': tab, 'is_self': user.get("is_self", False),
+        'tab': tab, 'is_self': user.get('is_self', False),
+    })
+
+
+@login_required(login_url='/login')
+def quiz_view(request, quiz_id):
+    from cursos.models import Quiz, Questao, Alternativa, TentativaQuiz
+    quiz = get_object_or_404(Quiz.objects.prefetch_related('questoes__alternativas'), id=quiz_id)
+    questoes = []
+    for q in quiz.questoes.all():
+        alt_list = [{'id': a.id, 'texto': a.texto, 'ordem': a.ordem} for a in q.alternativas.all()]
+        questoes.append({
+            'id': q.id, 'enunciado': q.enunciado, 'tipo': q.tipo, 'ordem': q.ordem,
+            'alternativas': alt_list,
+        })
+    tentativa = TentativaQuiz.objects.filter(usuario=request.user, quiz=quiz).order_by('-concluido_em').first()
+    return render(request, 'quiz.html', {
+        'quiz': quiz,
+        'questoes': questoes,
+        'tentativa': tentativa,
+    })
+
+
+@login_required(login_url='/login')
+def quiz_resultado(request, quiz_id):
+    from cursos.models import Quiz, TentativaQuiz, Questao
+    quiz = get_object_or_404(Quiz, id=quiz_id)
+    tentativa = TentativaQuiz.objects.filter(usuario=request.user, quiz=quiz).order_by('-concluido_em').first()
+    if not tentativa:
+        return redirect('quiz_view', quiz_id=quiz_id)
+    questoes_raw = Questao.objects.filter(quiz=quiz).prefetch_related('alternativas').order_by('ordem')
+    primeira_tentativa = TentativaQuiz.objects.filter(usuario=request.user, quiz=quiz).count() == 1
+    if primeira_tentativa and tentativa.total_questoes:
+        xp_ganho = int(quiz.xp_total * tentativa.pontuacao / tentativa.total_questoes)
+    else:
+        xp_ganho = 0
+    questoes = []
+    for q in questoes_raw:
+        respostas_json = tentativa.respostas or {}
+        resposta_id = respostas_json.get(str(q.id))
+        alt_correta = q.alternativas.filter(correta=True).first()
+        questoes.append({
+            'id': q.id,
+            'enunciado': q.enunciado,
+            'alternativas': [{'id': a.id, 'texto': a.texto, 'correta': a.correta} for a in q.alternativas.all()],
+            'resposta_id': resposta_id,
+            'correta_id': alt_correta.id if alt_correta else None,
+            'acertou': resposta_id == getattr(alt_correta, 'id', None),
+        })
+    return render(request, 'quiz_resultado.html', {
+        'tentativa': tentativa,
+        'questoes': questoes,
+        'xp_ganho': xp_ganho,
+        'primeira_tentativa': primeira_tentativa,
     })

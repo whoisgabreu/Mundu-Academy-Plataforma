@@ -42,21 +42,12 @@
       
       <!-- Categories -->
       <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-        {% set cats = ['Todos', 'Marketing', 'Vendas', 'Produto', 'Finanças', 'Design', 'IA & Automação'] %}
         {% for cat in cats %}
         <button class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border bg-transparent hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3 shrink-0 rounded-full {% if loop.first %}border-primary bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary{% else %}border-secondary/40 bg-card hover:border-primary/50 text-muted-foreground hover:text-foreground{% endif %}">
           {{ cat }}
         </button>
         {% endfor %}
       </div>
-
-      {% set insumos = [
-        {'id': '1', 'title': 'Checklist de Lançamento de Produto', 'desc': 'Template completo com todas as etapas para um lançamento de sucesso', 'meta': '2k views', 'author': 'Thiago Nigro', 'thumb': 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&q=80', 'new': false, 'trend': true, 'prem': false, 'fmt': 'PDF'},
-        {'id': '2', 'title': 'Planilha de Controle Financeiro', 'desc': 'Modelo para gestão de fluxo de caixa e projeções', 'meta': '5k views', 'author': 'Ana Lima', 'thumb': 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=400&q=80', 'new': false, 'trend': false, 'prem': true, 'fmt': 'Planilha'},
-        {'id': '3', 'title': 'Gerador de Títulos para Ads', 'desc': 'Prompt otimizado para criar títulos que convertem', 'meta': '1k views', 'author': 'Pedro Mendes', 'thumb': 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&q=80', 'new': true, 'trend': false, 'prem': false, 'fmt': 'Prompt'},
-        {'id': '4', 'title': 'Script de Cold Call B2B', 'desc': 'Roteiro para ligações de prospecção corporativa', 'meta': '3k views', 'author': 'Carlos Oliveira', 'thumb': 'https://images.unsplash.com/photo-1521791136064-7986c2920216?w=400&q=80', 'new': false, 'trend': false, 'prem': false, 'fmt': 'PDF'},
-        {'id': '5', 'title': 'Calculadora CAC e LTV', 'desc': 'Planilha para métricas de marketing', 'meta': '4k views', 'author': 'Rafael Costa', 'thumb': 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&q=80', 'new': false, 'trend': false, 'prem': true, 'fmt': 'Planilha'}
-      ] %}
 
       <!-- Em Alta -->
       <div class="space-y-3">

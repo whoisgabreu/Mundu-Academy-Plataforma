@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Resultado - {{ tentativa.quiz.titulo }} - Mundu Academy{% endblock %}
+{% block page_title %}Resultado do Quiz{% endblock %}
+
+{% block content %}
+<div class="px-4 md:px-8 py-4 md:py-6 space-y-6 pb-20 md:pb-6 w-full max-w-4xl mx-auto">
+  <div class="rounded-xl border p-6 {% if tentativa.aprovado %}bg-emerald-500/10 border-emerald-500/30{% else %}bg-red-500/10 border-red-500/30{% endif %}">
+    <div class="flex items-center gap-4">
+      <div class="h-16 w-16 rounded-full {% if tentativa.aprovado %}bg-emerald-500/20{% else %}bg-red-500/20{% endif %} flex items-center justify-center">
+        <i data-lucide="{% if tentativa.aprovado %}check-circle{% else %}x-circle{% endif %}" class="h-8 w-8 {% if tentativa.aprovado %}text-emerald-400{% else %}text-red-400{% endif %}"></i>
+      </div>
+      <div>
+        <h2 class="text-xl font-bold text-foreground">
+          {% if tentativa.aprovado %}Aprovado! 🎉{% else %}Não foi dessa vez{% endif %}
+        </h2>
+        <p class="text-muted-foreground">{{ tentativa.pontuacao }}/{{ tentativa.total_questoes }} acertos ({{ tentativa.percentual }}%)</p>
+        <p class="text-sm text-muted-foreground">Mínimo: {{ tentativa.quiz.aprovacao_percentual }}%</p>
+        {% if primeira_tentativa and xp_ganho > 0 %}
+        <p class="text-sm font-semibold text-amber-400 mt-1">+{{ xp_ganho }} XP</p>
+        {% elif not primeira_tentativa %}
+        <p class="text-sm text-muted-foreground mt-1">Revisão — nenhum XP ganho (já recompensado)</p>
+        {% endif %}
+      </div>
+    </div>
+    <div class="mt-4 flex gap-3">
+      {% if not tentativa.aprovado %}
+      <a href="/quiz/{{ tentativa.quiz.id }}" class="inline-flex items-center rounded-lg bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:bg-primary/90 transition-colors">
+        Tentar Novamente
+      </a>
+      {% endif %}
+      <a href="/conteudos" class="inline-flex items-center rounded-lg border border-border/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-card transition-colors">
+        Voltar para Conteúdos
+      </a>
+    </div>
+  </div>
+
+  <div class="space-y-4">
+    <h3 class="text-lg font-semibold text-foreground">Revisão das Questões</h3>
+    {% for item in questoes %}
+    <div class="rounded-xl border p-4 {% if item.acertou %}border-emerald-500/30 bg-emerald-500/5{% else %}border-red-500/30 bg-red-500/5{% endif %}">
+      <div class="flex items-start gap-3">
+        <span class="flex items-center justify-center w-7 h-7 rounded-full {% if item.acertou %}bg-emerald-500/20 text-emerald-400{% else %}bg-red-500/20 text-red-400{% endif %} text-sm font-bold shrink-0">{{ loop.index }}</span>
+        <div class="flex-1">
+          <p class="font-medium text-foreground">{{ item.enunciado }}</p>
+          <div class="mt-2 space-y-1 text-sm">
+            {% for a in item.alternativas %}
+            <div class="flex items-center gap-2 {% if a.id == item.resposta_id and not item.acertou %}text-red-400{% elif a.correta %}text-emerald-400{% else %}text-muted-foreground{% endif %}">
+              {% if a.id == item.resposta_id and item.acertou %}<i data-lucide="check" class="h-4 w-4 shrink-0"></i>
+              {% elif a.id == item.resposta_id and not item.acertou %}<i data-lucide="x" class="h-4 w-4 shrink-0"></i>
+              {% elif a.correta %}<i data-lucide="check" class="h-4 w-4 shrink-0"></i>
+              {% else %}<span class="w-4"></span>{% endif %}
+              <span>{{ a.texto }}</span>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -16,4 +16,8 @@ urlpatterns = [
     path('notifications/read-all', api.read_all_notifications, name='api_read_all_notifications'),
     path('notifications/<slug:notif_id>/read', api.read_notification, name='api_read_notification'),
     path('quick-note', api.quick_note, name='api_quick_note'),
+    path('progresso', api.update_progress, name='api_update_progress'),
+    path('desafio/<int:desafio_id>/completar', api.complete_challenge, name='api_complete_challenge'),
+    path('xp', api.my_xp, name='api_my_xp'),
+    path('quiz/<int:quiz_id>/submit', api.submit_quiz, name='api_submit_quiz'),
 ]
