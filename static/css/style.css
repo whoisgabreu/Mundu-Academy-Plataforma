@@ -7538,3 +7538,30 @@ ul, ol {
 
   .notes-grid { grid-template-columns: 1fr; }
 }
+
+.main-content.player-page {
+  align-items: center;
+}
+
+.player-layout {
+  display: flex;
+  gap: 32px;
+  width: 100%;
+  max-width: 1320px;
+  padding: 1.5rem 1rem;
+}
+
+.player-main {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 960px;
+}
+
+.player-sidebar {
+  flex: 0 0 320px;
+  position: sticky;
+  top: calc(var(--header-height) + 24px);
+  align-self: flex-start;
+  max-height: calc(100vh - var(--header-height) - 48px);
+  overflow-y: auto;
+}

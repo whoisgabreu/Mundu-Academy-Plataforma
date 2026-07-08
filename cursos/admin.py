@@ -11,23 +11,24 @@ class TrilhaModuloInline(admin.TabularInline):
 class AulaInline(admin.TabularInline):
     model = Aula
     extra = 1
-    fields = ['titulo', 'youtube_video_id', 'duracao', 'ordem', 'is_preview']
+    fields = ['titulo', 'url_video', 'duracao', 'ordem', 'is_preview']
     ordering = ['ordem']
 
 
 @admin.register(Modulo)
 class ModuloAdmin(admin.ModelAdmin):
-    list_display = ['titulo', 'nivel', 'total_aulas', 'duracao_total', 'xp_total', 'tem_certificado']
+    list_display = ['titulo', 'slug', 'nivel', 'total_aulas', 'duracao_total', 'xp_total', 'tem_certificado']
     list_filter = ['nivel', 'tem_certificado']
-    search_fields = ['titulo', 'descricao']
+    search_fields = ['titulo', 'slug', 'descricao']
+    prepopulated_fields = {'slug': ('titulo',)}
     inlines = [AulaInline]
 
 
 @admin.register(Aula)
 class AulaAdmin(admin.ModelAdmin):
-    list_display = ['titulo', 'modulo', 'youtube_video_id', 'duracao', 'ordem', 'is_preview']
+    list_display = ['titulo', 'modulo', 'url_video', 'duracao', 'ordem', 'is_preview']
     list_filter = ['is_preview', 'modulo']
-    search_fields = ['titulo', 'youtube_video_id']
+    search_fields = ['titulo', 'url_video']
 
 
 @admin.register(Trilha)

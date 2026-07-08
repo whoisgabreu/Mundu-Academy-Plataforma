@@ -32,6 +32,7 @@ SHARED_APPS = [
 TENANT_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'embed_video',
     'core',
     'cursos',
     'usuarios',
@@ -126,7 +127,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-APPEND_SLASH = False
+APPEND_SLASH = True
 
 # ===========================================================
 # Django REST Framework

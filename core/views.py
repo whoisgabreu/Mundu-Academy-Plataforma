@@ -201,11 +201,13 @@ def conteudos(request):
         concluidas = int(mod.total_aulas * prog / 100)
         aulas = [
             {'id': a.id, 'titulo': a.titulo, 'duracao': a.duracao,
-             'youtube_id': a.youtube_video_id, 'is_preview': a.is_preview}
+              'youtube_id': a.url_video, 'is_preview': a.is_preview,
+              'ordem': a.ordem}
             for a in mod.aulas.all()
         ]
         modules.append({
             'id': str(mod.id), 'title': mod.titulo, 'description': mod.descricao,
+            'slug': mod.slug,
             'thumbnail': mod.thumbnail, 'totalLessons': mod.total_aulas,
             'completedLessons': concluidas, 'progress': prog,
             'totalDuration': mod.duracao_total, 'xpTotal': mod.xp_total,

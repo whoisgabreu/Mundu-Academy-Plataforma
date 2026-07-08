@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.middleware.csrf import get_token
 from markupsafe import Markup
 from jinja2 import Environment
+from embed_video.backends import detect_backend, UnknownBackendException
 
 
 def url_for(endpoint, **kwargs):
@@ -82,11 +83,21 @@ def inject_globals(request):
     }
 
 
+def get_embed_video(url):
+    if not url:
+        return None
+    try:
+        return detect_backend(url)
+    except (UnknownBackendException, TypeError):
+        return None
+
+
 def environment(**options):
     env = Environment(**options)
     env.globals.update({
         'url_for': url_for,
         'csrf_input': csrf_input,
         'inject_globals': inject_globals,
+        'get_embed_video': get_embed_video,
     })
     return env

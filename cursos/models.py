@@ -1,9 +1,7 @@
-import re
 from django.db import models
 from django.contrib.auth.models import User
-
-
-YOUTUBE_RE = re.compile(r'(?:v=|youtu\.be/|youtube\.com/embed/)([\w-]{11})')
+from django.utils.text import slugify
+from embed_video.fields import EmbedVideoField
 
 
 class Modulo(models.Model):
@@ -14,6 +12,7 @@ class Modulo(models.Model):
     ]
 
     titulo = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=200, unique=True, blank=True)
     descricao = models.TextField(blank=True)
     thumbnail = models.URLField(blank=True)
     total_aulas = models.IntegerField(default=0)
@@ -27,6 +26,11 @@ class Modulo(models.Model):
         verbose_name = 'Módulo'
         verbose_name_plural = 'Módulos'
         ordering = ['titulo']
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.titulo)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.titulo
@@ -131,7 +135,7 @@ class Aula(models.Model):
     modulo = models.ForeignKey(Modulo, on_delete=models.CASCADE, related_name='aulas')
     titulo = models.CharField(max_length=255)
     descricao = models.TextField(blank=True)
-    youtube_video_id = models.CharField(max_length=50, help_text="Cole a URL completa do YouTube ou apenas o ID do vídeo")
+    url_video = EmbedVideoField(help_text="Cole a URL do YouTube ou Vimeo aqui")
     duracao = models.CharField(max_length=20, blank=True, help_text="Ex: 15:30")
     ordem = models.IntegerField(default=0)
     is_preview = models.BooleanField(default=False)
@@ -142,12 +146,6 @@ class Aula(models.Model):
         verbose_name_plural = 'Aulas'
         ordering = ['ordem']
         unique_together = ('modulo', 'ordem')
-
-    def save(self, *args, **kwargs):
-        match = YOUTUBE_RE.search(self.youtube_video_id)
-        if match:
-            self.youtube_video_id = match.group(1)
-        super().save(*args, **kwargs)
 
     def __str__(self):
         return f'{self.modulo.titulo} — {self.titulo}'
