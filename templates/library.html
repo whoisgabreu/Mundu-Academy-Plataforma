@@ -133,7 +133,7 @@
 <!-- ============ NEWSLETTER ============ -->
 <section class="library-newsletter animate-fade-in-up">
   <div class="library-newsletter-content">
-    <h3>📬 Newsletter da Mundu</h3>
+    <h3><i data-lucide="mail" class="inline-icon"></i>Newsletter da Mundu</h3>
     <p>1 e-mail por semana com o melhor da Library — resumos, frameworks novos e cases da Guild.</p>
   </div>
   <form class="library-newsletter-form" onsubmit="handleNewsletter(event)">
@@ -160,7 +160,7 @@
     })
     .then(function(r){ return r.json(); })
     .then(function(){
-      showToast('🍴 "' + title + '" forkado para o seu Brain');
+      showToast('"' + title + '" forkado para o seu Brain');
     })
     .catch(function(){ showToast('Erro ao forkar — tente novamente'); });
   }

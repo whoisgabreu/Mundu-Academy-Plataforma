@@ -1,24 +1,21 @@
 from django.db.models import Count
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.http import Http404
-from core.utils import render
-from guild.models import Community, Thread, Comment
+from django.shortcuts import get_object_or_404, redirect
+from django.utils import timezone
+from django.views.decorators.http import require_POST
+from core.utils import human_time_ago, render
+from guild.forms import CommunityForm
+from guild.models import Community, Thread, Comment, GuildMembership, GuildMission
+
+
+def _can_manage_guild(user):
+    return user.is_authenticated and (user.is_staff or user.is_superuser)
 
 
 def _time_ago(dt):
-    from django.utils import timezone
-    now = timezone.now()
-    diff = now - dt
-    if diff.days == 0:
-        mins = diff.seconds // 60
-        if mins < 1:
-            return 'agora'
-        if mins < 60:
-            return f'há {mins}min'
-        hours = mins // 60
-        return f'há {hours}h' if hours < 24 else 'ontem'
-    if diff.days == 1:
-        return 'ontem'
-    return f'há {diff.days} dias'
+    return human_time_ago(dt)
 
 
 def resolve_user(handle):
@@ -101,11 +98,23 @@ def guild_home(request):
     communities = Community.objects.all()
     threads = Thread.objects.select_related('community').annotate(
         reply_count=Count('comments')
-    ).order_by('-upvotes')[:20]
+    )
+    sort = request.GET.get('sort', 'hot')
+    if sort == 'new':
+        threads = threads.order_by('-created_at')
+    elif sort == 'unanswered':
+        threads = threads.filter(reply_count=0).order_by('-created_at')
+    else:
+        threads = threads.order_by('-upvotes')
+    threads = threads[:20]
     enriched = [enrich_thread(t, t.reply_count) for t in threads]
+    ranking = GuildMembership.objects.select_related('usuario', 'usuario__perfil', 'community').order_by('-xp')[:10]
     return render(request, 'guild.html', {
         'communities': communities,
         'threads': enriched,
+        'sort': sort,
+        'ranking': ranking,
+        'can_manage_guild': _can_manage_guild(request.user),
     })
 
 
@@ -131,6 +140,11 @@ def community_detail(request, slug):
 
     related = Community.objects.filter(slug__in=community.related)
     moderators = [resolve_user(h) for h in community.moderators]
+    membership = None
+    if request.user.is_authenticated:
+        membership = GuildMembership.objects.filter(usuario=request.user, community=community).first()
+    members = GuildMembership.objects.filter(community=community).select_related('usuario', 'usuario__perfil').order_by('-xp')[:30]
+    missions = GuildMission.objects.filter(community=community, ativo=True)
 
     return render(request, 'community.html', {
         'community': community,
@@ -138,6 +152,10 @@ def community_detail(request, slug):
         'sort': sort,
         'related_communities': related,
         'moderators': moderators,
+        'membership': membership,
+        'members': members,
+        'missions': missions,
+        'can_manage_guild': _can_manage_guild(request.user),
     })
 
 
@@ -171,3 +189,58 @@ def thread_detail(request, community_slug, post_slug):
         'related_communities': related,
         'moderators': moderators,
     })
+
+
+@login_required(login_url='/login')
+def guild_create(request):
+    if not _can_manage_guild(request.user):
+        messages.error(request, 'Apenas administradores podem criar guildas.')
+        return redirect('/guild')
+    form = CommunityForm(request.POST or None)
+    if request.method == 'POST':
+        if form.is_valid():
+            community = form.save(commit=False)
+            community.created_at = timezone.now().strftime('%b %Y')
+            community.save()
+            messages.success(request, 'Guilda criada com sucesso.')
+            return redirect('community', slug=community.slug)
+        messages.error(request, 'Revise os campos destacados.')
+    return render(request, 'guild_form.html', {
+        'form': form,
+        'title': 'Nova guilda',
+        'cancel_url': '/guild',
+        'messages_list': list(messages.get_messages(request)),
+    })
+
+
+@login_required(login_url='/login')
+def guild_edit(request, slug):
+    if not _can_manage_guild(request.user):
+        messages.error(request, 'Apenas administradores podem editar guildas.')
+        return redirect('/guild')
+    community = get_object_or_404(Community, slug=slug)
+    form = CommunityForm(request.POST or None, instance=community)
+    if request.method == 'POST':
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Guilda atualizada com sucesso.')
+            return redirect('community', slug=community.slug)
+        messages.error(request, 'Revise os campos destacados.')
+    return render(request, 'guild_form.html', {
+        'form': form,
+        'title': 'Editar guilda',
+        'cancel_url': f'/g/{community.slug}',
+        'messages_list': list(messages.get_messages(request)),
+    })
+
+
+@login_required(login_url='/login')
+@require_POST
+def guild_delete(request, slug):
+    if not _can_manage_guild(request.user):
+        messages.error(request, 'Apenas administradores podem excluir guildas.')
+        return redirect('/guild')
+    community = get_object_or_404(Community, slug=slug)
+    community.delete()
+    messages.success(request, 'Guilda excluída com sucesso.')
+    return redirect('/guild')

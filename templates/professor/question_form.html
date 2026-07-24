@@ -1,0 +1,47 @@
+{% extends "professor/base.html" %}
+
+{% block professor_content %}
+<div class="prof-page-head">
+  <div>
+    <span class="prof-eyebrow">{{ quiz.titulo }}</span>
+    <h1>{{ title }}</h1>
+  </div>
+  <a href="{{ cancel_url }}" class="prof-btn ghost"><i data-lucide="x"></i><span>Cancelar</span></a>
+</div>
+
+<form method="post" class="prof-form-card">
+  {{ csrf_input }}
+  <div class="prof-form-grid">
+    {% for field in form %}
+    <label class="prof-field">
+      <span>{{ field.label }}</span>
+      {{ field }}
+      {% if field.errors %}<strong>{{ field.errors|join(', ') }}</strong>{% endif %}
+    </label>
+    {% endfor %}
+  </div>
+
+  <div class="prof-form-section-title">Respostas</div>
+  {{ formset.management_form }}
+  <div class="prof-answer-editor">
+    {% for answer_form in formset.forms %}
+    <div class="prof-answer-edit-row">
+      {% for hidden in answer_form.hidden_fields() %}{{ hidden }}{% endfor %}
+      <label><span>Resposta</span>{{ answer_form.texto }}</label>
+      <label><span>Correta</span>{{ answer_form.correta }}</label>
+      <label><span>Ordem</span>{{ answer_form.ordem }}</label>
+      {% if answer_form.DELETE %}<label><span>Excluir</span>{{ answer_form.DELETE }}</label>{% endif %}
+      {% if answer_form.errors %}<strong>{{ answer_form.errors }}</strong>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% if formset.non_form_errors() %}
+  <div class="prof-form-errors">{{ formset.non_form_errors()|join(', ') }}</div>
+  {% endif %}
+
+  <div class="prof-form-actions">
+    <a href="{{ cancel_url }}" class="prof-btn ghost">Voltar</a>
+    <button type="submit" class="prof-btn primary"><i data-lucide="save"></i><span>Salvar</span></button>
+  </div>
+</form>
+{% endblock %}

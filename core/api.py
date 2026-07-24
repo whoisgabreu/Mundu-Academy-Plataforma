@@ -135,12 +135,27 @@ def create_comment(request):
 @require_POST
 def join_community(request, slug):
     community = get_object_or_404(Community, slug=slug)
+    if not request.user.is_authenticated:
+        return JsonResponse({"erro": "autenticação obrigatória"}, status=403)
     payload = json_body(request)
     joined = bool(payload.get('joined', True))
+    from guild.models import GuildMembership
     if joined:
-        community.members += 1
+        previous = GuildMembership.objects.filter(usuario=request.user).first()
+        if previous and previous.community_id != community.id:
+            previous.community.members = max(previous.community.members - 1, 0)
+            previous.community.save(update_fields=['members'])
+            previous.delete()
+        membership, created = GuildMembership.objects.get_or_create(usuario=request.user, defaults={'community': community})
+        if not created and membership.community_id != community.id:
+            membership.community = community
+            membership.save(update_fields=['community'])
+        if created:
+            community.members += 1
     elif community.members > 0:
-        community.members -= 1
+        deleted, _ = GuildMembership.objects.filter(usuario=request.user, community=community).delete()
+        if deleted:
+            community.members -= 1
     community.save()
     return JsonResponse({"ok": True, "slug": slug, "joined": joined})
 
@@ -315,14 +330,9 @@ def update_progress(request):
     old = pm.progresso
     pm.progresso = max(pm.progresso, progresso)
     if pm.progresso == 100 and old < 100:
-        from cursos.models import Certificate
-        import secrets
+        from cursos.services import issue_certificate
         request.user.perfil.adicionar_xp(aula.modulo.xp_total)
-        if not Certificate.objects.filter(usuario=request.user, modulo=aula.modulo).exists():
-            Certificate.objects.create(
-                usuario=request.user, modulo=aula.modulo,
-                codigo=f'CERT-{aula.modulo_id}-{secrets.token_hex(4).upper()}'
-            )
+        issue_certificate(request.user, modulo=aula.modulo)
     pm.save()
     return JsonResponse({"ok": True, "progresso": pm.progresso})
 
@@ -350,6 +360,7 @@ def complete_challenge(request):
 @require_GET
 def my_xp(request):
     p = request.user.perfil
+    last_event = request.user.xp_events.first()
     return JsonResponse({
         "xp_total": p.xp_total,
         "nivel": p.nivel,
@@ -357,17 +368,33 @@ def my_xp(request):
         "nome_nivel": p.nome_nivel,
         "xp_proximo_nivel": p.xp_proximo_nivel,
         "xp_percentual": p.xp_percentual,
+        "moedas": p.moedas,
+        "titulo_ativo": p.titulo_ativo.nome if p.titulo_ativo else p.nome_nivel,
+        "last_event": {
+            "xp": last_event.xp,
+            "descricao": last_event.descricao,
+            "level_up": last_event.level_up,
+            "nivel_anterior": last_event.nivel_anterior,
+            "nivel_atual": last_event.nivel_atual,
+        } if last_event else None,
     })
 
 
 @csrf_exempt
 @require_POST
 def submit_quiz(request, quiz_id):
-    from cursos.models import Quiz, Questao, Alternativa, TentativaQuiz
+    from cursos.models import Quiz, Questao, TentativaQuiz
     payload = json_body(request)
     respostas = payload.get('respostas', {})
+    if not isinstance(respostas, dict):
+        return JsonResponse({"erro": "Formato de respostas inválido."}, status=400)
     quiz = get_object_or_404(Quiz.objects.prefetch_related('questoes__alternativas'), id=quiz_id)
     questoes = list(quiz.questoes.all())
+    if not questoes:
+        return JsonResponse({"erro": "Este quiz ainda não possui perguntas."}, status=400)
+    question_ids = {str(question.id) for question in questoes}
+    if question_ids - set(respostas):
+        return JsonResponse({"erro": "Responda todas as perguntas antes de enviar."}, status=400)
     acertos = 0
     for q in questoes:
         alt_id = respostas.get(str(q.id))
@@ -378,7 +405,10 @@ def submit_quiz(request, quiz_id):
     total = len(questoes)
     pct = int(acertos / total * 100) if total else 0
     aprovado = pct >= quiz.aprovacao_percentual
-    primeira_tentativa = not TentativaQuiz.objects.filter(usuario=request.user, quiz=quiz).exists()
+    tentativas_feitas = TentativaQuiz.objects.filter(usuario=request.user, quiz=quiz).count()
+    if tentativas_feitas >= quiz.max_tentativas:
+        return JsonResponse({"erro": "número máximo de tentativas atingido"}, status=403)
+    primeira_tentativa = tentativas_feitas == 0
     if primeira_tentativa:
         xp_ganho = int(quiz.xp_total * acertos / total) if total else 0
         if xp_ganho:

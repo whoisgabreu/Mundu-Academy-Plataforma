@@ -1,0 +1,68 @@
+{% extends "professor/base.html" %}
+
+{% block professor_content %}
+<div class="prof-page-head">
+  <div>
+    <span class="prof-eyebrow">{{ quiz.aula.titulo if quiz.aula else quiz.modulo.titulo }}</span>
+    <h1>{{ quiz.titulo }}</h1>
+  </div>
+  <div class="prof-head-actions">
+    <a href="/quiz/{{ quiz.id }}" class="prof-btn"><i data-lucide="external-link"></i><span>Ver como aluno</span></a>
+    <a href="/professor/quizzes/{{ quiz.id }}/editar/" class="prof-btn primary"><i data-lucide="pencil"></i><span>Editar</span></a>
+  </div>
+</div>
+
+<section class="prof-stat-grid">
+  <article class="prof-stat-card"><i data-lucide="target"></i><span>Nota mínima</span><strong>{{ quiz.aprovacao_percentual }}%</strong></article>
+  <article class="prof-stat-card"><i data-lucide="repeat"></i><span>Tentativas</span><strong>{{ quiz.max_tentativas }}</strong></article>
+  <article class="prof-stat-card"><i data-lucide="sparkles"></i><span>XP</span><strong>{{ quiz.xp_total }}</strong></article>
+  <article class="prof-stat-card"><i data-lucide="message-square"></i><span>Feedback</span><strong>{{ 'Auto' if quiz.feedback_automatico else 'Manual' }}</strong></article>
+</section>
+
+<section class="prof-two-col">
+  <article class="prof-panel">
+    <div class="prof-panel-head">
+      <h2>Perguntas</h2>
+      <a href="/professor/quizzes/{{ quiz.id }}/perguntas/nova/" class="prof-btn small"><i data-lucide="plus"></i><span>Adicionar</span></a>
+    </div>
+    <div class="prof-stack">
+      {% for question in questions %}
+      <div class="prof-question-card">
+        <div class="prof-row">
+          <div><strong>{{ question.ordem }}. {{ question.enunciado }}</strong><span>{{ question.get_tipo_display() }}</span></div>
+          <div class="prof-actions">
+            <a class="prof-icon-btn" href="/professor/perguntas/{{ question.id }}/editar/" aria-label="Editar"><i data-lucide="pencil"></i></a>
+            <form method="post" action="/professor/perguntas/{{ question.id }}/excluir/" onsubmit="return confirm('Excluir esta pergunta?')">
+              {{ csrf_input }}
+              <button class="prof-icon-btn danger" type="submit" aria-label="Excluir"><i data-lucide="trash-2"></i></button>
+            </form>
+          </div>
+        </div>
+        <div class="prof-answer-grid">
+          {% for alt in question.alternativas.all() %}
+          <span class="{% if alt.correta %}correct{% endif %}">{{ alt.texto }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% else %}
+      <p class="prof-empty">Nenhuma pergunta cadastrada.</p>
+      {% endfor %}
+    </div>
+  </article>
+
+  <article class="prof-panel">
+    <div class="prof-panel-head"><h2>Histórico</h2></div>
+    <div class="prof-stack">
+      {% for attempt in attempts %}
+      <div class="prof-row compact">
+        <div><strong>{{ attempt.usuario.get_full_name() or attempt.usuario.username }}</strong><span>{{ attempt.concluido_em.strftime('%d/%m/%Y %H:%M') }}</span></div>
+        <span class="prof-pill {% if attempt.aprovado %}published{% else %}draft{% endif %}">{{ attempt.pontuacao }}/{{ attempt.total_questoes }} · {{ attempt.percentual }}%</span>
+      </div>
+      {% else %}
+      <p class="prof-empty">Nenhuma tentativa registrada.</p>
+      {% endfor %}
+    </div>
+  </article>
+</section>
+{% endblock %}
+

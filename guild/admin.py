@@ -1,10 +1,10 @@
 from django.contrib import admin
-from .models import Community, Thread, Comment, Vote
+from .models import Community, Thread, Comment, Vote, GuildMembership, GuildMission, GuildMissionProgress
 
 
 @admin.register(Community)
 class CommunityAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug', 'members', 'posts_today')
+    list_display = ('name', 'slug', 'members', 'nivel', 'xp_total', 'missions_completed', 'posts_today')
     prepopulated_fields = {'slug': ('name',)}
 
 
@@ -20,3 +20,22 @@ class CommentAdmin(admin.ModelAdmin):
 @admin.register(Vote)
 class VoteAdmin(admin.ModelAdmin):
     list_display = ('usuario', 'valor', 'content_type', 'object_id', 'created_at')
+
+
+@admin.register(GuildMembership)
+class GuildMembershipAdmin(admin.ModelAdmin):
+    list_display = ('usuario', 'community', 'role', 'xp', 'joined_at')
+    list_filter = ('role', 'community')
+    search_fields = ('usuario__username', 'community__name')
+
+
+@admin.register(GuildMission)
+class GuildMissionAdmin(admin.ModelAdmin):
+    list_display = ('titulo', 'community', 'meta', 'xp', 'ativo')
+    list_filter = ('ativo', 'community')
+
+
+@admin.register(GuildMissionProgress)
+class GuildMissionProgressAdmin(admin.ModelAdmin):
+    list_display = ('membership', 'mission', 'progresso', 'concluida')
+    list_filter = ('concluida', 'mission__community')

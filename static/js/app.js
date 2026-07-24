@@ -330,6 +330,8 @@ function saveQuickNote() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
+    }).then(function(){
+      if (window.MunduGamification) window.MunduGamification.refresh();
     }).catch(function(){ /* silencioso — é mockup */ });
   } catch (_) { /* noop */ }
 
@@ -428,3 +430,106 @@ function showToast(message) {
     toast.classList.remove('show');
   }, 2800);
 }
+
+// ============ GAMIFICATION ============
+
+const MunduGamification = (function(){
+  const storageKey = 'mundu:last-level';
+  const xpKey = 'mundu:last-xp';
+  let initialized = false;
+
+  function ensureModal() {
+    let modal = document.getElementById('levelUpModal');
+    if (modal) return modal;
+    modal = document.createElement('div');
+    modal.id = 'levelUpModal';
+    modal.className = 'levelup-backdrop';
+    modal.innerHTML = [
+      '<div class="levelup-card" role="dialog" aria-modal="true" aria-label="Level up">',
+      '<div class="levelup-burst" aria-hidden="true"></div>',
+      '<button class="levelup-close" type="button" aria-label="Fechar">×</button>',
+      '<span class="levelup-kicker">Level up</span>',
+      '<h2 id="levelUpTitle">Nível alcançado!</h2>',
+      '<p id="levelUpText">Sua evolução acabou de subir.</p>',
+      '<div class="levelup-rewards">',
+      '<span><strong id="levelUpXp">0</strong> XP atual</span>',
+      '<span><strong id="levelUpCoins">0</strong> moedas</span>',
+      '<span><strong id="levelUpTitleName">Novo</strong> título</span>',
+      '</div>',
+      '<button class="prof-btn primary" type="button" id="levelUpOk">Continuar</button>',
+      '</div>'
+    ].join('');
+    document.body.appendChild(modal);
+    modal.querySelector('.levelup-close').addEventListener('click', close);
+    modal.querySelector('#levelUpOk').addEventListener('click', close);
+    modal.addEventListener('click', function(event){
+      if (event.target === modal) close();
+    });
+    return modal;
+  }
+
+  function close() {
+    const modal = document.getElementById('levelUpModal');
+    if (modal) modal.classList.remove('open');
+  }
+
+  function particleBurst(modal) {
+    const burst = modal.querySelector('.levelup-burst');
+    if (!burst) return;
+    burst.innerHTML = '';
+    for (let i = 0; i < 22; i += 1) {
+      const particle = document.createElement('span');
+      particle.style.setProperty('--angle', (i * 17) + 'deg');
+      particle.style.setProperty('--distance', (70 + (i % 5) * 12) + 'px');
+      particle.style.animationDelay = (i * 12) + 'ms';
+      burst.appendChild(particle);
+    }
+  }
+
+  function show(data) {
+    const modal = ensureModal();
+    const level = data.nivel || (data.last_event && data.last_event.nivel_atual) || 1;
+    modal.querySelector('#levelUpTitle').textContent = 'Nível ' + level + ' alcançado!';
+    modal.querySelector('#levelUpText').textContent = data.last_event && data.last_event.descricao
+      ? data.last_event.descricao
+      : 'Você desbloqueou uma nova etapa na Mundu.';
+    modal.querySelector('#levelUpXp').textContent = data.xp_total || 0;
+    modal.querySelector('#levelUpCoins').textContent = data.moedas || 0;
+    modal.querySelector('#levelUpTitleName').textContent = data.titulo_ativo || data.nome_nivel || 'Novo';
+    particleBurst(modal);
+    modal.classList.add('open');
+  }
+
+  function refresh() {
+    fetch('/api/xp', {headers: {'Accept': 'application/json'}})
+      .then(function(response){
+        if (!response.ok) throw new Error('xp unavailable');
+        return response.json();
+      })
+      .then(function(data){
+        const previousLevel = parseInt(localStorage.getItem(storageKey) || data.nivel, 10);
+        const previousXp = parseInt(localStorage.getItem(xpKey) || data.xp_total, 10);
+        localStorage.setItem(storageKey, data.nivel);
+        localStorage.setItem(xpKey, data.xp_total);
+        if (initialized && (data.nivel > previousLevel || (data.last_event && data.last_event.level_up))) {
+          show(data);
+        }
+        if (initialized && data.xp_total > previousXp && window.showToast) {
+          showToast('+' + (data.xp_total - previousXp) + ' XP');
+        }
+        initialized = true;
+      })
+      .catch(function(){
+        initialized = true;
+      });
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    refresh();
+    setTimeout(refresh, 1500);
+  });
+
+  return {refresh: refresh, show: show};
+})();
+
+window.MunduGamification = MunduGamification;

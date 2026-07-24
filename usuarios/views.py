@@ -1,6 +1,11 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
+from django.contrib import messages
 from django.contrib.auth.models import User
+from core.utils import render as app_render
 
 
 def login_view(request):
@@ -56,3 +61,16 @@ def registro_view(request):
             return redirect('index')
 
     return render(request, 'registro.html', {'request': request, 'error': error})
+
+
+@login_required(login_url='/login')
+def alterar_senha_view(request):
+    form = PasswordChangeForm(request.user, request.POST or None)
+    if request.method == 'POST':
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            messages.success(request, 'Senha alterada com sucesso.')
+            return redirect('/perfil')
+        messages.error(request, 'Revise os campos destacados.')
+    return app_render(request, 'alterar_senha.html', {'form': form, 'messages_list': list(messages.get_messages(request))})

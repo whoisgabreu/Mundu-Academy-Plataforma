@@ -1,0 +1,79 @@
+{% extends "professor/base.html" %}
+
+{% block professor_content %}
+<div class="prof-page-head">
+  <div>
+    <span class="prof-eyebrow">Conteúdo</span>
+    <h1>Módulos</h1>
+  </div>
+  <a href="/professor/modulos/novo/" class="prof-btn primary"><i data-lucide="plus"></i><span>Criar</span></a>
+</div>
+
+<form class="prof-search" method="get">
+  <i data-lucide="search"></i>
+  <input type="search" name="q" value="{{ q }}" placeholder="Pesquisar módulos">
+  <button type="submit">Pesquisar</button>
+</form>
+
+<form id="module-csrf">{{ csrf_input }}</form>
+<div class="prof-table-wrap">
+  <table class="prof-table">
+    <thead><tr><th>Ordem</th><th>Nome</th><th>Aulas</th><th>Alunos</th><th>Status</th><th>Criado em</th><th></th></tr></thead>
+    <tbody id="module-sort-list">
+      {% for mod in page_obj.object_list %}
+      <tr draggable="true" data-id="{{ mod.id }}">
+        <td><button type="button" class="prof-drag" aria-label="Arrastar módulo"><i data-lucide="grip-vertical"></i></button> {{ mod.ordem }}</td>
+        <td><strong>{{ mod.titulo }}</strong><span>{{ mod.descricao|truncate(80) }}</span></td>
+        <td>{{ mod.aulas_count }}</td>
+        <td>{{ mod.alunos_count }}</td>
+        <td><span class="prof-pill {{ mod.status }}">{{ mod.get_status_display() }}</span></td>
+        <td>{{ mod.created_at.strftime('%d/%m/%Y') if mod.created_at else '-' }}</td>
+        <td class="prof-actions">
+          <a class="prof-icon-btn" href="/professor/modulos/{{ mod.id }}/" aria-label="Visualizar"><i data-lucide="eye"></i></a>
+          <a class="prof-icon-btn" href="/professor/modulos/{{ mod.id }}/editar/" aria-label="Editar"><i data-lucide="pencil"></i></a>
+          <form method="post" action="/professor/modulos/{{ mod.id }}/excluir/" onsubmit="return confirm('Excluir este módulo?')">
+            {{ csrf_input }}
+            <button class="prof-icon-btn danger" type="submit" aria-label="Excluir"><i data-lucide="trash-2"></i></button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="prof-empty">Nenhum módulo encontrado.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "professor/partials/pagination.html" %}
+
+<script>
+  (function(){
+    const tbody = document.getElementById('module-sort-list');
+    if (!tbody) return;
+    let dragged = null;
+    tbody.querySelectorAll('tr[draggable="true"]').forEach(function(row){
+      row.addEventListener('dragstart', function(){ dragged = row; row.classList.add('dragging'); });
+      row.addEventListener('dragend', function(){ row.classList.remove('dragging'); dragged = null; saveOrder(); });
+      row.addEventListener('dragover', function(event){
+        event.preventDefault();
+        if (!dragged || dragged === row) return;
+        const box = row.getBoundingClientRect();
+        const after = event.clientY > box.top + box.height / 2;
+        tbody.insertBefore(dragged, after ? row.nextSibling : row);
+      });
+    });
+    function saveOrder(){
+      const token = document.querySelector('#module-csrf input[name="csrfmiddlewaretoken"]').value;
+      const orderedIds = Array.from(tbody.querySelectorAll('tr[data-id]')).map(function(row){ return row.dataset.id; });
+      fetch('/professor/modulos/reordenar/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'X-CSRFToken': token},
+        body: JSON.stringify({ordered_ids: orderedIds})
+      }).then(function(resp){
+        if (!resp.ok) throw new Error('Falha');
+        if (window.showToast) showToast('Ordem atualizada');
+      }).catch(function(){ if (window.showToast) showToast('Não foi possível salvar a ordem'); });
+    }
+  })();
+</script>
+{% endblock %}
+

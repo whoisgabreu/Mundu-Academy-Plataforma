@@ -9,13 +9,16 @@ class PerfilModelForm(forms.ModelForm):
 
     class Meta:
         model = Perfil
-        fields = ['cargo', 'empresa', 'localizacao', 'linkedin', 'instagram', 'bio']
+        fields = ['cargo', 'empresa', 'localizacao', 'cidade', 'linkedin', 'instagram', 'foto', 'banner', 'bio']
         labels = {
             'cargo': 'Cargo / Função',
             'empresa': 'Empresa',
             'localizacao': 'Localização',
+            'cidade': 'Cidade',
             'linkedin': 'LinkedIn',
             'instagram': 'Instagram',
+            'foto': 'Foto',
+            'banner': 'Banner',
             'bio': 'Sobre você',
         }
 

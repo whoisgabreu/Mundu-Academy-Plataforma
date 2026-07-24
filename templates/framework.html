@@ -241,7 +241,7 @@
 {% block scripts %}
 <script>
   function openFramework(title) {
-    showToast('📋 Template "' + title + '" copiado pro seu workspace (+{{ framework.xp }} XP)');
+    showToast('Template "' + title + '" copiado pro seu workspace (+{{ framework.xp }} XP)');
   }
 
   function forkFramework(fwId, title) {
@@ -252,7 +252,7 @@
     })
     .then(function(r){ return r.json(); })
     .then(function(){
-      showToast('🍴 "' + title + '" forkado para o seu Brain');
+      showToast('"' + title + '" forkado para o seu Brain');
     })
     .catch(function(){ showToast('Erro ao forkar'); });
   }
@@ -264,7 +264,7 @@
       body: JSON.stringify({source_type: sourceType, source_id: sourceId, community_slug: 'gestao-pessoas'})
     })
     .then(function(r){ return r.json(); })
-    .then(function(){ showToast('🎉 "' + title + '" compartilhado na Guild'); })
+    .then(function(){ showToast('"' + title + '" compartilhado na Guild'); })
     .catch(function(){ showToast('Erro ao compartilhar'); });
   }
 
@@ -304,7 +304,7 @@
       closeReviewModal();
       document.getElementById('reviewText').value = '';
       setStarRating(0);
-      showToast('✓ Review publicada — obrigado!');
+      showToast('Review publicada — obrigado!');
     })
     .catch(function(){ showToast('Erro ao publicar review'); });
   }

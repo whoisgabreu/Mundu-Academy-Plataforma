@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
+from .guild_models import GuildMembership, GuildMission, GuildMissionProgress
 
 
 class Community(models.Model):
@@ -13,12 +14,18 @@ class Community(models.Model):
     online_now = models.IntegerField(default=0)
     icon = models.CharField(max_length=50)
     color = models.CharField(max_length=20)
+    image = models.URLField(blank=True)
+    banner = models.URLField(blank=True)
+    main_color = models.CharField(max_length=24, default='#16a34a')
     description = models.TextField()
     description_long = models.TextField(blank=True)
     rules = models.JSONField(default=list, blank=True)
     moderators = models.JSONField(default=list, blank=True)
     created_at = models.CharField(max_length=50)
     related = models.JSONField(default=list, blank=True)
+    nivel = models.PositiveIntegerField(default=1)
+    xp_total = models.PositiveIntegerField(default=0)
+    missions_completed = models.PositiveIntegerField(default=0)
 
     class Meta:
         verbose_name_plural = 'Communities'

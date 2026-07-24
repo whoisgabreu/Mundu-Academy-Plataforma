@@ -1,0 +1,47 @@
+{% extends "professor/base.html" %}
+
+{% block professor_content %}
+<div class="prof-page-head">
+  <div>
+    <span class="prof-eyebrow">Avaliações</span>
+    <h1>Quizzes</h1>
+  </div>
+  <a href="/professor/quizzes/novo/" class="prof-btn primary"><i data-lucide="plus"></i><span>Criar</span></a>
+</div>
+
+<form class="prof-search" method="get">
+  <i data-lucide="search"></i>
+  <input type="search" name="q" value="{{ q }}" placeholder="Pesquisar quizzes">
+  <button type="submit">Pesquisar</button>
+</form>
+
+<div class="prof-table-wrap">
+  <table class="prof-table">
+    <thead><tr><th>Quiz</th><th>Aula</th><th>Perguntas</th><th>Nota mínima</th><th>Tentativas</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+      {% for quiz in page_obj.object_list %}
+      <tr>
+        <td><strong>{{ quiz.titulo }}</strong><span>{{ quiz.descricao|truncate(80) }}</span></td>
+        <td>{{ quiz.aula.titulo if quiz.aula else '-' }}</td>
+        <td>{{ quiz.questoes_count }}</td>
+        <td>{{ quiz.aprovacao_percentual }}%</td>
+        <td>{{ quiz.max_tentativas }}</td>
+        <td><span class="prof-pill {{ quiz.status }}">{{ quiz.get_status_display() }}</span></td>
+        <td class="prof-actions">
+          <a class="prof-icon-btn" href="/professor/quizzes/{{ quiz.id }}/" aria-label="Visualizar"><i data-lucide="eye"></i></a>
+          <a class="prof-icon-btn" href="/professor/quizzes/{{ quiz.id }}/editar/" aria-label="Editar"><i data-lucide="pencil"></i></a>
+          <form method="post" action="/professor/quizzes/{{ quiz.id }}/excluir/" onsubmit="return confirm('Excluir este quiz?')">
+            {{ csrf_input }}
+            <button class="prof-icon-btn danger" type="submit" aria-label="Excluir"><i data-lucide="trash-2"></i></button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="prof-empty">Nenhum quiz encontrado.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "professor/partials/pagination.html" %}
+{% endblock %}
+
