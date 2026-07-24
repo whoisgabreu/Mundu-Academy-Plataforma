@@ -164,6 +164,12 @@
     </nav>
 
     <div class="sidebar-bottom">
+      {% if request.user.is_authenticated and (request.user.is_staff or 'Professor' in (current_user.cargo or '') or 'professor' in (current_user.cargo or '')) %}
+      <a href="/professor/" class="sidebar-nav-link {% if request.path.startswith('/professor') %}active{% endif %}">
+        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.42A12.08 12.08 0 0 1 18 13c0 2.76-2.69 5-6 5s-6-2.24-6-5c0-.82.16-1.62.46-2.35L12 14z"/></svg>
+        <span class="nav-label">Professor</span>
+      </a>
+      {% endif %}
       <a href="/perfil" class="sidebar-nav-link {% if request.path == '/perfil' %}active{% endif %}">
         <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         <span class="nav-label">Meu Perfil</span>

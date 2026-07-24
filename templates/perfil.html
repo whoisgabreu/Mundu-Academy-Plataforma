@@ -4,230 +4,199 @@
 {% block page_title %}Meu Perfil{% endblock %}
 
 {% block content %}
-<div class="space-y-4 md:space-y-8 pb-20 md:pb-6 w-full max-w-5xl mx-auto">
-  <!-- Header -->
-  <section class="relative overflow-hidden rounded-xl sm:rounded-2xl border border-secondary/20 bg-gradient-to-br from-background via-secondary/5 to-background">
-    <div class="h-24 sm:h-32 md:h-40 bg-gradient-to-r from-primary/20 via-secondary/15 to-primary/10 relative overflow-hidden">
-      <div class="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent"></div>
-    </div>
-    <div class="px-4 sm:px-6 md:px-8 pb-4 sm:pb-6 -mt-12 sm:-mt-16 md:-mt-20 relative z-10">
-      <div class="flex flex-col sm:flex-row gap-3 sm:gap-5 md:gap-6 sm:items-end">
-        <div class="flex-shrink-0 relative">
-          <div class="h-20 w-20 sm:h-28 sm:w-28 md:h-36 md:w-36 rounded-xl sm:rounded-2xl border-3 sm:border-4 border-background bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-2xl sm:text-4xl md:text-5xl font-bold text-white shadow-2xl shadow-primary/30">{{ current_user.perfil.iniciais }}</div>
-          <div class="absolute -bottom-1 -right-1 sm:bottom-0 sm:right-0 sm:translate-x-1 sm:translate-y-1 h-7 w-7 sm:h-9 sm:w-9 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 sm:border-3 border-background flex items-center justify-center shadow-lg">
-            <i data-lucide="crown" class="h-3 w-3 sm:h-4 sm:w-4 text-white"></i>
+<div class="profile-v2-shell">
+  <section class="profile-hero-v2">
+    <div class="profile-banner-v2" {% if current_user.banner %}style="background-image:url('{{ current_user.banner }}')"{% endif %}></div>
+    <div class="profile-identity-v2">
+      <div class="profile-avatar-v2">
+        {% if current_user.foto %}
+        <img src="{{ current_user.foto }}" alt="{{ current_user.nome_completo }}">
+        {% else %}
+        <span>{{ current_user.perfil.iniciais }}</span>
+        {% endif %}
+      </div>
+      <div class="profile-main-v2">
+        <div class="profile-name-row">
+          <div>
+            <span class="profile-handle">@{{ current_user.username }}</span>
+            <h1>{{ current_user.nome_completo or current_user.username }}</h1>
           </div>
+          <span class="profile-level-badge">Nível {{ current_user.perfil.nivel }}</span>
         </div>
-        <div class="flex-1 min-w-0 py-1 sm:py-2">
-          <div class="flex items-center gap-2 sm:gap-3">
-            <h1 class="text-lg sm:text-2xl md:text-3xl font-bold text-foreground truncate">{{ current_user.nome_completo or current_user.username }}</h1>
-            <i data-lucide="shield" class="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0"></i>
-          </div>
-          <p class="text-foreground-muted flex items-center flex-wrap gap-1.5 sm:gap-2 mt-1 sm:mt-1.5 text-xs sm:text-sm">
-            <span>@{{ current_user.username }}</span><span class="text-border hidden sm:inline">•</span>
-            <span class="flex items-center gap-1 sm:gap-1.5"><i data-lucide="calendar" class="h-3 w-3 sm:h-3.5 sm:w-3.5"></i><span class="hidden sm:inline">Membro desde</span> {{ joined_at }}</span>
-          </p>
-          <div class="flex flex-wrap gap-1.5 sm:gap-2 mt-2 sm:mt-4">
-            <span class="px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] sm:text-xs font-medium flex items-center gap-1 sm:gap-1.5 hover:bg-primary/15 transition-colors"><i data-lucide="trending-up" class="h-2.5 w-2.5 sm:h-3 sm:w-3"></i> {{ cargo }}</span>
-            <span class="px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-secondary/10 border border-secondary/20 text-secondary text-[10px] sm:text-xs font-medium flex items-center gap-1 sm:gap-1.5 hover:bg-secondary/15 transition-colors"><i data-lucide="star" class="h-2.5 w-2.5 sm:h-3 sm:w-3"></i> Nível {{ current_user.perfil.nivel }}</span>
-            <span class="px-2 sm:px-3 py-1 sm:py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] sm:text-xs font-medium flex items-center gap-1 sm:gap-1.5 hover:bg-orange-500/15 transition-colors"><i data-lucide="flame" class="h-2.5 w-2.5 sm:h-3 sm:w-3"></i> {{ current_user.perfil.streak_dias }} dias</span>
-          </div>
+        <p class="profile-role">{{ current_user.role }}</p>
+        <p class="profile-bio">{{ current_user.bio or 'Sem bio definida ainda.' }}</p>
+        <div class="profile-meta-row">
+          <span><i data-lucide="map-pin"></i>{{ current_user.cidade or current_user.localizacao or 'Cidade não informada' }}</span>
+          <span><i data-lucide="calendar"></i>Membro desde {{ joined_at }}</span>
+          <span><i data-lucide="activity"></i>{{ last_activity }}</span>
         </div>
-        <a href="/config" class="self-start sm:self-auto block">
-          <button class="px-4 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl bg-gradient-to-r from-primary to-secondary text-white hover:opacity-90 transition-all text-xs sm:text-sm font-semibold flex items-center gap-1.5 sm:gap-2 shadow-lg shadow-secondary/30">
-            <i data-lucide="settings" class="h-3.5 w-3.5 sm:h-4 sm:w-4"></i><span class="hidden sm:inline">Editar Perfil</span><span class="sm:hidden">Editar</span>
-          </button>
-        </a>
+        <div class="profile-actions-v2">
+          <a href="/config" class="prof-btn primary"><i data-lucide="user-pen"></i><span>Editar perfil</span></a>
+          <a href="/alterar-senha" class="prof-btn"><i data-lucide="lock"></i><span>Alterar senha</span></a>
+          <a href="/config" class="prof-btn ghost"><i data-lucide="settings"></i><span>Configurações</span></a>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Tabs Nav -->
-  <div class="w-full">
-    <div class="flex w-full justify-start bg-card border border-border/30 rounded-lg sm:rounded-xl p-0.5 sm:p-1 mb-4 sm:mb-6">
-      <button onclick="switchTab('perfil')" id="btn-tab-perfil" class="flex-1 md:flex-none text-xs sm:text-sm py-2 sm:py-2.5 px-4 rounded-md transition-colors bg-primary text-primary-foreground font-medium">Meu Perfil</button>
-      <button onclick="switchTab('progresso')" id="btn-tab-progresso" class="flex-1 md:flex-none text-xs sm:text-sm py-2 sm:py-2.5 px-4 rounded-md transition-colors text-foreground-muted hover:text-foreground font-medium flex items-center justify-center">
-        <i data-lucide="trending-up" class="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1 sm:mr-2"></i><span class="hidden sm:inline">Meu</span> Progresso
-      </button>
+  <section class="profile-xp-panel" data-profile-xp>
+    <div>
+      <span class="profile-kicker">Evolução</span>
+      <h2>{{ gamification.titulo_ativo }}</h2>
     </div>
+    <div class="profile-xp-copy">
+      <strong>{{ gamification.xp_atual }} / {{ gamification.xp_necessario }} XP</strong>
+      <span>{{ gamification.moedas }} moedas</span>
+    </div>
+    <div class="profile-xp-track" aria-label="Progresso de XP">
+      <span data-pct="{{ gamification.xp_percentual }}"></span>
+    </div>
+  </section>
 
-    <!-- Perfil Tab -->
-    <div id="tab-perfil" class="space-y-4 sm:space-y-6">
-      <section class="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
-        {% for stat in stats %}
-        <div class="p-3 sm:p-5 rounded-xl sm:rounded-2xl border border-border/30 bg-gradient-to-br from-card to-secondary/5 hover:border-secondary/40 transition-all hover:shadow-xl hover:shadow-secondary/10 group cursor-pointer hover:-translate-y-1">
-          <div class="flex items-start justify-between mb-2 sm:mb-3">
-            <div class="h-9 w-9 sm:h-12 sm:w-12 rounded-lg sm:rounded-xl {{ stat.bg }} flex items-center justify-center group-hover:scale-110 transition-transform"><i data-lucide="{{ stat.icon }}" class="h-4 w-4 sm:h-6 sm:w-6 {{ stat.color }}"></i></div>
+  <section class="profile-stat-grid-v2">
+    {% for stat in stats %}
+    <article>
+      <i data-lucide="{{ stat.icon }}"></i>
+      <strong>{{ stat.value }}</strong>
+      <span>{{ stat.label }}</span>
+    </article>
+    {% endfor %}
+    <article>
+      <i data-lucide="flame"></i>
+      <strong>{{ streak_dias }}</strong>
+      <span>Sequência de estudos</span>
+    </article>
+    <article>
+      <i data-lucide="clock"></i>
+      <strong>{{ total_hours }}</strong>
+      <span>Tempo estudado</span>
+    </article>
+  </section>
+
+  <section class="profile-grid-v2">
+    <article class="profile-panel-v2 wide">
+      <div class="profile-panel-head">
+        <div><span>Aprendizado</span><h2>Cursos em andamento</h2></div>
+        <a href="/conteudos">Ver cursos</a>
+      </div>
+      <div class="profile-course-list">
+        {% for course in trilhas_progresso %}
+        <div class="profile-course-row">
+          <div>
+            <strong>{{ course.titulo }}</strong>
+            <span>{{ course.aulas_concluidas }}/{{ course.total_aulas }} aulas · {{ course.duracao }}</span>
           </div>
-          <p class="text-xl sm:text-3xl font-bold text-foreground mb-0.5 sm:mb-1">{{ stat.value }}</p>
-          <p class="text-[10px] sm:text-sm text-foreground-muted truncate">{{ stat.label }}</p>
+          <div class="profile-mini-progress"><span data-pct="{{ course.progresso }}"></span></div>
+          <b>{{ course.progresso }}%</b>
+        </div>
+        {% else %}
+        <p class="profile-empty">Nenhum curso em andamento.</p>
+        {% endfor %}
+      </div>
+    </article>
+
+    <article class="profile-panel-v2">
+      <div class="profile-panel-head">
+        <div><span>Badges</span><h2>Medalhas</h2></div>
+      </div>
+      <div class="profile-badge-grid">
+        {% for badge in gamification.badges %}
+        <div class="profile-badge">
+          <i data-lucide="{{ badge.icone }}"></i>
+          <strong>{{ badge.nome }}</strong>
+        </div>
+        {% else %}
+        {% for achievement in achievements[:4] %}
+        <div class="profile-badge">
+          <i data-lucide="{{ achievement.icon }}"></i>
+          <strong>{{ achievement.title }}</strong>
+        </div>
+        {% else %}
+        <p class="profile-empty">Nenhuma medalha desbloqueada.</p>
+        {% endfor %}
+        {% endfor %}
+      </div>
+    </article>
+  </section>
+
+  <section class="profile-grid-v2">
+    <article class="profile-panel-v2">
+      <div class="profile-panel-head">
+        <div><span>Missões</span><h2>Objetivos ativos</h2></div>
+        <a href="/desafios">Ver desafios</a>
+      </div>
+      <div class="profile-mission-list">
+        {% for mission in gamification.missoes %}
+        <div>
+          <div><strong>{{ mission.titulo }}</strong><span>+{{ mission.xp }} XP · {{ mission.moedas }} moedas</span></div>
+          <div class="profile-mini-progress"><span data-pct="{{ mission.percentual }}"></span></div>
+        </div>
+        {% else %}
+        <p class="profile-empty">Nenhuma missão ativa.</p>
+        {% endfor %}
+      </div>
+    </article>
+
+    <article class="profile-panel-v2">
+      <div class="profile-panel-head">
+        <div><span>Competências</span><h2>Habilidades</h2></div>
+      </div>
+      <div class="profile-skill-list">
+        {% for skill in skills %}
+        <div>
+          <span><i data-lucide="{{ skill.icon }}"></i>{{ skill.name }}</span>
+          <div class="profile-mini-progress"><span data-pct="{{ skill.level * 10 }}"></span></div>
+        </div>
+        {% else %}
+        <p class="profile-empty">Nenhuma habilidade cadastrada.</p>
+        {% endfor %}
+      </div>
+    </article>
+
+    <article class="profile-panel-v2">
+      <div class="profile-panel-head">
+        <div><span>Ranking</span><h2>Leaderboard</h2></div>
+      </div>
+      <div class="profile-rank-list">
+        {% for item in leaderboard %}
+        <div class="{% if item.usuario.id == request.user.id %}active{% endif %}">
+          <span>#{{ item.posicao }}</span>
+          <strong>{{ item.nome }}</strong>
+          <b>{{ item.xp }} XP</b>
         </div>
         {% endfor %}
-      </section>
-
-      <div class="grid md:grid-cols-3 gap-3 sm:gap-6">
-        <div class="md:col-span-2 space-y-3 sm:space-y-6">
-          <section class="rounded-xl sm:rounded-2xl border border-border/30 bg-card p-3 sm:p-6">
-            <div class="flex items-center justify-between mb-3 sm:mb-5">
-              <h2 class="text-sm sm:text-lg font-semibold text-foreground flex items-center gap-1.5 sm:gap-2"><i data-lucide="route" class="h-4 w-4 sm:h-5 sm:w-5 text-secondary"></i> Trilhas em Progresso</h2>
-            </div>
-            <div class="space-y-2.5 sm:space-y-5">
-              {% for t in trilhas_progresso %}
-              <div class="p-2.5 sm:p-4 rounded-lg sm:rounded-xl bg-secondary/5 border border-secondary/10">
-                <div class="flex justify-between mb-1.5 sm:mb-2"><span class="text-xs sm:text-base font-medium text-foreground truncate">{{ t.titulo }}</span><span class="text-xs sm:text-sm font-bold text-secondary flex-shrink-0 ml-2">{{ t.progresso }}%</span></div>
-                <div class="h-1.5 sm:h-2.5 rounded-full bg-secondary/20 overflow-hidden"><div class="h-full rounded-full bg-gradient-to-r from-primary to-secondary" style="width: {{ t.progresso }}%;"></div></div>
-                <div class="flex items-center gap-2 sm:gap-4 mt-1.5 sm:mt-3 text-[10px] sm:text-xs text-foreground-muted"><span class="flex items-center gap-1"><i data-lucide="clock" class="h-2.5 w-2.5 sm:h-3 sm:w-3"></i> {{ t.duracao }}</span><span class="flex items-center gap-1"><i data-lucide="play-circle" class="h-2.5 w-2.5 sm:h-3 sm:w-3"></i> {{ t.aulas_concluidas }}/{{ t.total_aulas }}</span></div>
-              </div>
-              {% else %}
-              <p class="text-sm text-foreground-muted">Nenhuma trilha em progresso.</p>
-              {% endfor %}
-            </div>
-          </section>
-        </div>
-
-        <div class="space-y-3 sm:space-y-6">
-          <section class="rounded-xl sm:rounded-2xl border border-border/30 bg-card p-3 sm:p-6">
-            <div class="flex items-center justify-between mb-3 sm:mb-5">
-              <h2 class="text-sm sm:text-lg font-semibold text-foreground flex items-center gap-1.5 sm:gap-2"><i data-lucide="medal" class="h-4 w-4 sm:h-5 sm:w-5 text-amber-400"></i> Conquistas</h2>
-            </div>
-            <div class="grid grid-cols-2 gap-2 sm:gap-3">
-              {% for badge in achievements %}
-              <div class="p-2 sm:p-4 rounded-lg sm:rounded-xl bg-secondary/5 border border-secondary/10 text-center hover:border-secondary/30 transition-all cursor-pointer group hover:scale-[1.02]">
-                <div class="h-8 w-8 sm:h-12 sm:w-12 rounded-lg sm:rounded-xl bg-gradient-to-br {{ badge.color }} flex items-center justify-center mx-auto mb-1.5 sm:mb-2 shadow-lg"><i data-lucide="{{ badge.icon }}" class="h-4 w-4 sm:h-6 sm:w-6 text-white"></i></div>
-                <p class="font-medium text-foreground text-[10px] sm:text-sm truncate">{{ badge.title }}</p>
-              </div>
-              {% endfor %}
-            </div>
-          </section>
-        </div>
       </div>
+    </article>
+  </section>
 
-      <!-- Skills Section -->
-      <section class="rounded-xl sm:rounded-2xl border border-border/30 bg-card/50 backdrop-blur-sm p-3 sm:p-6 mb-6 mt-6">
-        <div class="flex items-center justify-between mb-3 sm:mb-6">
-          <h2 class="text-sm sm:text-lg font-semibold text-foreground flex items-center gap-1.5 sm:gap-2">
-            <i data-lucide="sparkles" class="h-4 w-4 sm:h-5 sm:w-5 text-secondary"></i>
-            Habilidades
-          </h2>
-          <span class="text-[10px] sm:text-xs text-foreground bg-secondary/15 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-medium">{{ skills|length }} skills</span>
-        </div>
-        <div class="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
-          {% for skill in skills %}
-          <div class="p-2 sm:p-3 rounded-lg bg-background/60 border border-border/30">
-            <div class="flex items-center justify-between mb-1.5 sm:mb-2">
-              <div class="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                <div class="h-6 w-6 sm:h-8 sm:w-8 rounded-md sm:rounded-lg bg-secondary/10 flex items-center justify-center flex-shrink-0 {{ skill.color }}"><i data-lucide="{{ skill.icon }}" class="h-3 w-3 sm:h-4 sm:w-4"></i></div>
-                <span class="text-[11px] sm:text-xs font-medium text-foreground truncate">{{ skill.name }}</span>
-              </div>
-              <span class="text-[10px] sm:text-xs font-bold {{ skill.color }} flex-shrink-0">{{ skill.level }}</span>
-            </div>
-            <div class="h-1 sm:h-1.5 rounded-full bg-secondary/10 overflow-hidden"><div class="h-full rounded-full {{ skill.bg }}" style="width: {{ skill.pct }};"></div></div>
-          </div>
-          {% endfor %}
-        </div>
-      </section>
-      
-      <!-- Networking Section -->
-      <section class="rounded-xl sm:rounded-2xl border border-border/30 bg-card p-3 sm:p-6 mb-6">
-        <div class="flex items-center justify-between mb-3 sm:mb-6">
-          <h2 class="text-sm sm:text-lg font-semibold text-foreground flex items-center gap-1.5 sm:gap-2"><i data-lucide="users" class="h-4 w-4 sm:h-5 sm:w-5 text-secondary"></i> Networking</h2>
-        </div>
-        <div class="grid md:grid-cols-2 gap-3 sm:gap-6">
-          <div class="space-y-2 sm:space-y-4">
-            <h3 class="text-xs sm:text-sm font-medium text-foreground flex items-center gap-1.5 sm:gap-2"><i data-lucide="sparkles" class="h-3 w-3 sm:h-4 sm:w-4 text-amber-400"></i> Conexões Recentes</h3>
-            <div class="space-y-1.5 sm:space-y-3">
-              {% for c in conexoes_recentes %}
-              <div class="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg sm:rounded-xl bg-secondary/5 border border-border/20 hover:border-secondary/40 transition-all cursor-pointer group">
-                <div class="h-8 w-8 sm:h-11 sm:w-11 rounded-lg sm:rounded-xl flex items-center justify-center text-[10px] sm:text-sm font-bold text-white bg-gradient-to-br flex-shrink-0 from-primary to-secondary">{{ c.iniciais }}</div>
-                <div class="flex-1 min-w-0"><p class="font-medium text-foreground text-xs sm:text-sm truncate">{{ c.nome }}</p><p class="text-[10px] sm:text-xs text-foreground-muted truncate">{{ c.role }}</p></div>
-              </div>
-              {% else %}
-              <p class="text-xs text-foreground-muted">Nenhuma conexão ainda.</p>
-              {% endfor %}
-            </div>
-          </div>
-          <div class="space-y-2 sm:space-y-4">
-            <h3 class="text-xs sm:text-sm font-medium text-foreground flex items-center gap-1.5 sm:gap-2"><i data-lucide="user-plus" class="h-3 w-3 sm:h-4 sm:w-4 text-secondary"></i> Sugestões</h3>
-            <div class="space-y-1.5 sm:space-y-3">
-              {% for s in sugestoes %}
-              <div class="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-gradient-to-br from-secondary/5 to-background border border-border/20 hover:border-secondary/40 transition-all">
-                <div class="flex items-center gap-2 sm:gap-3">
-                  <div class="h-8 w-8 sm:h-11 sm:w-11 rounded-lg sm:rounded-xl flex items-center justify-center text-[10px] sm:text-sm font-bold text-white bg-gradient-to-br flex-shrink-0 from-blue-500 to-cyan-500">{{ s.iniciais }}</div>
-                  <div class="flex-1 min-w-0"><p class="font-medium text-foreground text-xs sm:text-sm truncate">{{ s.nome }}</p><p class="text-[10px] sm:text-xs text-foreground-muted truncate">{{ s.role }}</p></div>
-                  <a href="/u/{{ s.handle }}" class="px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-medium flex items-center gap-1 bg-secondary/15 text-secondary"><i data-lucide="user-plus" class="h-3 w-3"></i></a>
-                </div>
-              </div>
-              {% else %}
-              <p class="text-xs text-foreground-muted">Nenhuma sugestão no momento.</p>
-              {% endfor %}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Certificados Section -->
-      <section class="rounded-xl sm:rounded-2xl border border-border/30 bg-card p-3 sm:p-6 mb-6">
-        <div class="flex items-center justify-between gap-2 mb-3 sm:mb-5">
-          <h2 class="text-sm sm:text-lg font-semibold text-foreground flex items-center gap-1.5 sm:gap-2">
-            <i data-lucide="file-check" class="h-4 w-4 sm:h-5 sm:w-5 text-secondary"></i> Certificados
-          </h2>
-        </div>
-        <h3 class="text-xs sm:text-sm font-medium text-foreground-muted mb-2 sm:mb-3 flex items-center gap-1.5 sm:gap-2">
-          <i data-lucide="book-open" class="h-3 w-3 sm:h-4 sm:w-4"></i> Cursos Concluídos
-        </h3>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
-          {% for cert in certificates %}
-          <div class="p-2.5 sm:p-4 rounded-lg sm:rounded-xl border border-secondary/20 bg-gradient-to-br from-secondary/5 to-primary/5 hover:border-secondary/40 transition-all">
-            <div class="flex items-start justify-between mb-2 sm:mb-3">
-              <div class="flex items-center gap-2">
-                <div class="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0"><i data-lucide="award" class="h-4 w-4 sm:h-5 sm:w-5 text-white"></i></div>
-                <div class="min-w-0"><h3 class="text-xs sm:text-sm font-semibold text-foreground truncate">{{ cert.title }}</h3><p class="text-[10px] sm:text-xs text-foreground-muted truncate">{{ cert.issuer }}</p></div>
-              </div>
-            </div>
-            <div class="flex items-center gap-2 sm:gap-3 text-[10px] sm:text-xs text-foreground-muted">
-              <span class="flex items-center gap-1"><i data-lucide="calendar" class="h-2.5 w-2.5 sm:h-3 sm:w-3"></i> {{ cert.date }}</span>
-              {% if cert.hours %}<span class="flex items-center gap-1"><i data-lucide="clock" class="h-2.5 w-2.5 sm:h-3 sm:w-3"></i> {{ cert.hours }}h</span>{% endif %}
-            </div>
-          </div>
-          {% else %}
-          <div class="col-span-full text-center py-8">
-            <i data-lucide="file-check" class="h-10 w-10 text-foreground-muted mx-auto mb-3"></i>
-            <p class="text-foreground-muted">Nenhum certificado ainda.</p>
-            <p class="text-xs text-foreground-muted mt-1">Complete módulos e trilhas para ganhar certificados.</p>
-          </div>
-          {% endfor %}
-        </div>
-      </section>
-    </div>
-
-    <!-- Progresso Tab -->
-    <div id="tab-progresso" class="hidden space-y-4 sm:space-y-6">
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-        <div class="border border-border/50 bg-card/50 backdrop-blur-sm shadow-sm rounded-xl p-4">
-          <div class="flex items-start justify-between"><div class="p-2 rounded-lg bg-warning/10"><i data-lucide="flame" class="h-4 w-4 text-warning"></i></div></div>
-          <div class="mt-3"><p class="text-xl font-bold text-foreground">{{ streak_dias }} dias</p><p class="text-xs text-foreground-muted mt-0.5">Ofensiva</p></div>
-        </div>
-        <div class="border border-border/50 bg-card/50 backdrop-blur-sm shadow-sm rounded-xl p-4">
-          <div class="flex items-start justify-between"><div class="p-2 rounded-lg bg-primary/10"><i data-lucide="clock" class="h-4 w-4 text-primary"></i></div></div>
-          <div class="mt-3"><p class="text-xl font-bold text-foreground">{{ total_hours }}</p><p class="text-xs text-foreground-muted mt-0.5">Tempo Total</p></div>
-        </div>
+  <section class="profile-grid-v2">
+    <article class="profile-panel-v2 wide">
+      <div class="profile-panel-head">
+        <div><span>Certificados</span><h2>Cursos concluídos</h2></div>
       </div>
-    </div>
-  </div>
+      <div class="profile-cert-grid">
+        {% for cert in certificates %}
+        <a href="/certificados/{{ cert.code }}" class="profile-cert-card">
+          <i data-lucide="award"></i>
+          <strong>{{ cert.title }}</strong>
+          <span>{{ cert.issuer }} · {{ cert.date }}</span>
+        </a>
+        {% else %}
+        <p class="profile-empty">Nenhum certificado emitido.</p>
+        {% endfor %}
+      </div>
+    </article>
+
+    <article class="profile-panel-v2">
+      <div class="profile-panel-head">
+        <div><span>Social</span><h2>Redes</h2></div>
+      </div>
+      <div class="profile-social-list">
+        {% if current_user.linkedin %}<a href="{{ current_user.linkedin }}" target="_blank" rel="noopener"><i data-lucide="linkedin"></i>LinkedIn</a>{% endif %}
+        {% if current_user.instagram %}<a href="https://instagram.com/{{ current_user.instagram.replace('@', '') }}" target="_blank" rel="noopener"><i data-lucide="instagram"></i>Instagram</a>{% endif %}
+        <a href="/u/{{ current_user.username }}"><i data-lucide="user-round"></i>Perfil público</a>
+      </div>
+    </article>
+  </section>
 </div>
-
-<script>
-  function switchTab(tabName) {
-    document.getElementById('tab-perfil').classList.add('hidden');
-    document.getElementById('tab-progresso').classList.add('hidden');
-    document.getElementById('btn-tab-perfil').classList.remove('bg-primary', 'text-primary-foreground');
-    document.getElementById('btn-tab-perfil').classList.add('text-foreground-muted');
-    document.getElementById('btn-tab-progresso').classList.remove('bg-primary', 'text-primary-foreground');
-    document.getElementById('btn-tab-progresso').classList.add('text-foreground-muted');
-    
-    document.getElementById('tab-' + tabName).classList.remove('hidden');
-    document.getElementById('btn-tab-' + tabName).classList.remove('text-foreground-muted');
-    document.getElementById('btn-tab-' + tabName).classList.add('bg-primary', 'text-primary-foreground');
-  }
-</script>
 {% endblock %}

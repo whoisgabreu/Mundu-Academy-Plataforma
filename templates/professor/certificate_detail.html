@@ -1,0 +1,58 @@
+{% extends "professor/base.html" %}
+
+{% block professor_content %}
+<div class="prof-page-head">
+  <div>
+    <span class="prof-eyebrow">Template</span>
+    <h1>{{ template.nome }}</h1>
+  </div>
+  <div class="prof-head-actions">
+    <a href="/professor/certificados/{{ template.id }}/editar/" class="prof-btn"><i data-lucide="pencil"></i><span>Editar</span></a>
+  </div>
+</div>
+
+<section class="prof-two-col">
+  <article class="prof-panel">
+    <div class="prof-panel-head"><h2>Gerar certificado</h2></div>
+    <form method="post" class="prof-form-inline">
+      {{ csrf_input }}
+      {% for field in issue_form %}
+      <label class="prof-field">
+        <span>{{ field.label }}</span>
+        {{ field }}
+        {% if field.errors %}<strong>{{ field.errors|join(', ') }}</strong>{% endif %}
+      </label>
+      {% endfor %}
+      {% if issue_form.non_field_errors() %}<div class="prof-form-errors">{{ issue_form.non_field_errors()|join(', ') }}</div>{% endif %}
+      <button type="submit" class="prof-btn primary"><i data-lucide="award"></i><span>Gerar certificado</span></button>
+    </form>
+  </article>
+
+  <article class="prof-panel">
+    <div class="prof-panel-head"><h2>Configuração</h2></div>
+    <div class="prof-stack">
+      <div class="prof-row compact"><span>Carga horária</span><strong>{{ template.carga_horaria }}h</strong></div>
+      <div class="prof-row compact"><span>Assinatura</span><strong>{{ template.assinatura or '-' }}</strong></div>
+      <div class="prof-row compact"><span>Logo</span><strong>{{ template.logo or '-' }}</strong></div>
+      <div class="prof-row compact"><span>Status</span><strong>{{ 'Ativo' if template.ativo else 'Inativo' }}</strong></div>
+    </div>
+  </article>
+</section>
+
+<section class="prof-panel">
+  <div class="prof-panel-head"><h2>Certificados emitidos</h2></div>
+  <div class="prof-stack">
+    {% for cert in issued %}
+    <div class="prof-row compact">
+      <div><strong>{{ cert.nome_aluno or cert.usuario.get_full_name() or cert.usuario.username }}</strong><span>{{ cert.codigo }} · {{ cert.emitido_em.strftime('%d/%m/%Y') }}</span></div>
+      <div class="prof-actions">
+        <a class="prof-icon-btn" href="/professor/certificados/emitidos/{{ cert.codigo }}/" aria-label="Visualizar"><i data-lucide="eye"></i></a>
+        <a class="prof-icon-btn" href="/professor/certificados/emitidos/{{ cert.codigo }}/pdf/" aria-label="Download PDF"><i data-lucide="download"></i></a>
+      </div>
+    </div>
+    {% else %}
+    <p class="prof-empty">Nenhuma emissão para este template.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

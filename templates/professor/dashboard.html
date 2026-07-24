@@ -1,0 +1,79 @@
+{% extends "professor/base.html" %}
+
+{% block professor_content %}
+<div class="prof-page-head">
+  <div>
+    <span class="prof-eyebrow">Área do professor</span>
+    <h1>Dashboard</h1>
+  </div>
+  <a href="/professor/modulos/novo/" class="prof-btn primary"><i data-lucide="plus"></i><span>Novo módulo</span></a>
+</div>
+
+<section class="prof-stat-grid">
+  {% for card in cards %}
+  <article class="prof-stat-card">
+    <i data-lucide="{{ card.icon }}"></i>
+    <span>{{ card.label }}</span>
+    <strong>{{ card.value }}</strong>
+  </article>
+  {% endfor %}
+</section>
+
+<section class="prof-two-col">
+  <article class="prof-panel">
+    <div class="prof-panel-head">
+      <h2>Status dos módulos</h2>
+      <a href="/professor/modulos/" class="prof-link">Ver módulos</a>
+    </div>
+    <div class="prof-meter-row"><span>Publicado</span><strong>{{ published_modules }}</strong></div>
+    <div class="prof-meter-row"><span>Rascunho</span><strong>{{ draft_modules }}</strong></div>
+    <div class="prof-meter-row"><span>Alunos únicos</span><strong>{{ students_count }}</strong></div>
+  </article>
+
+  <article class="prof-panel">
+    <div class="prof-panel-head">
+      <h2>Tentativas recentes</h2>
+      <a href="/professor/quizzes/" class="prof-link">Ver quizzes</a>
+    </div>
+    <div class="prof-stack">
+      {% for attempt in recent_attempts %}
+      <div class="prof-row compact">
+        <div>
+          <strong>{{ attempt.usuario.get_full_name() or attempt.usuario.username }}</strong>
+          <span>{{ attempt.quiz.titulo }}</span>
+        </div>
+        <span class="prof-pill {% if attempt.aprovado %}published{% else %}draft{% endif %}">{{ attempt.percentual }}%</span>
+      </div>
+      {% else %}
+      <p class="prof-empty">Nenhuma tentativa registrada.</p>
+      {% endfor %}
+    </div>
+  </article>
+</section>
+
+<section class="prof-panel">
+  <div class="prof-panel-head">
+    <h2>Módulos recentes</h2>
+    <a href="/professor/modulos/novo/" class="prof-btn small"><i data-lucide="plus"></i><span>Criar</span></a>
+  </div>
+  <div class="prof-table-wrap">
+    <table class="prof-table">
+      <thead><tr><th>Nome</th><th>Aulas</th><th>Alunos</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        {% for mod in recent_modules %}
+        <tr>
+          <td>{{ mod.titulo }}</td>
+          <td>{{ mod.aulas_count }}</td>
+          <td>{{ mod.alunos_count }}</td>
+          <td><span class="prof-pill {{ mod.status }}">{{ mod.get_status_display() }}</span></td>
+          <td><a class="prof-icon-btn" href="/professor/modulos/{{ mod.id }}/" aria-label="Visualizar"><i data-lucide="eye"></i></a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="prof-empty">Nenhum módulo cadastrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
+

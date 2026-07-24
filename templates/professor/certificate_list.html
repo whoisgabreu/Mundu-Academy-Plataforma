@@ -1,0 +1,66 @@
+{% extends "professor/base.html" %}
+
+{% block professor_content %}
+<div class="prof-page-head">
+  <div>
+    <span class="prof-eyebrow">Credenciais</span>
+    <h1>Certificados</h1>
+  </div>
+  <a href="/professor/certificados/novo/" class="prof-btn primary"><i data-lucide="plus"></i><span>Criar template</span></a>
+</div>
+
+<form class="prof-search" method="get">
+  <i data-lucide="search"></i>
+  <input type="search" name="q" value="{{ q }}" placeholder="Pesquisar certificados">
+  <button type="submit">Pesquisar</button>
+</form>
+
+<section class="prof-two-col">
+  <article class="prof-panel">
+    <div class="prof-panel-head"><h2>Templates</h2></div>
+    <div class="prof-table-wrap">
+      <table class="prof-table">
+        <thead><tr><th>Nome</th><th>Carga</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          {% for template in page_obj.object_list %}
+          <tr>
+            <td><strong>{{ template.nome }}</strong><span>{{ template.assinatura or 'Mundu Academy' }}</span></td>
+            <td>{{ template.carga_horaria }}h</td>
+            <td><span class="prof-pill {% if template.ativo %}published{% else %}draft{% endif %}">{{ 'Ativo' if template.ativo else 'Inativo' }}</span></td>
+            <td class="prof-actions">
+              <a class="prof-icon-btn" href="/professor/certificados/{{ template.id }}/" aria-label="Visualizar"><i data-lucide="eye"></i></a>
+              <a class="prof-icon-btn" href="/professor/certificados/{{ template.id }}/editar/" aria-label="Editar"><i data-lucide="pencil"></i></a>
+              <form method="post" action="/professor/certificados/{{ template.id }}/excluir/" onsubmit="return confirm('Excluir este template?')">
+                {{ csrf_input }}
+                <button class="prof-icon-btn danger" type="submit" aria-label="Excluir"><i data-lucide="trash-2"></i></button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4" class="prof-empty">Nenhum template encontrado.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% include "professor/partials/pagination.html" %}
+  </article>
+
+  <article class="prof-panel">
+    <div class="prof-panel-head"><h2>Emitidos recentemente</h2></div>
+    <div class="prof-stack">
+      {% for cert in issued %}
+      <div class="prof-row compact">
+        <div>
+          <strong>{{ cert.nome_aluno or cert.usuario.get_full_name() or cert.usuario.username }}</strong>
+          <span>{% if cert.curso %}{{ cert.curso }}{% elif cert.modulo %}{{ cert.modulo.titulo }}{% elif cert.trilha %}{{ cert.trilha.titulo }}{% else %}{{ cert.codigo }}{% endif %}</span>
+        </div>
+        <a class="prof-icon-btn" href="/professor/certificados/emitidos/{{ cert.codigo }}/" aria-label="Visualizar"><i data-lucide="eye"></i></a>
+      </div>
+      {% else %}
+      <p class="prof-empty">Nenhum certificado emitido.</p>
+      {% endfor %}
+    </div>
+  </article>
+</section>
+{% endblock %}
+

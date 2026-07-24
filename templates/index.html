@@ -103,11 +103,11 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
           Pergunta
         </button>
-        <button class="composer-type-btn disabled" title="Em breve">
+        <button class="composer-type-btn disabled" type="button" disabled title="Em breve">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect width="15" height="14" x="1" y="5" rx="2" ry="2"/></svg>
           Vídeo
         </button>
-        <button class="composer-type-btn disabled" title="Em breve">
+        <button class="composer-type-btn disabled" type="button" disabled title="Em breve">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
           Link
         </button>
@@ -249,7 +249,7 @@
             <div class="social-actor-info">
               <div class="social-actor-row">
                 <strong>Mundu Academy</strong>
-                <span class="social-verb-badge">✓ Curadoria</span>
+                <span class="social-verb-badge"><i data-lucide="check" class="inline-icon"></i>Curadoria</span>
                 <span class="social-verb">{{ it.verb }}</span>
               </div>
               <div class="social-actor-meta">
@@ -302,7 +302,7 @@
 
     <!-- Final do feed -->
     <div class="social-feed-end">
-      <span>Você chegou no fim do feed por hoje 🎉</span>
+      <span><i data-lucide="party-popper" class="inline-icon"></i>Você chegou no fim do feed por hoje</span>
       <a href="/explorar" class="btn-outline btn-outline-sm">Explorar conteúdo curado</a>
     </div>
 
@@ -359,7 +359,7 @@
           </a>
           <button class="sidebar-suggest-follow" data-handle="{{ u.handle }}" data-following="false" onclick="toggleFollow(this)">
             <span class="follow-state-out">+ Seguir</span>
-            <span class="follow-state-in">✓</span>
+            <span class="follow-state-in"><i data-lucide="check" class="inline-icon"></i></span>
           </button>
         </li>
         {% endfor %}
@@ -415,8 +415,8 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/></svg>
         Pergunta
       </button>
-      <button class="composer-tab disabled" title="Em breve">Vídeo</button>
-      <button class="composer-tab disabled" title="Em breve">Link</button>
+      <button class="composer-tab disabled" type="button" disabled title="Em breve">Vídeo</button>
+      <button class="composer-tab disabled" type="button" disabled title="Em breve">Link</button>
     </div>
 
     <div class="composer-body">
@@ -507,8 +507,8 @@
       document.getElementById('socialComposerTitleField').value = '';
       document.getElementById('socialComposerBody').value = '';
       showToast(socialComposerType === 'question'
-        ? '🎉 Pergunta publicada na Guild'
-        : '🧠 Nota salva no seu My Brain (+10 XP)');
+        ? 'Pergunta publicada na Guild'
+        : 'Nota salva no seu My Brain (+10 XP)');
     })
     .catch(function(){ showToast('Erro ao publicar — tente de novo'); });
   }

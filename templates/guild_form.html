@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Mundu Guild{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="account-shell">
+  <div class="account-card">
+    <div class="account-head">
+      <span>Guilda</span>
+      <h1>{{ title }}</h1>
+    </div>
+    {% if messages_list %}
+    <div class="prof-messages">
+      {% for message in messages_list %}
+      <div class="prof-message {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <form method="post" class="prof-form-grid">
+      {{ csrf_input }}
+      {% for field in form %}
+      <label class="prof-field">
+        <span>{{ field.label }}</span>
+        {{ field }}
+        {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+        {% if field.errors %}<strong>{{ field.errors|join(', ') }}</strong>{% endif %}
+      </label>
+      {% endfor %}
+      {% if form.non_field_errors() %}<div class="prof-form-errors">{{ form.non_field_errors()|join(', ') }}</div>{% endif %}
+      <div class="prof-form-actions">
+        <a href="{{ cancel_url }}" class="prof-btn ghost">Cancelar</a>
+        <button type="submit" class="prof-btn primary"><i data-lucide="save"></i><span>Salvar</span></button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

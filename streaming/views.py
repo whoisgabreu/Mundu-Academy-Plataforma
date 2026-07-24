@@ -11,7 +11,7 @@ def player_aula(request, modulo_slug, ordem):
     aulas_modulo = Aula.objects.filter(
         modulo=aula.modulo
     ).order_by('ordem')
-    quiz = Quiz.objects.filter(modulo=aula.modulo).first()
+    quiz = Quiz.objects.filter(aula=aula).first() or Quiz.objects.filter(modulo=aula.modulo).first()
     quiz_feito = False
     if quiz:
         quiz_feito = TentativaQuiz.objects.filter(

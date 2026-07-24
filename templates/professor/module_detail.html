@@ -1,0 +1,67 @@
+{% extends "professor/base.html" %}
+
+{% block professor_content %}
+<div class="prof-page-head">
+  <div>
+    <span class="prof-eyebrow">Módulo</span>
+    <h1>{{ modulo.titulo }}</h1>
+  </div>
+  <div class="prof-head-actions">
+    <a href="/professor/modulos/{{ modulo.id }}/editar/" class="prof-btn"><i data-lucide="pencil"></i><span>Editar</span></a>
+    <a href="/professor/aulas/nova/" class="prof-btn primary"><i data-lucide="plus"></i><span>Nova aula</span></a>
+  </div>
+</div>
+
+<section class="prof-detail-hero">
+  <div class="prof-thumb" {% if modulo.thumbnail %}style="background-image:url('{{ modulo.thumbnail }}')"{% endif %}></div>
+  <div>
+    <span class="prof-pill {{ modulo.status }}">{{ modulo.get_status_display() }}</span>
+    <p>{{ modulo.descricao or 'Sem descrição.' }}</p>
+    <div class="prof-metrics">
+      <span><strong>{{ modulo.aulas_count }}</strong>Aulas</span>
+      <span><strong>{{ modulo.alunos_count }}</strong>Alunos</span>
+      <span><strong>{{ modulo.xp_total }}</strong>XP</span>
+      <span><strong>{{ modulo.ordem }}</strong>Ordem</span>
+    </div>
+  </div>
+</section>
+
+<section class="prof-two-col">
+  <article class="prof-panel">
+    <div class="prof-panel-head">
+      <h2>Aulas</h2>
+      <a href="/professor/aulas/nova/" class="prof-link">Criar aula</a>
+    </div>
+    <div class="prof-stack">
+      {% for aula in aulas %}
+      <div class="prof-row">
+        <div><strong>{{ aula.ordem }}. {{ aula.titulo }}</strong><span>{{ aula.get_video_tipo_display() }} · {{ aula.duracao or aula.tempo_estimado ~ 'min' }}</span></div>
+        <div class="prof-actions">
+          <a class="prof-icon-btn" href="/professor/aulas/{{ aula.id }}/" aria-label="Visualizar"><i data-lucide="eye"></i></a>
+          <a class="prof-icon-btn" href="/professor/aulas/{{ aula.id }}/editar/" aria-label="Editar"><i data-lucide="pencil"></i></a>
+        </div>
+      </div>
+      {% else %}
+      <p class="prof-empty">Nenhuma aula cadastrada.</p>
+      {% endfor %}
+    </div>
+  </article>
+
+  <article class="prof-panel">
+    <div class="prof-panel-head">
+      <h2>Quizzes</h2>
+      <a href="/professor/quizzes/novo/" class="prof-link">Criar quiz</a>
+    </div>
+    <div class="prof-stack">
+      {% for quiz in quizzes %}
+      <div class="prof-row">
+        <div><strong>{{ quiz.titulo }}</strong><span>{{ quiz.aula.titulo if quiz.aula else 'Módulo' }} · {{ quiz.aprovacao_percentual }}%</span></div>
+        <a class="prof-icon-btn" href="/professor/quizzes/{{ quiz.id }}/" aria-label="Visualizar"><i data-lucide="eye"></i></a>
+      </div>
+      {% else %}
+      <p class="prof-empty">Nenhum quiz cadastrado.</p>
+      {% endfor %}
+    </div>
+  </article>
+</section>
+{% endblock %}

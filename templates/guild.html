@@ -34,10 +34,12 @@
       <h2>Suas comunidades</h2>
       <p>Entre por interesse, fique pelo time.</p>
     </div>
-    <button class="btn-outline" onclick="showToast('Em breve: criar uma nova comunidade')">
+    {% if can_manage_guild %}
+    <a class="btn-outline" href="/guild/nova">
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-      Nova comunidade
-    </button>
+      Nova guilda
+    </a>
+    {% endif %}
   </div>
 
   <div class="communities-grid">
@@ -64,6 +66,30 @@
   </div>
 </section>
 
+<section class="library-section">
+  <div class="library-section-header">
+    <div>
+      <h2>Ranking geral</h2>
+      <p>XP acumulado por integrantes das guildas.</p>
+    </div>
+  </div>
+  <div class="guild-rank-grid">
+    {% for item in ranking %}
+    <a href="/u/{{ item.usuario.username }}" class="guild-rank-card">
+      <span>#{{ loop.index }}</span>
+      <div class="guild-rank-avatar">{{ item.usuario.perfil.iniciais }}</div>
+      <div>
+        <strong>{{ item.usuario.get_full_name() or item.usuario.username }}</strong>
+        <small>{{ item.community.name }} · nível {{ item.usuario.perfil.nivel }}</small>
+      </div>
+      <b>{{ item.xp }} XP</b>
+    </a>
+    {% else %}
+    <p class="prof-empty">Nenhum integrante ranqueado ainda.</p>
+    {% endfor %}
+  </div>
+</section>
+
 <!-- ============ THREADS — FEED DE DISCUSSÃO ============ -->
 <section class="library-section">
   <div class="library-section-header">
@@ -72,9 +98,9 @@
       <p>Discussões de caso reais — entre, comente, defenda um ponto.</p>
     </div>
     <div class="thread-filters">
-      <button class="thread-filter-chip active">Em alta</button>
-      <button class="thread-filter-chip">Recentes</button>
-      <button class="thread-filter-chip">Sem resposta</button>
+      <a class="thread-filter-chip {% if sort == 'hot' %}active{% endif %}" href="/guild?sort=hot">Em alta</a>
+      <a class="thread-filter-chip {% if sort == 'new' %}active{% endif %}" href="/guild?sort=new">Recentes</a>
+      <a class="thread-filter-chip {% if sort == 'unanswered' %}active{% endif %}" href="/guild?sort=unanswered">Sem resposta</a>
     </div>
   </div>
 
@@ -82,11 +108,11 @@
     {% for t in threads %}
     <article class="thread-card animate-fade-in-up" data-delay="{{ loop.index0 * 0.05 }}">
       <div class="thread-card-vote">
-        <button class="thread-vote-btn" aria-label="Upvote">
+        <button class="thread-vote-btn" type="button" data-post-id="{{ t.id }}" data-direction="up" aria-label="Upvote">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
         </button>
         <span class="thread-vote-count">{{ t.upvotes }}</span>
-        <button class="thread-vote-btn" aria-label="Downvote">
+        <button class="thread-vote-btn" type="button" data-post-id="{{ t.id }}" data-direction="down" aria-label="Downvote">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
         </button>
       </div>
@@ -136,11 +162,25 @@
 
 {% block scripts %}
 <script>
-  document.querySelectorAll('.thread-filter-chip').forEach(function(chip){
-    chip.addEventListener('click', function(){
-      document.querySelectorAll('.thread-filter-chip').forEach(function(c){ c.classList.remove('active'); });
-      chip.classList.add('active');
+  document.querySelectorAll('.thread-vote-btn[data-post-id]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      const postId = btn.dataset.postId;
+      const direction = btn.dataset.direction;
+      fetch('/api/post/' + postId + '/vote', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({direction: direction})
+      })
+      .then(function(resp){ return resp.json(); })
+      .then(function(data){
+        if (typeof data.upvotes !== 'undefined') {
+          const count = btn.parentElement.querySelector('.thread-vote-count');
+          if (count) count.textContent = data.upvotes;
+        }
+      })
+      .catch(function(){ if (window.showToast) showToast('Não foi possível votar'); });
     });
   });
 </script>
 {% endblock %}
+

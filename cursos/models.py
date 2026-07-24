@@ -1,7 +1,16 @@
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 from django.utils.text import slugify
 from embed_video.fields import EmbedVideoField
+
+
+def validate_upload_size(file_obj):
+    max_mb = 250
+    if file_obj.size > max_mb * 1024 * 1024:
+        from django.core.exceptions import ValidationError
+        raise ValidationError(f'O arquivo deve ter no máximo {max_mb}MB.')
 
 
 class Modulo(models.Model):
@@ -11,21 +20,29 @@ class Modulo(models.Model):
         ('Avançado', 'Avançado'),
     ]
 
+    STATUS_CHOICES = [
+        ('draft', 'Rascunho'),
+        ('published', 'Publicado'),
+    ]
+
     titulo = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
     descricao = models.TextField(blank=True)
     thumbnail = models.URLField(blank=True)
+    ordem = models.PositiveIntegerField(default=0, db_index=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft', db_index=True)
     total_aulas = models.IntegerField(default=0)
     duracao_total = models.CharField(max_length=50, blank=True)
     xp_total = models.IntegerField(default=0)
     nivel = models.CharField(max_length=20, choices=NIVEIS, default='Iniciante')
     tem_certificado = models.BooleanField(default=True)
     num_secoes = models.IntegerField(default=1)
+    created_at = models.DateTimeField(default=timezone.now)
 
     class Meta:
         verbose_name = 'Módulo'
         verbose_name_plural = 'Módulos'
-        ordering = ['titulo']
+        ordering = ['ordem', 'titulo']
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -132,13 +149,44 @@ class ProgressoDesafio(models.Model):
 
 # Mantido para compatibilidade com a tabela já existente no PostgreSQL
 class Aula(models.Model):
+    VIDEO_TIPOS = [
+        ('youtube', 'YouTube'),
+        ('vimeo', 'Vimeo'),
+        ('upload', 'Upload proprio'),
+    ]
+    STATUS_CHOICES = [
+        ('draft', 'Rascunho'),
+        ('published', 'Publicado'),
+    ]
+
     modulo = models.ForeignKey(Modulo, on_delete=models.CASCADE, related_name='aulas')
     titulo = models.CharField(max_length=255)
     descricao = models.TextField(blank=True)
-    url_video = EmbedVideoField(help_text="Cole a URL do YouTube ou Vimeo aqui")
+    video_tipo = models.CharField(max_length=20, choices=VIDEO_TIPOS, default='youtube')
+    url_video = EmbedVideoField(blank=True, help_text="Cole a URL do YouTube ou Vimeo aqui")
+    video_upload = models.FileField(
+        upload_to='aulas/videos/',
+        blank=True,
+        validators=[
+            FileExtensionValidator(['mp4', 'webm', 'mov', 'm4v']),
+            validate_upload_size,
+        ],
+    )
+    thumbnail = models.URLField(blank=True)
     duracao = models.CharField(max_length=20, blank=True, help_text="Ex: 15:30")
+    tempo_estimado = models.PositiveIntegerField(default=0, help_text="Tempo estimado em minutos")
     ordem = models.IntegerField(default=0)
+    material_complementar = models.FileField(
+        upload_to='aulas/materiais/',
+        blank=True,
+        validators=[
+            FileExtensionValidator(['pdf', 'docx', 'zip']),
+            validate_upload_size,
+        ],
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft', db_index=True)
     is_preview = models.BooleanField(default=False)
+    premium = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -155,7 +203,14 @@ class Certificate(models.Model):
     usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name='certificados')
     modulo = models.ForeignKey(Modulo, on_delete=models.SET_NULL, null=True, blank=True)
     trilha = models.ForeignKey(Trilha, on_delete=models.SET_NULL, null=True, blank=True)
+    template = models.ForeignKey('CertificateTemplate', on_delete=models.SET_NULL, null=True, blank=True, related_name='certificados')
     codigo = models.CharField(max_length=32, unique=True)
+    nome_aluno = models.CharField(max_length=200, blank=True)
+    curso = models.CharField(max_length=200, blank=True)
+    carga_horaria = models.PositiveIntegerField(default=0)
+    assinatura = models.CharField(max_length=200, blank=True)
+    logo = models.URLField(blank=True)
+    qr_payload = models.TextField(blank=True)
     emitido_em = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -165,6 +220,27 @@ class Certificate(models.Model):
 
     def __str__(self):
         return f'{self.usuario.username} — {self.modulo or self.trilha}'
+
+
+class CertificateTemplate(models.Model):
+    nome = models.CharField(max_length=160)
+    template = models.TextField(
+        blank=True,
+        help_text='HTML opcional com placeholders: {{ nome_aluno }}, {{ curso }}, {{ data }}, {{ codigo }}.',
+    )
+    carga_horaria = models.PositiveIntegerField(default=0)
+    assinatura = models.CharField(max_length=200, blank=True)
+    logo = models.URLField(blank=True)
+    ativo = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Template de Certificado'
+        verbose_name_plural = 'Templates de Certificado'
+        ordering = ['nome']
+
+    def __str__(self):
+        return self.nome
 
 
 class FeaturedContent(models.Model):
@@ -196,12 +272,21 @@ class FeaturedContent(models.Model):
 
 
 class Quiz(models.Model):
+    STATUS_CHOICES = [
+        ('draft', 'Rascunho'),
+        ('published', 'Publicado'),
+    ]
+
     modulo = models.ForeignKey(Modulo, on_delete=models.CASCADE, related_name='quizzes')
+    aula = models.ForeignKey(Aula, on_delete=models.CASCADE, related_name='quizzes', null=True, blank=True)
     titulo = models.CharField(max_length=200)
     descricao = models.TextField(blank=True)
     ordem = models.IntegerField(default=0)
     xp_total = models.IntegerField(default=50, help_text="XP concedido ao passar")
     aprovacao_percentual = models.IntegerField(default=70, help_text="% mínima para aprovação")
+    max_tentativas = models.PositiveIntegerField(default=3)
+    feedback_automatico = models.BooleanField(default=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft', db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

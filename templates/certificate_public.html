@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Certificado {{ codigo }} - Mundu Academy{% endblock %}
+{% block page_title %}Certificado{% endblock %}
+
+{% block content %}
+<div class="profile-v2-shell">
+  <div class="prof-page-head">
+    <div>
+      <span class="prof-eyebrow">Certificado emitido</span>
+      <h1>{{ nome_aluno }}</h1>
+    </div>
+    <a href="/certificados/{{ codigo }}/pdf" class="prof-btn primary"><i data-lucide="download"></i><span>Download PDF</span></a>
+  </div>
+
+  <section class="cert-preview">
+    <div class="cert-brand">
+      {% if logo %}<img src="{{ logo }}" alt="Logo">{% else %}<span>MUNDU</span>{% endif %}
+    </div>
+    <p class="cert-kicker">Certificado</p>
+    <h2>{{ nome_aluno }}</h2>
+    <p class="cert-copy">concluiu com sucesso</p>
+    <h3>{{ curso }}</h3>
+    <div class="cert-meta">
+      <span>Data: {{ data }}</span>
+      <span>Carga horária: {{ carga_horaria }}h</span>
+      <span>Código: {{ codigo }}</span>
+    </div>
+    <div class="cert-footer">
+      <div>
+        <strong>{{ assinatura or 'Mundu Academy' }}</strong>
+        <span>Assinatura</span>
+      </div>
+      <div class="cert-qr" aria-label="QR Code">
+        {% for row in qr_matrix %}
+        <div>
+          {% for cell in row %}
+          <span class="{% if cell %}on{% endif %}"></span>
+          {% endfor %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

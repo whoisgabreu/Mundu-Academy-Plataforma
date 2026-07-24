@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Curso, Modulo, Aula, ProgressoModulo, Trilha, TrilhaModulo, Desafio, ProgressoDesafio, Certificate, FeaturedContent, Quiz, Questao, Alternativa, TentativaQuiz
+from .models import Curso, Modulo, Aula, ProgressoModulo, Trilha, TrilhaModulo, Desafio, ProgressoDesafio, Certificate, CertificateTemplate, FeaturedContent, Quiz, Questao, Alternativa, TentativaQuiz
 
 
 class TrilhaModuloInline(admin.TabularInline):
@@ -11,14 +11,15 @@ class TrilhaModuloInline(admin.TabularInline):
 class AulaInline(admin.TabularInline):
     model = Aula
     extra = 1
-    fields = ['titulo', 'url_video', 'duracao', 'ordem', 'is_preview']
+    fields = ['titulo', 'video_tipo', 'url_video', 'duracao', 'ordem', 'status', 'is_preview', 'premium']
     ordering = ['ordem']
 
 
 @admin.register(Modulo)
 class ModuloAdmin(admin.ModelAdmin):
-    list_display = ['titulo', 'slug', 'nivel', 'total_aulas', 'duracao_total', 'xp_total', 'tem_certificado']
-    list_filter = ['nivel', 'tem_certificado']
+    list_display = ['titulo', 'slug', 'ordem', 'status', 'nivel', 'total_aulas', 'duracao_total', 'xp_total', 'tem_certificado']
+    list_filter = ['status', 'nivel', 'tem_certificado']
+    list_editable = ['ordem', 'status']
     search_fields = ['titulo', 'slug', 'descricao']
     prepopulated_fields = {'slug': ('titulo',)}
     inlines = [AulaInline]
@@ -26,8 +27,8 @@ class ModuloAdmin(admin.ModelAdmin):
 
 @admin.register(Aula)
 class AulaAdmin(admin.ModelAdmin):
-    list_display = ['titulo', 'modulo', 'url_video', 'duracao', 'ordem', 'is_preview']
-    list_filter = ['is_preview', 'modulo']
+    list_display = ['titulo', 'modulo', 'video_tipo', 'duracao', 'ordem', 'status', 'is_preview', 'premium']
+    list_filter = ['status', 'video_tipo', 'is_preview', 'premium', 'modulo']
     search_fields = ['titulo', 'url_video']
 
 
@@ -61,10 +62,18 @@ class ProgressoDesafioAdmin(admin.ModelAdmin):
 
 @admin.register(Certificate)
 class CertificateAdmin(admin.ModelAdmin):
-    list_display = ['usuario', 'modulo', 'trilha', 'codigo', 'emitido_em']
+    list_display = ['usuario', 'modulo', 'trilha', 'template', 'codigo', 'emitido_em']
     list_filter = ['emitido_em']
     search_fields = ['usuario__username', 'codigo']
     readonly_fields = ['codigo', 'emitido_em']
+
+
+@admin.register(CertificateTemplate)
+class CertificateTemplateAdmin(admin.ModelAdmin):
+    list_display = ['nome', 'carga_horaria', 'assinatura', 'ativo']
+    list_filter = ['ativo']
+    list_editable = ['ativo']
+    search_fields = ['nome', 'assinatura']
 
 
 @admin.register(FeaturedContent)
@@ -95,8 +104,8 @@ class QuestaoInline(admin.TabularInline):
 
 @admin.register(Quiz)
 class QuizAdmin(admin.ModelAdmin):
-    list_display = ['titulo', 'modulo', 'ordem', 'xp_total', 'aprovacao_percentual']
-    list_filter = ['modulo']
+    list_display = ['titulo', 'modulo', 'aula', 'ordem', 'xp_total', 'aprovacao_percentual', 'max_tentativas', 'status']
+    list_filter = ['status', 'modulo', 'aula']
     inlines = [QuestaoInline]
 
 

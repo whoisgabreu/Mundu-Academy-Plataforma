@@ -1,6 +1,18 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from .gamification_models import (
+    Badge,
+    CoinTransaction,
+    Mission,
+    Reward,
+    Title,
+    UserBadge,
+    UserMission,
+    UserReward,
+    UserTitle,
+    XPEvent,
+)
 
 
 NIVEIS_NOME = {
@@ -18,11 +30,16 @@ class Perfil(models.Model):
     ultimo_login = models.DateField(null=True, blank=True)
     cargo = models.CharField(max_length=100, blank=True, default='Aprendiz')
     bio = models.TextField(blank=True)
+    foto = models.URLField(blank=True)
+    banner = models.URLField(blank=True)
     empresa = models.CharField(max_length=200, blank=True)
     localizacao = models.CharField(max_length=200, blank=True)
+    cidade = models.CharField(max_length=120, blank=True)
     linkedin = models.URLField(blank=True)
     instagram = models.CharField(max_length=100, blank=True)
     karma = models.IntegerField(default=0)
+    moedas = models.PositiveIntegerField(default=0)
+    titulo_ativo = models.ForeignKey('Title', on_delete=models.SET_NULL, null=True, blank=True, related_name='perfis_ativos')
     data_criacao = models.DateTimeField(default=timezone.now)
 
     class Meta:
@@ -60,12 +77,42 @@ class Perfil(models.Model):
             return 0
         return min(int(self.xp_total / self.xp_proximo_nivel * 100), 100)
 
-    def adicionar_xp(self, quantidade):
+    def adicionar_xp(self, quantidade, origem='manual', descricao=''):
+        quantidade = max(int(quantidade or 0), 0)
+        if quantidade == 0:
+            return {
+                'old_level': self.nivel,
+                'new_level': self.nivel,
+                'leveled_up': False,
+                'xp_ganho': 0,
+            }
+        old_level = self.nivel
+        old_xp = self.xp_total
         self.xp_total += quantidade
         while self.xp_total >= self.xp_proximo_nivel and self.nivel < 10:
             self.xp_total -= self.xp_proximo_nivel
             self.nivel += 1
-        self.save()
+        self.moedas += max(1, quantidade // 10)
+        self.save(update_fields=['xp_total', 'nivel', 'moedas'])
+        try:
+            XPEvent.objects.create(
+                usuario=self.usuario,
+                origem=origem,
+                descricao=descricao,
+                xp=quantidade,
+                nivel_anterior=old_level,
+                nivel_atual=self.nivel,
+                xp_anterior=old_xp,
+                xp_atual=self.xp_total,
+            )
+        except Exception:
+            pass
+        return {
+            'old_level': old_level,
+            'new_level': self.nivel,
+            'leveled_up': self.nivel > old_level,
+            'xp_ganho': quantidade,
+        }
 
 
 class Achievement(models.Model):

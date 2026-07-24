@@ -1,4 +1,57 @@
+from datetime import date, datetime, time
+
 from django.shortcuts import render as django_render
+from django.utils import timezone
+from django.utils.dateparse import parse_date, parse_datetime
+
+
+def coerce_datetime(value):
+    if not value:
+        return None
+    if isinstance(value, datetime):
+        dt = value
+    elif isinstance(value, date):
+        dt = datetime.combine(value, time.min)
+    elif isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return None
+        dt = parse_datetime(text)
+        if dt is None:
+            parsed_date = parse_date(text)
+            dt = datetime.combine(parsed_date, time.min) if parsed_date else None
+        if dt is None:
+            return None
+    else:
+        return None
+
+    if timezone.is_naive(dt):
+        return timezone.make_aware(dt, timezone.get_current_timezone())
+    return dt
+
+
+def human_time_ago(value):
+    raw_value = value.strip() if isinstance(value, str) else ''
+    dt = coerce_datetime(value)
+    if dt is None:
+        return raw_value or 'recentemente'
+
+    seconds = int((timezone.now() - dt).total_seconds())
+    if seconds < 60:
+        return 'agora'
+    if seconds < 3600:
+        return f'há {seconds // 60}min'
+    if seconds < 86400:
+        return f'há {seconds // 3600}h'
+    days = seconds // 86400
+    if days == 1:
+        return 'ontem'
+    return f'há {days} dias'
+
+
+def time_sort_value(value):
+    dt = coerce_datetime(value)
+    return dt.timestamp() if dt else 0
 
 
 def _get_current_user(request):
@@ -14,7 +67,10 @@ def _get_current_user(request):
                 'cargo': perfil.cargo,
                 'empresa': perfil.empresa,
                 'bio': perfil.bio,
+                'foto': perfil.foto,
+                'banner': perfil.banner,
                 'localizacao': perfil.localizacao,
+                'cidade': perfil.cidade,
                 'linkedin': perfil.linkedin,
                 'instagram': perfil.instagram,
                 'joined_at': perfil.data_criacao,
@@ -24,6 +80,8 @@ def _get_current_user(request):
                     'xp_total': perfil.xp_total,
                     'xp_proximo_nivel': perfil.xp_proximo_nivel,
                     'xp_percentual': perfil.xp_percentual,
+                    'moedas': perfil.moedas,
+                    'titulo_ativo': perfil.titulo_ativo.nome if perfil.titulo_ativo else perfil.nome_nivel,
                     'streak': perfil.streak_dias,
                     'streak_dias': perfil.streak_dias,
                     'iniciais': perfil.iniciais,
@@ -39,12 +97,16 @@ def _get_current_user(request):
             'cargo': '',
             'empresa': '',
             'bio': '',
+            'foto': '',
+            'banner': '',
             'localizacao': '',
+            'cidade': '',
             'linkedin': '',
             'instagram': '',
             'perfil': {
                 'nivel': 1, 'nome_nivel': 'Iniciante', 'xp_total': 0,
-                'xp_proximo_nivel': 500, 'xp_percentual': 0, 'streak': 0,
+                'xp_proximo_nivel': 500, 'xp_percentual': 0, 'moedas': 0,
+                'titulo_ativo': 'Iniciante', 'streak': 0,
                 'streak_dias': 0,
                 'iniciais': (request.user.get_full_name() or request.user.username)[:2].upper(),
                 'pilar_favorito': 'Cursos',
@@ -54,11 +116,12 @@ def _get_current_user(request):
         'nome': 'Visitante', 'nome_completo': 'Visitante',
         'username': 'visitante',
         'role': 'Visitante',
-        'cargo': '', 'empresa': '', 'bio': '', 'localizacao': '',
+        'cargo': '', 'empresa': '', 'bio': '', 'foto': '', 'banner': '', 'localizacao': '', 'cidade': '',
         'linkedin': '', 'instagram': '',
         'perfil': {
             'nivel': 0, 'nome_nivel': 'Iniciante', 'xp_total': 0,
-            'xp_proximo_nivel': 500, 'xp_percentual': 0, 'streak': 0,
+            'xp_proximo_nivel': 500, 'xp_percentual': 0, 'moedas': 0,
+            'titulo_ativo': 'Iniciante', 'streak': 0,
             'streak_dias': 0, 'iniciais': 'VI', 'pilar_favorito': 'Cursos',
         },
     }
@@ -100,20 +163,7 @@ def _get_notifications():
 
 
 def _time_ago(dt):
-    from django.utils import timezone
-    now = timezone.now()
-    diff = now - dt
-    if diff.days == 0:
-        mins = diff.seconds // 60
-        if mins < 1:
-            return 'agora'
-        if mins < 60:
-            return f'há {mins}min'
-        hours = mins // 60
-        return f'há {hours}h' if hours < 24 else 'ontem'
-    if diff.days == 1:
-        return 'ontem'
-    return f'há {diff.days} dias'
+    return human_time_ago(dt)
 
 
 def render(request, template, context=None, **kwargs):

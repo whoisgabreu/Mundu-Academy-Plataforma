@@ -12,7 +12,7 @@
       </div>
       <div>
         <h2 class="text-xl font-bold text-foreground">
-          {% if tentativa.aprovado %}Aprovado! 🎉{% else %}Não foi dessa vez{% endif %}
+          {% if tentativa.aprovado %}Aprovado!{% else %}Não foi dessa vez{% endif %}
         </h2>
         <p class="text-muted-foreground">{{ tentativa.pontuacao }}/{{ tentativa.total_questoes }} acertos ({{ tentativa.percentual }}%)</p>
         <p class="text-sm text-muted-foreground">Mínimo: {{ tentativa.quiz.aprovacao_percentual }}%</p>

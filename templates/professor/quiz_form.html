@@ -1,0 +1,263 @@
+{% extends "professor/base.html" %}
+
+{% block professor_content %}
+<div class="prof-page-head">
+  <div>
+    <span class="prof-eyebrow">Avaliações</span>
+    <h1>{{ title }}</h1>
+  </div>
+  <a href="{{ cancel_url }}" class="prof-btn ghost"><i data-lucide="x"></i><span>Cancelar</span></a>
+</div>
+
+<form method="post" class="prof-form-card" id="quiz-builder-form">
+  {{ csrf_input }}
+  <div class="prof-form-grid">
+    {% for field in form %}
+    <label class="prof-field {% if field.field.widget.input_type == 'checkbox' %}check{% endif %}">
+      <span>{{ field.label }}</span>
+      {{ field }}
+      {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+      {% if field.errors %}<strong>{{ field.errors|join(', ') }}</strong>{% endif %}
+    </label>
+    {% endfor %}
+  </div>
+  {% if form.non_field_errors() %}
+  <div class="prof-form-errors">{{ form.non_field_errors()|join(', ') }}</div>
+  {% endif %}
+
+  <div class="prof-builder-head">
+    <div>
+      <span class="prof-form-section-title">Perguntas e respostas</span>
+      <p>Crie o quiz completo em uma única etapa.</p>
+    </div>
+    <button type="button" class="prof-btn small" id="add-question-btn">
+      <i data-lucide="plus"></i><span>Adicionar pergunta</span>
+    </button>
+  </div>
+
+  {% if question_errors %}
+  <div class="prof-form-errors prof-question-errors">
+    {% for error in question_errors %}
+    <div>{{ error }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <input type="hidden" name="questions_payload" id="questions-payload">
+  <div id="quiz-questions-builder" class="prof-question-builder"></div>
+  <script type="application/json" id="quizQuestionsInitial">{{ questions_payload_json|safe }}</script>
+
+  <div class="prof-form-actions">
+    <a href="{{ cancel_url }}" class="prof-btn ghost">Voltar</a>
+    <button type="submit" class="prof-btn primary"><i data-lucide="save"></i><span>Salvar quiz</span></button>
+  </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function(){
+    const form = document.getElementById('quiz-builder-form');
+    const builder = document.getElementById('quiz-questions-builder');
+    const payloadInput = document.getElementById('questions-payload');
+    const initialEl = document.getElementById('quizQuestionsInitial');
+    const addQuestionBtn = document.getElementById('add-question-btn');
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function defaultQuestion(type) {
+      if (type === 'verdadeiro_falso') {
+        return {
+          enunciado: '',
+          tipo: 'verdadeiro_falso',
+          alternativas: [
+            {texto: 'Verdadeiro', correta: true},
+            {texto: 'Falso', correta: false}
+          ]
+        };
+      }
+      return {
+        enunciado: '',
+        tipo: 'multipla_escolha',
+        alternativas: [
+          {texto: '', correta: true},
+          {texto: '', correta: false}
+        ]
+      };
+    }
+
+    function normalizeQuestion(question) {
+      const type = question && question.tipo === 'verdadeiro_falso' ? 'verdadeiro_falso' : 'multipla_escolha';
+      let alternatives = Array.isArray(question && question.alternativas) ? question.alternativas : [];
+      alternatives = alternatives.map(function(answer){
+        return {
+          texto: answer && answer.texto ? String(answer.texto) : '',
+          correta: Boolean(answer && answer.correta)
+        };
+      });
+      if (type === 'verdadeiro_falso') {
+        alternatives = [
+          {texto: alternatives[0] && alternatives[0].texto ? alternatives[0].texto : 'Verdadeiro', correta: alternatives[0] ? alternatives[0].correta : true},
+          {texto: alternatives[1] && alternatives[1].texto ? alternatives[1].texto : 'Falso', correta: alternatives[1] ? alternatives[1].correta : false}
+        ];
+      }
+      if (alternatives.length < 2) {
+        alternatives.push({texto: '', correta: alternatives.length === 0});
+        alternatives.push({texto: '', correta: false});
+      }
+      if (!alternatives.some(function(answer){ return answer.correta; })) {
+        alternatives[0].correta = true;
+      }
+      return {
+        enunciado: question && question.enunciado ? String(question.enunciado) : '',
+        tipo: type,
+        alternativas: alternatives
+      };
+    }
+
+    function readInitialQuestions() {
+      try {
+        const parsed = JSON.parse(initialEl.textContent || '[]');
+        if (Array.isArray(parsed) && parsed.length) {
+          return parsed.map(normalizeQuestion);
+        }
+      } catch (error) {}
+      return [defaultQuestion('multipla_escolha')];
+    }
+
+    let questions = readInitialQuestions();
+
+    function setOnlyCorrect(questionIndex, answerIndex) {
+      questions[questionIndex].alternativas = questions[questionIndex].alternativas.map(function(answer, index){
+        return {texto: answer.texto, correta: index === answerIndex};
+      });
+    }
+
+    function updatePayload() {
+      payloadInput.value = JSON.stringify(questions);
+    }
+
+    function renderBuilder() {
+      builder.innerHTML = questions.map(function(question, questionIndex){
+        const canRemoveQuestion = questions.length > 1;
+        const isTrueFalse = question.tipo === 'verdadeiro_falso';
+        const answers = question.alternativas.map(function(answer, answerIndex){
+          const canRemoveAnswer = !isTrueFalse && question.alternativas.length > 2;
+          return `
+            <div class="prof-answer-line" data-answer="${answerIndex}">
+              <label class="prof-correct-choice" title="Resposta correta">
+                <input type="radio" name="correct-${questionIndex}" ${answer.correta ? 'checked' : ''} data-action="set-correct" data-question="${questionIndex}" data-answer="${answerIndex}">
+                <span></span>
+              </label>
+              <input type="text" value="${escapeHtml(answer.texto)}" ${isTrueFalse ? 'readonly' : ''} placeholder="Texto da resposta" data-action="answer-text" data-question="${questionIndex}" data-answer="${answerIndex}">
+              <button type="button" class="prof-icon-btn danger" ${canRemoveAnswer ? '' : 'disabled'} data-action="remove-answer" data-question="${questionIndex}" data-answer="${answerIndex}" aria-label="Remover resposta">
+                <i data-lucide="trash-2"></i>
+              </button>
+            </div>
+          `;
+        }).join('');
+        return `
+          <article class="prof-question-edit-card" data-question="${questionIndex}">
+            <div class="prof-question-edit-head">
+              <strong>Pergunta ${questionIndex + 1}</strong>
+              <div class="prof-actions">
+                <select class="prof-form-control compact" data-action="question-type" data-question="${questionIndex}">
+                  <option value="multipla_escolha" ${question.tipo === 'multipla_escolha' ? 'selected' : ''}>Múltipla escolha</option>
+                  <option value="verdadeiro_falso" ${isTrueFalse ? 'selected' : ''}>Verdadeiro/Falso</option>
+                </select>
+                <button type="button" class="prof-icon-btn danger" ${canRemoveQuestion ? '' : 'disabled'} data-action="remove-question" data-question="${questionIndex}" aria-label="Remover pergunta">
+                  <i data-lucide="trash-2"></i>
+                </button>
+              </div>
+            </div>
+            <label class="prof-field">
+              <span>Enunciado</span>
+              <textarea rows="3" placeholder="Digite a pergunta" data-action="question-text" data-question="${questionIndex}">${escapeHtml(question.enunciado)}</textarea>
+            </label>
+            <div class="prof-answer-list">
+              ${answers}
+            </div>
+            <button type="button" class="prof-btn small" ${isTrueFalse ? 'disabled' : ''} data-action="add-answer" data-question="${questionIndex}">
+              <i data-lucide="plus"></i><span>Adicionar resposta</span>
+            </button>
+          </article>
+        `;
+      }).join('');
+      updatePayload();
+      if (window.lucide) {
+        window.lucide.createIcons();
+      }
+    }
+
+    builder.addEventListener('input', function(event){
+      const target = event.target;
+      const questionIndex = Number(target.dataset.question);
+      const answerIndex = Number(target.dataset.answer);
+      if (!Number.isInteger(questionIndex) || !questions[questionIndex]) return;
+      if (target.dataset.action === 'question-text') {
+        questions[questionIndex].enunciado = target.value;
+      }
+      if (target.dataset.action === 'answer-text' && Number.isInteger(answerIndex)) {
+        questions[questionIndex].alternativas[answerIndex].texto = target.value;
+      }
+      updatePayload();
+    });
+
+    builder.addEventListener('change', function(event){
+      const target = event.target;
+      const questionIndex = Number(target.dataset.question);
+      const answerIndex = Number(target.dataset.answer);
+      if (!Number.isInteger(questionIndex) || !questions[questionIndex]) return;
+      if (target.dataset.action === 'question-type') {
+        const currentText = questions[questionIndex].enunciado;
+        questions[questionIndex] = target.value === 'verdadeiro_falso'
+          ? Object.assign(defaultQuestion('verdadeiro_falso'), {enunciado: currentText})
+          : normalizeQuestion({enunciado: currentText, tipo: target.value, alternativas: questions[questionIndex].alternativas});
+        renderBuilder();
+      }
+      if (target.dataset.action === 'set-correct' && Number.isInteger(answerIndex)) {
+        setOnlyCorrect(questionIndex, answerIndex);
+        updatePayload();
+      }
+    });
+
+    builder.addEventListener('click', function(event){
+      const button = event.target.closest('button[data-action]');
+      if (!button || button.disabled) return;
+      const questionIndex = Number(button.dataset.question);
+      const answerIndex = Number(button.dataset.answer);
+      if (button.dataset.action === 'remove-question') {
+        questions.splice(questionIndex, 1);
+        renderBuilder();
+      }
+      if (button.dataset.action === 'add-answer') {
+        questions[questionIndex].alternativas.push({texto: '', correta: false});
+        renderBuilder();
+      }
+      if (button.dataset.action === 'remove-answer') {
+        questions[questionIndex].alternativas.splice(answerIndex, 1);
+        if (!questions[questionIndex].alternativas.some(function(answer){ return answer.correta; })) {
+          questions[questionIndex].alternativas[0].correta = true;
+        }
+        renderBuilder();
+      }
+    });
+
+    addQuestionBtn.addEventListener('click', function(){
+      questions.push(defaultQuestion('multipla_escolha'));
+      renderBuilder();
+    });
+
+    form.addEventListener('submit', updatePayload);
+    renderBuilder();
+  })();
+</script>
+{% endblock %}
+

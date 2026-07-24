@@ -41,7 +41,7 @@
           </a>
           <button class="thread-author-follow" data-handle="{{ post.author_user.handle }}" data-following="false" onclick="toggleFollow(this)">
             <span class="follow-state-out">+ Seguir</span>
-            <span class="follow-state-in">✓ Seguindo</span>
+            <span class="follow-state-in"><i data-lucide="check" class="inline-icon"></i>Seguindo</span>
           </button>
           <span class="thread-meta-secondary">
             em <a href="/g/{{ community.slug }}" class="thread-meta-community">r/{{ community.slug }}</a>
@@ -325,7 +325,7 @@
     .then(function(data){
       ta.value = '';
       if (parentId) toggleReply(parentId);
-      showToast(parentId ? '✓ Resposta enviada' : '✓ Comentário publicado');
+      showToast(parentId ? 'Resposta enviada' : 'Comentário publicado');
     })
     .catch(function(){
       showToast('Erro ao enviar — tente novamente');

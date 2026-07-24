@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Professor - Mundu Academy{% endblock %}
+{% block page_title %}Professor{% endblock %}
+
+{% block content %}
+<div class="prof-shell">
+  <nav class="prof-nav" aria-label="Menu do professor">
+    <a class="prof-nav-item {% if prof_nav == 'dashboard' %}active{% endif %}" href="/professor/"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a>
+    <a class="prof-nav-item {% if prof_nav == 'modules' %}active{% endif %}" href="/professor/modulos/"><i data-lucide="layers"></i><span>Módulos</span></a>
+    <a class="prof-nav-item {% if prof_nav == 'lessons' %}active{% endif %}" href="/professor/aulas/"><i data-lucide="play-circle"></i><span>Aulas</span></a>
+    <a class="prof-nav-item {% if prof_nav == 'quizzes' %}active{% endif %}" href="/professor/quizzes/"><i data-lucide="list-checks"></i><span>Quizzes</span></a>
+    <a class="prof-nav-item {% if prof_nav == 'certificates' %}active{% endif %}" href="/professor/certificados/"><i data-lucide="award"></i><span>Certificados</span></a>
+  </nav>
+
+  <section class="prof-main">
+    {% if messages_list %}
+    <div class="prof-messages">
+      {% for message in messages_list %}
+      <div class="prof-message {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% block professor_content %}{% endblock %}
+  </section>
+</div>
+{% endblock %}
+

@@ -7,7 +7,7 @@
 
 <!-- ============ COMMUNITY HEADER ============ -->
 <section class="community-header community-banner-{{ community.color }}">
-  <div class="community-banner"></div>
+  <div class="community-banner" {% if community.banner %}style="background-image:url('{{ community.banner }}')"{% endif %}></div>
   <div class="community-header-row">
     <div class="community-icon-large">
       <i data-lucide="{{ community.icon }}"></i>
@@ -26,9 +26,22 @@
       </div>
     </div>
     <div class="community-header-actions">
-      <button class="community-join-btn" id="joinBtn" data-slug="{{ community.slug }}" data-joined="false" onclick="toggleJoin(this)">
+      {% if can_manage_guild %}
+      <a class="community-create-btn" href="/g/{{ community.slug }}/editar">
+        <i data-lucide="settings"></i>
+        Editar
+      </a>
+      <form method="post" action="/g/{{ community.slug }}/excluir" onsubmit="return confirm('Excluir esta guilda?')">
+        {{ csrf_input }}
+        <button type="submit" class="community-create-btn">
+          <i data-lucide="trash-2"></i>
+          Excluir
+        </button>
+      </form>
+      {% endif %}
+      <button class="community-join-btn" id="joinBtn" data-slug="{{ community.slug }}" data-joined="{{ 'true' if membership else 'false' }}" onclick="toggleJoin(this)">
         <span class="join-state-out">+ Entrar</span>
-        <span class="join-state-in">✓ Membro</span>
+        <span class="join-state-in"><i data-lucide="check" class="inline-icon"></i>Membro</span>
       </button>
       <button class="community-create-btn" onclick="openComposer('{{ community.slug }}')">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
@@ -93,14 +106,14 @@
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
               {{ p.replies }} comentários
             </a>
-            <span class="redd-post-action">
+            <button type="button" class="redd-post-action" onclick="openQuickNote('{{ p.title|e }}', 'Guild · r/{{ community.slug }}')">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
               Salvar
-            </span>
-            <span class="redd-post-action">
+            </button>
+            <button type="button" class="redd-post-action" onclick="navigator.clipboard.writeText(location.origin + '/g/{{ p.community_slug }}/post/{{ p.slug }}').then(function(){ showToast('Link copiado'); })">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
               Compartilhar
-            </span>
+            </button>
           </div>
         </div>
       </article>
@@ -129,6 +142,42 @@
           <strong>{{ community.online_now }}</strong>
           <span class="online-dot-meta"><span class="community-pulse"></span>Online</span>
         </div>
+        <div>
+          <strong>{{ community.nivel }}</strong>
+          <span>Nível</span>
+        </div>
+        <div>
+          <strong>{{ community.xp_total }}</strong>
+          <span>XP total</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-card">
+      <h3 class="sidebar-card-title">Missões</h3>
+      <div class="guild-side-list">
+        {% for mission in missions %}
+        <div>
+          <strong>{{ mission.titulo }}</strong>
+          <span>{{ mission.meta }} ações · +{{ mission.xp }} XP</span>
+        </div>
+        {% else %}
+        <p class="prof-empty">Nenhuma missão ativa.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="sidebar-card">
+      <h3 class="sidebar-card-title">Integrantes</h3>
+      <div class="guild-side-list">
+        {% for member in members %}
+        <a href="/u/{{ member.usuario.username }}">
+          <strong>{{ member.usuario.get_full_name() or member.usuario.username }}</strong>
+          <span>{{ member.xp }} XP · {{ member.get_role_display() }}</span>
+        </a>
+        {% else %}
+        <p class="prof-empty">Nenhum integrante ainda.</p>
+        {% endfor %}
       </div>
     </div>
 
@@ -198,11 +247,11 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
         Link
       </button>
-      <button class="composer-tab disabled" title="Em breve">
+      <button class="composer-tab disabled" type="button" disabled title="Em breve">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
         Imagem
       </button>
-      <button class="composer-tab disabled" title="Em breve">
+      <button class="composer-tab disabled" type="button" disabled title="Em breve">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.4 9.4a2 2 0 1 1-2.83-2.82"/><path d="M14 14a4 4 0 1 1-5.66-5.65"/></svg>
         Enquete
       </button>
@@ -229,6 +278,11 @@
 {% block scripts %}
 <script>
   // === Join / Leave comunidade ===
+  var initialJoinBtn = document.getElementById('joinBtn');
+  if (initialJoinBtn && initialJoinBtn.dataset.joined === 'true') {
+    initialJoinBtn.classList.add('is-joined');
+  }
+
   function toggleJoin(btn) {
     var slug = btn.dataset.slug;
     var joined = btn.dataset.joined === 'true';
@@ -348,7 +402,7 @@
     .then(function(r){ return r.json(); })
     .then(function(data){
       closeComposer();
-      showToast('🎉 Post publicado em r/{{ community.slug }}');
+      showToast('Post publicado em r/{{ community.slug }}');
       if (titleEl) titleEl.value = '';
       if (bodyEl) bodyEl.value = '';
       if (urlEl) urlEl.value = '';

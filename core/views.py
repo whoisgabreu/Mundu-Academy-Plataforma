@@ -2,26 +2,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.shortcuts import redirect, get_object_or_404
 from django.db.models import Count
-from core.utils import render
+from core.utils import human_time_ago, render, time_sort_value
 from cursos.models import Modulo, Trilha, TrilhaModulo, Desafio, ProgressoModulo, ProgressoDesafio
 from guild.models import Community, Thread, Comment
 
 
 def _time_ago(dt):
-    from django.utils import timezone
-    now = timezone.now()
-    diff = now - dt
-    if diff.days == 0:
-        mins = diff.seconds // 60
-        if mins < 1:
-            return 'agora'
-        if mins < 60:
-            return f'há {mins}min'
-        hours = mins // 60
-        return f'há {hours}h' if hours < 24 else 'ontem'
-    if diff.days == 1:
-        return 'ontem'
-    return f'há {diff.days} dias'
+    return human_time_ago(dt)
 
 
 def resolve_user(handle):
@@ -87,7 +74,7 @@ def build_unified_feed(sort="for-you"):
         items.append({
             "kind": "thread", "id": str(t.id), "actor": author, "actor_handle": t.author_handle,
             "verb": "postou em r/" + t.community.slug,
-            "time_ago": _time_ago(t.created_at), "_sort": t.created_at.timestamp(),
+            "time_ago": _time_ago(t.created_at), "_sort": time_sort_value(t.created_at),
             "engagement": {"upvotes": t.upvotes, "comments": t.reply_count},
             "payload": payload,
         })
@@ -301,6 +288,7 @@ def perfil(request):
             'issuer': emissor,
             'date': c.emitido_em.strftime('%b %Y') if c.emitido_em else '',
             'hours': 0,
+            'code': c.codigo,
         })
 
     # Progresso tab data
@@ -340,6 +328,11 @@ def perfil(request):
             'pct': f'{s.nivel}0%',
         })
 
+    from usuarios.services import gamification_summary, leaderboard
+    gamification = gamification_summary(user)
+    last_event = gamification['eventos_xp'][0] if gamification['eventos_xp'] else None
+    last_activity = last_event['descricao'] if last_event and last_event.get('descricao') else 'Perfil atualizado'
+
     return render(request, 'perfil.html', {
         'stats': stats,
         'trilhas_progresso': trilhas_progresso,
@@ -352,6 +345,9 @@ def perfil(request):
         'total_hours': f'{int(total_hours)}h {int((total_hours % 1) * 60):02d}min' if total_hours else '0h',
         'joined_at': perfil.data_criacao.strftime('%b %Y') if perfil.data_criacao else 'Jan 2024',
         'cargo': perfil.cargo or 'Aprendiz',
+        'gamification': gamification,
+        'leaderboard': leaderboard(5),
+        'last_activity': last_activity,
     })
 
 
@@ -672,7 +668,7 @@ def user_profile(request, handle):
 
 @login_required(login_url='/login')
 def quiz_view(request, quiz_id):
-    from cursos.models import Quiz, Questao, Alternativa, TentativaQuiz
+    from cursos.models import Quiz, Questao, TentativaQuiz
     quiz = get_object_or_404(Quiz.objects.prefetch_related('questoes__alternativas'), id=quiz_id)
     questoes = []
     for q in quiz.questoes.all():
@@ -681,11 +677,16 @@ def quiz_view(request, quiz_id):
             'id': q.id, 'enunciado': q.enunciado, 'tipo': q.tipo, 'ordem': q.ordem,
             'alternativas': alt_list,
         })
-    tentativa = TentativaQuiz.objects.filter(usuario=request.user, quiz=quiz).order_by('-concluido_em').first()
+    tentativas_qs = TentativaQuiz.objects.filter(usuario=request.user, quiz=quiz).order_by('-concluido_em')
+    tentativa = tentativas_qs.first()
+    tentativas_feitas = tentativas_qs.count()
     return render(request, 'quiz.html', {
         'quiz': quiz,
         'questoes': questoes,
         'tentativa': tentativa,
+        'tentativas_feitas': tentativas_feitas,
+        'tentativas_restantes': max(quiz.max_tentativas - tentativas_feitas, 0),
+        'pode_tentar': tentativas_feitas < quiz.max_tentativas and not (tentativa and tentativa.aprovado),
     })
 
 
@@ -693,7 +694,8 @@ def quiz_view(request, quiz_id):
 def quiz_resultado(request, quiz_id):
     from cursos.models import Quiz, TentativaQuiz, Questao
     quiz = get_object_or_404(Quiz, id=quiz_id)
-    tentativa = TentativaQuiz.objects.filter(usuario=request.user, quiz=quiz).order_by('-concluido_em').first()
+    tentativas_qs = TentativaQuiz.objects.filter(usuario=request.user, quiz=quiz).order_by('-concluido_em')
+    tentativa = tentativas_qs.first()
     if not tentativa:
         return redirect('quiz_view', quiz_id=quiz_id)
     questoes_raw = Questao.objects.filter(quiz=quiz).prefetch_related('alternativas').order_by('ordem')
@@ -720,4 +722,6 @@ def quiz_resultado(request, quiz_id):
         'questoes': questoes,
         'xp_ganho': xp_ganho,
         'primeira_tentativa': primeira_tentativa,
+        'tentativas_feitas': tentativas_qs.count(),
+        'tentativas_restantes': max(quiz.max_tentativas - tentativas_qs.count(), 0),
     })

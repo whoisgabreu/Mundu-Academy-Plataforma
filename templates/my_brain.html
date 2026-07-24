@@ -12,7 +12,7 @@
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4.5 4.5 0 0 0-4.5 4.5c0 .56.1 1.1.28 1.6A4.5 4.5 0 0 0 5 12.5c0 1.18.46 2.27 1.21 3.07A4.5 4.5 0 0 0 7.5 22h9a4.5 4.5 0 0 0 1.29-6.43A4.49 4.49 0 0 0 19 12.5a4.5 4.5 0 0 0-2.78-4.4c.18-.5.28-1.04.28-1.6A4.5 4.5 0 0 0 12 2z"/></svg>
       <span>My Brain</span>
     </div>
-    <h1 class="pillar-title">Olá, {{ current_user.nome }} 👋</h1>
+    <h1 class="pillar-title">Olá, {{ current_user.nome }}</h1>
     <p class="pillar-subtitle">Seu Segundo Cérebro na Mundu — privadas, públicas, forks. Liderança é hábito, não evento.</p>
   </div>
   <div class="pillar-header-stats">
@@ -40,7 +40,7 @@
   <div class="brain-streak-card animate-fade-in-up">
     <div class="brain-streak-header">
       <div>
-        <div class="brain-streak-eyebrow">🔥 Streak diário</div>
+        <div class="brain-streak-eyebrow"><i data-lucide="flame" class="inline-icon"></i>Streak diário</div>
         <h3 class="brain-streak-value">{{ current_user.perfil.streak }} dias</h3>
         <p class="brain-streak-hint">Liderança é hábito. Mantenha a chama acesa.</p>
       </div>
@@ -61,7 +61,7 @@
   <div class="brain-level-card animate-fade-in-up">
     <div class="brain-level-header">
       <div>
-        <div class="brain-level-eyebrow">⚡ Nível {{ current_user.perfil.nivel }}</div>
+        <div class="brain-level-eyebrow"><i data-lucide="zap" class="inline-icon"></i>Nível {{ current_user.perfil.nivel }}</div>
         <h3 class="brain-level-name">{{ current_user.perfil.nome_nivel }}</h3>
       </div>
       <span class="brain-level-xp">{{ current_user.perfil.xp_total }} / {{ current_user.perfil.xp_proximo_nivel }} XP</span>
@@ -79,7 +79,7 @@
 <!-- ============ QUICK NOTE FAB / CTA ============ -->
 <section class="brain-quicknote-cta animate-fade-in-up">
   <div>
-    <h3>📝 Capture uma ideia agora</h3>
+    <h3><i data-lucide="notebook-pen" class="inline-icon"></i>Capture uma ideia agora</h3>
     <p>Aprendeu algo no Feed, Library ou Guild? 30 segundos pra destilar — depois você revisita.</p>
   </div>
   <button class="btn-primary" onclick="openQuickNote('Nota livre', 'Captura espontânea')">
@@ -91,19 +91,19 @@
 <!-- ============ TABS ============ -->
 <nav class="profile-tabs brain-tabs">
   <a href="?tab=private" class="profile-tab {% if tab == 'private' %}active{% endif %}">
-    🔒 Privadas <span class="tab-count">{{ notes|length - public_notes_count }}</span>
+    <i data-lucide="lock" class="inline-icon"></i>Privadas <span class="tab-count">{{ notes|length - public_notes_count }}</span>
   </a>
   <a href="?tab=public" class="profile-tab {% if tab == 'public' %}active{% endif %}">
-    🌐 Públicas <span class="tab-count">{{ public_notes_count }}</span>
+    <i data-lucide="globe-2" class="inline-icon"></i>Públicas <span class="tab-count">{{ public_notes_count }}</span>
   </a>
   <a href="?tab=saved" class="profile-tab {% if tab == 'saved' %}active{% endif %}">
-    📌 Salvos <span class="tab-count">{{ saved_items|length }}</span>
+    <i data-lucide="pin" class="inline-icon"></i>Salvos <span class="tab-count">{{ saved_items|length }}</span>
   </a>
   <a href="?tab=forks" class="profile-tab {% if tab == 'forks' %}active{% endif %}">
-    🍴 Forks <span class="tab-count">{{ forks|length }}</span>
+    <i data-lucide="git-fork" class="inline-icon"></i>Forks <span class="tab-count">{{ forks|length }}</span>
   </a>
   <a href="?tab=followers" class="profile-tab {% if tab == 'followers' %}active{% endif %}">
-    👥 Seguidores <span class="tab-count">{{ followers|length }}</span>
+    <i data-lucide="users" class="inline-icon"></i>Seguidores <span class="tab-count">{{ followers|length }}</span>
   </a>
 </nav>
 
@@ -122,7 +122,7 @@
           </div>
           <h3 class="note-card-title">{{ n.title }}</h3>
           <p class="note-card-content">{{ n.content }}</p>
-          <p class="note-card-source">📎 {{ n.source }}</p>
+          <p class="note-card-source"><i data-lucide="paperclip" class="inline-icon"></i>{{ n.source }}</p>
           <div class="note-card-tags">
             {% for tagx in n.tags %}
             <span class="note-card-tag">#{{ tagx }}</span>
@@ -258,8 +258,8 @@
     .then(function(r){ return r.json(); })
     .then(function(){
       showToast(newState
-        ? '🌐 Nota agora é pública — visível no seu perfil'
-        : '🔒 Nota voltou a ser privada');
+        ? 'Nota agora é pública — visível no seu perfil'
+        : 'Nota voltou a ser privada');
     })
     .catch(function(){
       // Reverte em caso de erro
