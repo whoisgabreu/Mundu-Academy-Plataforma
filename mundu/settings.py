@@ -52,12 +52,13 @@ INSTALLED_APPS = list(SHARED_APPS) + [
 
 TENANT_MODEL = 'tenants.Tenant'
 TENANT_DOMAIN_MODEL = 'tenants.Domain'
+DEFAULT_TENANT_SLUG = os.getenv('DEFAULT_TENANT_SLUG', 'mundu')
 
 # ===========================================================
 # Middleware
 # ===========================================================
 MIDDLEWARE = [
-    'django_tenants.middleware.main.TenantMainMiddleware',
+    'core.middleware.TenantFallbackMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
