@@ -12,6 +12,11 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-troque-isso-em-prod
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://mundu-academy-mundu-plataforma.9qlaka.easypanel.host').split(',')
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
 
 # ===========================================================
 # django-tenants: apps compartilhados vs apps por tenant
