@@ -42,7 +42,11 @@ def registro_view(request):
         password = request.POST.get('password', '')
         password2 = request.POST.get('password2', '')
 
-        if password != password2:
+        if not nome or not username:
+            error = 'Informe seu nome e um nome de usuário.'
+        elif len(password) < 8:
+            error = 'A senha precisa ter pelo menos 8 caracteres.'
+        elif password != password2:
             error = 'As senhas não coincidem.'
         elif User.objects.filter(username=username).exists():
             error = 'Este nome de usuário já está em uso.'

@@ -1,36 +1,64 @@
 {% extends "base.html" %}
 
-{% block title %}{{ title }} - Mundu Guild{% endblock %}
+{% block title %}{{ title }} - Mundu Academy{% endblock %}
 {% block page_title %}{{ title }}{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/community.css') }}">
+{% endblock %}
 
 {% block content %}
-<div class="account-shell">
-  <div class="account-card">
-    <div class="account-head">
-      <span>Guilda</span>
+<div class="m-page community-page">
+  <div class="c-form-shell">
+    <header class="c-form-intro">
+      <a class="m-text-link" href="{{ cancel_url }}">
+        <i data-lucide="arrow-left" aria-hidden="true"></i>
+        Voltar às comunidades
+      </a>
+      <span class="m-eyebrow">Curadoria da Mundu</span>
       <h1>{{ title }}</h1>
-    </div>
+      <p>
+        Defina a identidade, o propósito e os acordos deste espaço. As informações serão
+        apresentadas aos membros exatamente como forem publicadas aqui.
+      </p>
+    </header>
+
     {% if messages_list %}
-    <div class="prof-messages">
+    <div class="c-message-list" aria-live="polite">
       {% for message in messages_list %}
-      <div class="prof-message {{ message.tags }}">{{ message }}</div>
+      <p class="c-message {{ message.tags }}">{{ message }}</p>
       {% endfor %}
     </div>
     {% endif %}
-    <form method="post" class="prof-form-grid">
+
+    <form class="c-community-form m-form" method="post" novalidate>
       {{ csrf_input }}
       {% for field in form %}
-      <label class="prof-field">
-        <span>{{ field.label }}</span>
+      <div class="m-field">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
         {{ field }}
-        {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
-        {% if field.errors %}<strong>{{ field.errors|join(', ') }}</strong>{% endif %}
-      </label>
+        {% if field.help_text %}<span class="m-form-help">{{ field.help_text }}</span>{% endif %}
+        {% if field.errors %}
+        <ul class="errorlist" id="{{ field.id_for_label }}-errors">
+          {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
+        </ul>
+        {% endif %}
+      </div>
       {% endfor %}
-      {% if form.non_field_errors() %}<div class="prof-form-errors">{{ form.non_field_errors()|join(', ') }}</div>{% endif %}
-      <div class="prof-form-actions">
-        <a href="{{ cancel_url }}" class="prof-btn ghost">Cancelar</a>
-        <button type="submit" class="prof-btn primary"><i data-lucide="save"></i><span>Salvar</span></button>
+
+      {% if form.non_field_errors() %}
+      <div class="c-community-form__errors" role="alert">
+        <ul class="errorlist">
+          {% for error in form.non_field_errors() %}<li>{{ error }}</li>{% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+
+      <div class="c-community-form__actions">
+        <a class="m-button m-button--quiet" href="{{ cancel_url }}">Cancelar</a>
+        <button class="m-button m-button--primary" type="submit">
+          <i data-lucide="check" aria-hidden="true"></i>
+          Salvar comunidade
+        </button>
       </div>
     </form>
   </div>

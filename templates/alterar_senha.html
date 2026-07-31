@@ -1,38 +1,40 @@
 {% extends "base.html" %}
 
-{% block title %}Alterar senha - Mundu Academy{% endblock %}
-{% block page_title %}Alterar senha{% endblock %}
+{% block title %}Alterar senha — Mundu Academy{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/growth.css') }}">
+{% endblock %}
 
 {% block content %}
-<div class="account-shell">
-  <div class="account-card">
-    <div class="account-head">
-      <span>Segurança</span>
-      <h1>Alterar senha</h1>
-    </div>
-    {% if messages_list %}
-    <div class="prof-messages">
-      {% for message in messages_list %}
-      <div class="prof-message {{ message.tags }}">{{ message }}</div>
-      {% endfor %}
-    </div>
-    {% endif %}
-    <form method="post" class="prof-form-grid">
-      {{ csrf_input }}
-      {% for field in form %}
-      <label class="prof-field">
-        <span>{{ field.label }}</span>
-        {{ field }}
-        {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
-        {% if field.errors %}<strong>{{ field.errors|join(', ') }}</strong>{% endif %}
-      </label>
-      {% endfor %}
-      {% if form.non_field_errors() %}<div class="prof-form-errors">{{ form.non_field_errors()|join(', ') }}</div>{% endif %}
-      <div class="prof-form-actions">
-        <a href="/perfil" class="prof-btn ghost">Cancelar</a>
-        <button type="submit" class="prof-btn primary"><i data-lucide="lock"></i><span>Salvar senha</span></button>
-      </div>
-    </form>
+<div class="m-page m-page--reading account-page">
+  <header class="m-page-intro m-reveal">
+    <a class="m-text-link" href="/perfil"><i data-lucide="arrow-left" aria-hidden="true"></i>Voltar ao perfil</a>
+    <span class="m-eyebrow">Segurança</span>
+    <h1 class="m-display m-display--sm">Escolha uma senha nova e memorável.</h1>
+    <p class="m-lead">Ao salvar, sua nova senha passa a proteger o acesso à sua jornada na Mundu.</p>
+  </header>
+
+  {% if messages_list %}
+  <div class="account-messages" role="status">
+    {% for message in messages_list %}<p class="{{ message.tags }}">{{ message }}</p>{% endfor %}
   </div>
+  {% endif %}
+
+  <form class="m-form account-form m-reveal" method="post">
+    {{ csrf_input }}
+    {% if form.non_field_errors() %}<div class="settings-alert" role="alert">{{ form.non_field_errors()|join(', ') }}</div>{% endif %}
+    {% for field in form %}
+    <div class="m-field">
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.help_text %}<span class="m-field__hint">{{ field.help_text }}</span>{% endif %}
+      {% if field.errors %}<div class="m-form-error">{{ field.errors|join(', ') }}</div>{% endif %}
+    </div>
+    {% endfor %}
+    <div class="m-actions">
+      <button class="m-button m-button--primary" type="submit"><i data-lucide="lock-keyhole" aria-hidden="true"></i>Atualizar senha</button>
+      <a class="m-button m-button--quiet" href="/perfil">Cancelar</a>
+    </div>
+  </form>
 </div>
 {% endblock %}

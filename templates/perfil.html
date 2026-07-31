@@ -1,202 +1,213 @@
 {% extends "base.html" %}
 
-{% block title %}Meu Perfil - Mundu Academy{% endblock %}
-{% block page_title %}Meu Perfil{% endblock %}
+{% block title %}Minha evolução — Mundu Academy{% endblock %}
+{% block meta_description %}Sua trajetória de aprendizado, domínio e contribuição na Mundu.{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/growth.css') }}">
+{% endblock %}
 
 {% block content %}
-<div class="profile-v2-shell">
-  <section class="profile-hero-v2">
-    <div class="profile-banner-v2" {% if current_user.banner %}style="background-image:url('{{ current_user.banner }}')"{% endif %}></div>
-    <div class="profile-identity-v2">
-      <div class="profile-avatar-v2">
-        {% if current_user.foto %}
-        <img src="{{ current_user.foto }}" alt="{{ current_user.nome_completo }}">
-        {% else %}
-        <span>{{ current_user.perfil.iniciais }}</span>
-        {% endif %}
-      </div>
-      <div class="profile-main-v2">
-        <div class="profile-name-row">
-          <div>
-            <span class="profile-handle">@{{ current_user.username }}</span>
-            <h1>{{ current_user.nome_completo or current_user.username }}</h1>
-          </div>
-          <span class="profile-level-badge">Nível {{ current_user.perfil.nivel }}</span>
-        </div>
-        <p class="profile-role">{{ current_user.role }}</p>
-        <p class="profile-bio">{{ current_user.bio or 'Sem bio definida ainda.' }}</p>
-        <div class="profile-meta-row">
-          <span><i data-lucide="map-pin"></i>{{ current_user.cidade or current_user.localizacao or 'Cidade não informada' }}</span>
-          <span><i data-lucide="calendar"></i>Membro desde {{ joined_at }}</span>
-          <span><i data-lucide="activity"></i>{{ last_activity }}</span>
-        </div>
-        <div class="profile-actions-v2">
-          <a href="/config" class="prof-btn primary"><i data-lucide="user-pen"></i><span>Editar perfil</span></a>
-          <a href="/alterar-senha" class="prof-btn"><i data-lucide="lock"></i><span>Alterar senha</span></a>
-          <a href="/config" class="prof-btn ghost"><i data-lucide="settings"></i><span>Configurações</span></a>
-        </div>
+<div class="m-page growth-profile">
+  <header class="growth-identity m-reveal">
+    <div class="growth-identity__portrait">
+      {% if current_user.foto %}
+      <img src="{{ current_user.foto }}" alt="{{ current_user.nome_completo }}">
+      {% else %}
+      <span>{{ current_user.perfil.iniciais }}</span>
+      {% endif %}
+    </div>
+    <div class="growth-identity__copy">
+      <span class="m-eyebrow">Minha evolução</span>
+      <h1>{{ current_user.nome_completo or current_user.username }}</h1>
+      <p class="growth-identity__role">{{ cargo }}{% if current_user.empresa %} · {{ current_user.empresa }}{% endif %}</p>
+      <p class="growth-identity__bio">{{ current_user.bio or 'Use este espaço para contar o que você está construindo e quais temas deseja dominar.' }}</p>
+      <div class="growth-identity__meta">
+        <span><i data-lucide="map-pin" aria-hidden="true"></i>{{ current_user.cidade or current_user.localizacao or 'Localização não informada' }}</span>
+        <span><i data-lucide="calendar-days" aria-hidden="true"></i>Na Mundu desde {{ joined_at }}</span>
+        <span><i data-lucide="activity" aria-hidden="true"></i>{{ last_activity }}</span>
       </div>
     </div>
+    <div class="growth-identity__actions">
+      <a class="m-button m-button--primary" href="/config"><i data-lucide="user-pen" aria-hidden="true"></i>Editar identidade</a>
+      <a class="m-button m-button--quiet" href="/u/{{ current_user.username }}">Ver perfil público</a>
+    </div>
+  </header>
+
+  <section class="growth-level m-reveal" aria-labelledby="level-title">
+    <div class="growth-level__orbit" data-progress-ring="{{ gamification.xp_percentual }}">
+      <span>{{ gamification.nivel }}</span>
+      <small>nível</small>
+    </div>
+    <div class="growth-level__copy">
+      <span class="m-section-kicker">Trajetória atual</span>
+      <h2 id="level-title">{{ gamification.titulo_ativo }}</h2>
+      <p>{{ gamification.xp_atual }} de {{ gamification.xp_necessario }} XP para o próximo nível.</p>
+      <div class="m-progress" role="progressbar" aria-label="Progresso para o próximo nível"
+        aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ gamification.xp_percentual }}">
+        <span class="m-progress__fill" data-progress="{{ gamification.xp_percentual }}"></span>
+      </div>
+    </div>
+    <dl class="growth-level__facts">
+      <div><dt>Sequência</dt><dd>{{ streak_dias }} dias</dd></div>
+      <div><dt>Tempo de estudo</dt><dd>{{ total_hours }}</dd></div>
+      <div><dt>Moedas</dt><dd>{{ gamification.moedas }}</dd></div>
+    </dl>
   </section>
 
-  <section class="profile-xp-panel" data-profile-xp>
-    <div>
-      <span class="profile-kicker">Evolução</span>
-      <h2>{{ gamification.titulo_ativo }}</h2>
-    </div>
-    <div class="profile-xp-copy">
-      <strong>{{ gamification.xp_atual }} / {{ gamification.xp_necessario }} XP</strong>
-      <span>{{ gamification.moedas }} moedas</span>
-    </div>
-    <div class="profile-xp-track" aria-label="Progresso de XP">
-      <span data-pct="{{ gamification.xp_percentual }}"></span>
-    </div>
-  </section>
-
-  <section class="profile-stat-grid-v2">
+  <section class="growth-stat-line m-reveal" aria-label="Resumo da trajetória">
     {% for stat in stats %}
-    <article>
-      <i data-lucide="{{ stat.icon }}"></i>
-      <strong>{{ stat.value }}</strong>
+    <div>
+      <i data-lucide="{{ stat.icon }}" aria-hidden="true"></i>
       <span>{{ stat.label }}</span>
-    </article>
+      <strong>{{ stat.value }}</strong>
+    </div>
     {% endfor %}
-    <article>
-      <i data-lucide="flame"></i>
-      <strong>{{ streak_dias }}</strong>
-      <span>Sequência de estudos</span>
-    </article>
-    <article>
-      <i data-lucide="clock"></i>
-      <strong>{{ total_hours }}</strong>
-      <span>Tempo estudado</span>
-    </article>
   </section>
 
-  <section class="profile-grid-v2">
-    <article class="profile-panel-v2 wide">
-      <div class="profile-panel-head">
-        <div><span>Aprendizado</span><h2>Cursos em andamento</h2></div>
-        <a href="/conteudos">Ver cursos</a>
+  <section class="m-section growth-learning m-reveal" aria-labelledby="learning-title">
+    <div class="m-section-head">
+      <div>
+        <span class="m-section-kicker">Em movimento</span>
+        <h2 class="m-section-title" id="learning-title">Seu caminho de aprendizado</h2>
+        <p class="m-section-description">O que você começou, onde está e qual é o próximo passo.</p>
       </div>
-      <div class="profile-course-list">
-        {% for course in trilhas_progresso %}
-        <div class="profile-course-row">
-          <div>
-            <strong>{{ course.titulo }}</strong>
-            <span>{{ course.aulas_concluidas }}/{{ course.total_aulas }} aulas · {{ course.duracao }}</span>
-          </div>
-          <div class="profile-mini-progress"><span data-pct="{{ course.progresso }}"></span></div>
-          <b>{{ course.progresso }}%</b>
+      <a class="m-text-link m-section-head__action" href="/conteudos">Abrir cursos <i data-lucide="arrow-right" aria-hidden="true"></i></a>
+    </div>
+    <div class="growth-course-list">
+      {% for course in trilhas_progresso %}
+      <a class="growth-course" href="/conteudos">
+        <span class="growth-course__step">0{{ loop.index }}</span>
+        <span class="growth-course__copy">
+          <strong>{{ course.titulo }}</strong>
+          <small>{{ course.aulas_concluidas }} de {{ course.total_aulas }} aulas · {{ course.duracao }}</small>
+        </span>
+        <span class="growth-course__progress">
+          <span class="m-progress" role="progressbar" aria-label="{{ course.progresso }}% concluído"
+            aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ course.progresso }}">
+            <span class="m-progress__fill" data-progress="{{ course.progresso }}"></span>
+          </span>
+          <strong>{{ course.progresso }}%</strong>
+        </span>
+        <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+      </a>
+      {% else %}
+      <div class="m-empty">
+        <div class="m-empty__inner">
+          <span class="m-empty__icon"><i data-lucide="book-open" aria-hidden="true"></i></span>
+          <h3>Escolha algo que vale dominar</h3>
+          <p>Seu primeiro curso em andamento aparecerá como uma linha clara de progresso.</p>
+          <a class="m-button m-button--primary" href="/conteudos">Ver cursos</a>
         </div>
-        {% else %}
-        <p class="profile-empty">Nenhum curso em andamento.</p>
-        {% endfor %}
       </div>
-    </article>
-
-    <article class="profile-panel-v2">
-      <div class="profile-panel-head">
-        <div><span>Badges</span><h2>Medalhas</h2></div>
-      </div>
-      <div class="profile-badge-grid">
-        {% for badge in gamification.badges %}
-        <div class="profile-badge">
-          <i data-lucide="{{ badge.icone }}"></i>
-          <strong>{{ badge.nome }}</strong>
-        </div>
-        {% else %}
-        {% for achievement in achievements[:4] %}
-        <div class="profile-badge">
-          <i data-lucide="{{ achievement.icon }}"></i>
-          <strong>{{ achievement.title }}</strong>
-        </div>
-        {% else %}
-        <p class="profile-empty">Nenhuma medalha desbloqueada.</p>
-        {% endfor %}
-        {% endfor %}
-      </div>
-    </article>
+      {% endfor %}
+    </div>
   </section>
 
-  <section class="profile-grid-v2">
-    <article class="profile-panel-v2">
-      <div class="profile-panel-head">
-        <div><span>Missões</span><h2>Objetivos ativos</h2></div>
-        <a href="/desafios">Ver desafios</a>
+  <section class="m-section growth-practice m-reveal">
+    <div class="growth-practice__missions">
+      <div class="m-section-head">
+        <div>
+          <span class="m-section-kicker">Prática</span>
+          <h2 class="m-section-title">Missões em curso</h2>
+        </div>
+        <a class="m-text-link" href="/desafios">Ver missões <i data-lucide="arrow-right" aria-hidden="true"></i></a>
       </div>
-      <div class="profile-mission-list">
+      <div class="growth-mission-list">
         {% for mission in gamification.missoes %}
-        <div>
-          <div><strong>{{ mission.titulo }}</strong><span>+{{ mission.xp }} XP · {{ mission.moedas }} moedas</span></div>
-          <div class="profile-mini-progress"><span data-pct="{{ mission.percentual }}"></span></div>
-        </div>
-        {% else %}
-        <p class="profile-empty">Nenhuma missão ativa.</p>
-        {% endfor %}
-      </div>
-    </article>
-
-    <article class="profile-panel-v2">
-      <div class="profile-panel-head">
-        <div><span>Competências</span><h2>Habilidades</h2></div>
-      </div>
-      <div class="profile-skill-list">
-        {% for skill in skills %}
-        <div>
-          <span><i data-lucide="{{ skill.icon }}"></i>{{ skill.name }}</span>
-          <div class="profile-mini-progress"><span data-pct="{{ skill.level * 10 }}"></span></div>
-        </div>
-        {% else %}
-        <p class="profile-empty">Nenhuma habilidade cadastrada.</p>
-        {% endfor %}
-      </div>
-    </article>
-
-    <article class="profile-panel-v2">
-      <div class="profile-panel-head">
-        <div><span>Ranking</span><h2>Leaderboard</h2></div>
-      </div>
-      <div class="profile-rank-list">
-        {% for item in leaderboard %}
-        <div class="{% if item.usuario.id == request.user.id %}active{% endif %}">
-          <span>#{{ item.posicao }}</span>
-          <strong>{{ item.nome }}</strong>
-          <b>{{ item.xp }} XP</b>
-        </div>
-        {% endfor %}
-      </div>
-    </article>
-  </section>
-
-  <section class="profile-grid-v2">
-    <article class="profile-panel-v2 wide">
-      <div class="profile-panel-head">
-        <div><span>Certificados</span><h2>Cursos concluídos</h2></div>
-      </div>
-      <div class="profile-cert-grid">
-        {% for cert in certificates %}
-        <a href="/certificados/{{ cert.code }}" class="profile-cert-card">
-          <i data-lucide="award"></i>
-          <strong>{{ cert.title }}</strong>
-          <span>{{ cert.issuer }} · {{ cert.date }}</span>
+        <a href="/desafios">
+          <span class="growth-mission-list__status {% if mission.concluida %}is-complete{% endif %}">
+            {% if mission.concluida %}<i data-lucide="check" aria-hidden="true"></i>{% else %}{{ loop.index }}{% endif %}
+          </span>
+          <span><strong>{{ mission.titulo }}</strong><small>{{ mission.descricao }}</small></span>
+          <span class="growth-mission-list__reward">+{{ mission.xp }} XP</span>
+          <span class="m-progress"><span class="m-progress__fill" data-progress="{{ mission.percentual }}"></span></span>
         </a>
         {% else %}
-        <p class="profile-empty">Nenhum certificado emitido.</p>
+        <p class="m-section-description">Nenhuma missão está ativa no momento.</p>
         {% endfor %}
       </div>
-    </article>
+    </div>
 
-    <article class="profile-panel-v2">
-      <div class="profile-panel-head">
-        <div><span>Social</span><h2>Redes</h2></div>
+    <aside class="growth-skills">
+      <span class="m-section-kicker">Domínios</span>
+      <h2 class="m-section-title">Habilidades que você vem construindo</h2>
+      <div class="growth-skill-list">
+        {% for skill in skills %}
+        <div>
+          <span><i data-lucide="{{ skill.icon }}" aria-hidden="true"></i>{{ skill.name }}</span>
+          <span class="m-progress" role="progressbar" aria-label="{{ skill.name }}, nível {{ skill.level }} de 10"
+            aria-valuemin="0" aria-valuemax="10" aria-valuenow="{{ skill.level }}">
+            <span class="m-progress__fill" data-progress="{{ skill.level * 10 }}"></span>
+          </span>
+          <strong>{{ skill.level }}/10</strong>
+        </div>
+        {% else %}
+        <p class="m-section-description">Suas habilidades aparecerão conforme você avança.</p>
+        {% endfor %}
       </div>
-      <div class="profile-social-list">
-        {% if current_user.linkedin %}<a href="{{ current_user.linkedin }}" target="_blank" rel="noopener"><i data-lucide="linkedin"></i>LinkedIn</a>{% endif %}
-        {% if current_user.instagram %}<a href="https://instagram.com/{{ current_user.instagram.replace('@', '') }}" target="_blank" rel="noopener"><i data-lucide="instagram"></i>Instagram</a>{% endif %}
-        <a href="/u/{{ current_user.username }}"><i data-lucide="user-round"></i>Perfil público</a>
+    </aside>
+  </section>
+
+  <section class="m-section growth-achievements m-reveal" aria-labelledby="achievements-title">
+    <div class="m-section-head">
+      <div>
+        <span class="m-section-kicker">Marcos</span>
+        <h2 class="m-section-title" id="achievements-title">Conquistas que contam sua história</h2>
       </div>
-    </article>
+    </div>
+    <div class="growth-achievement-line">
+      {% for badge in gamification.badges %}
+      <article>
+        <span><i data-lucide="{{ badge.icone }}" aria-hidden="true"></i></span>
+        <div><strong>{{ badge.nome }}</strong><small>{{ badge.descricao }}</small></div>
+      </article>
+      {% else %}
+      {% for achievement in achievements %}
+      <article>
+        <span><i data-lucide="{{ achievement.icon }}" aria-hidden="true"></i></span>
+        <div><strong>{{ achievement.title }}</strong><small>Conquista desbloqueada</small></div>
+      </article>
+      {% else %}
+      <div class="m-empty"><div class="m-empty__inner"><p>Seu primeiro marco ainda está por vir.</p></div></div>
+      {% endfor %}
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="m-section growth-final-grid m-reveal">
+    <div class="growth-certificates">
+      <div class="m-section-head">
+        <div>
+          <span class="m-section-kicker">Certificados</span>
+          <h2 class="m-section-title">Domínios reconhecidos</h2>
+        </div>
+      </div>
+      <div class="growth-certificate-list">
+        {% for certificate in certificates %}
+        <a href="/certificados/{{ certificate.code }}">
+          <i data-lucide="award" aria-hidden="true"></i>
+          <span><strong>{{ certificate.title }}</strong><small>{{ certificate.issuer }} · {{ certificate.date }}</small></span>
+          <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+        </a>
+        {% else %}
+        <p class="m-section-description">Conclua um curso elegível para emitir seu primeiro certificado.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <aside class="growth-ranking">
+      <span class="m-section-kicker">Comunidade</span>
+      <h2 class="m-section-title">Pessoas em movimento</h2>
+      <ol>
+        {% for item in leaderboard %}
+        <li class="{% if item.usuario.id == request.user.id %}is-current{% endif %}">
+          <span>{{ item.posicao }}</span>
+          <strong>{{ item.nome }}</strong>
+          <small>Nível {{ item.nivel }} · {{ item.xp }} XP</small>
+        </li>
+        {% endfor %}
+      </ol>
+    </aside>
   </section>
 </div>
 {% endblock %}

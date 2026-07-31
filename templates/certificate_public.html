@@ -1,46 +1,43 @@
 {% extends "base.html" %}
 
-{% block title %}Certificado {{ codigo }} - Mundu Academy{% endblock %}
-{% block page_title %}Certificado{% endblock %}
+{% block title %}Certificado {{ codigo }} — Mundu Academy{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/auth.css') }}">
+{% endblock %}
 
 {% block content %}
-<div class="profile-v2-shell">
-  <div class="prof-page-head">
+<div class="m-page certificate-page">
+  <header class="certificate-heading m-reveal">
     <div>
-      <span class="prof-eyebrow">Certificado emitido</span>
-      <h1>{{ nome_aluno }}</h1>
+      <span class="m-eyebrow">Domínio reconhecido</span>
+      <h1 class="m-display m-display--sm">Um marco construído com prática.</h1>
+      <p class="m-lead">Este certificado registra a conclusão de uma etapa de aprendizado na Mundu Academy.</p>
     </div>
-    <a href="/certificados/{{ codigo }}/pdf" class="prof-btn primary"><i data-lucide="download"></i><span>Download PDF</span></a>
-  </div>
+    <a class="m-button m-button--primary" href="/certificados/{{ codigo }}/pdf">
+      <i data-lucide="download" aria-hidden="true"></i>Baixar PDF
+    </a>
+  </header>
 
-  <section class="cert-preview">
-    <div class="cert-brand">
-      {% if logo %}<img src="{{ logo }}" alt="Logo">{% else %}<span>MUNDU</span>{% endif %}
+  <article class="certificate-paper m-reveal">
+    <div class="certificate-paper__brand">
+      {% if logo %}<img src="{{ logo }}" alt="">{% else %}<span class="certificate-paper__mark">M</span><strong>Mundu Academy</strong>{% endif %}
     </div>
-    <p class="cert-kicker">Certificado</p>
+    <span class="certificate-paper__kicker">Certificado de conclusão</span>
+    <p>Reconhecemos que</p>
     <h2>{{ nome_aluno }}</h2>
-    <p class="cert-copy">concluiu com sucesso</p>
+    <p>concluiu com sucesso</p>
     <h3>{{ curso }}</h3>
-    <div class="cert-meta">
-      <span>Data: {{ data }}</span>
-      <span>Carga horária: {{ carga_horaria }}h</span>
-      <span>Código: {{ codigo }}</span>
-    </div>
-    <div class="cert-footer">
-      <div>
-        <strong>{{ assinatura or 'Mundu Academy' }}</strong>
-        <span>Assinatura</span>
-      </div>
-      <div class="cert-qr" aria-label="QR Code">
-        {% for row in qr_matrix %}
-        <div>
-          {% for cell in row %}
-          <span class="{% if cell %}on{% endif %}"></span>
-          {% endfor %}
-        </div>
-        {% endfor %}
-      </div>
-    </div>
-  </section>
+    <dl class="certificate-paper__facts">
+      <div><dt>Conclusão</dt><dd>{{ data }}</dd></div>
+      <div><dt>Carga horária</dt><dd>{{ carga_horaria }}h</dd></div>
+      <div><dt>Código de verificação</dt><dd>{{ codigo }}</dd></div>
+    </dl>
+    <footer>
+      <div class="certificate-paper__signature"><strong>{{ assinatura or 'Mundu Academy' }}</strong><span>Responsável pela emissão</span></div>
+      <div class="certificate-paper__seal"><i data-lucide="award" aria-hidden="true"></i><span>Emissão<br>verificada</span></div>
+    </footer>
+  </article>
+
+  <p class="certificate-verification">A autenticidade deste documento pode ser confirmada por seu código único nesta mesma página.</p>
 </div>
 {% endblock %}

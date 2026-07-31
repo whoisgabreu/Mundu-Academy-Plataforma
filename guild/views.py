@@ -180,6 +180,20 @@ def thread_detail(request, community_slug, post_slug):
     post = enrich_thread(thread, thread.reply_count)
     related = Community.objects.filter(slug__in=community.related)
     moderators = [resolve_user(h) for h in community.moderators]
+    is_following_author = False
+    if (
+        request.user.is_authenticated
+        and request.user.username != post['author_user']['handle']
+    ):
+        from django.contrib.auth.models import User
+        from social.models import Follow
+
+        author = User.objects.filter(username=post['author_user']['handle']).first()
+        if author:
+            is_following_author = Follow.objects.filter(
+                seguidor=request.user,
+                seguido=author,
+            ).exists()
 
     return render(request, 'thread.html', {
         'community': community,
@@ -188,13 +202,14 @@ def thread_detail(request, community_slug, post_slug):
         'total_comments': total_comments,
         'related_communities': related,
         'moderators': moderators,
+        'is_following_author': is_following_author,
     })
 
 
 @login_required(login_url='/login')
 def guild_create(request):
     if not _can_manage_guild(request.user):
-        messages.error(request, 'Apenas administradores podem criar guildas.')
+        messages.error(request, 'Apenas administradores podem criar comunidades.')
         return redirect('/guild')
     form = CommunityForm(request.POST or None)
     if request.method == 'POST':
@@ -202,12 +217,12 @@ def guild_create(request):
             community = form.save(commit=False)
             community.created_at = timezone.now().strftime('%b %Y')
             community.save()
-            messages.success(request, 'Guilda criada com sucesso.')
+            messages.success(request, 'Comunidade criada com sucesso.')
             return redirect('community', slug=community.slug)
         messages.error(request, 'Revise os campos destacados.')
     return render(request, 'guild_form.html', {
         'form': form,
-        'title': 'Nova guilda',
+        'title': 'Nova comunidade',
         'cancel_url': '/guild',
         'messages_list': list(messages.get_messages(request)),
     })
@@ -216,19 +231,19 @@ def guild_create(request):
 @login_required(login_url='/login')
 def guild_edit(request, slug):
     if not _can_manage_guild(request.user):
-        messages.error(request, 'Apenas administradores podem editar guildas.')
+        messages.error(request, 'Apenas administradores podem editar comunidades.')
         return redirect('/guild')
     community = get_object_or_404(Community, slug=slug)
     form = CommunityForm(request.POST or None, instance=community)
     if request.method == 'POST':
         if form.is_valid():
             form.save()
-            messages.success(request, 'Guilda atualizada com sucesso.')
+            messages.success(request, 'Comunidade atualizada com sucesso.')
             return redirect('community', slug=community.slug)
         messages.error(request, 'Revise os campos destacados.')
     return render(request, 'guild_form.html', {
         'form': form,
-        'title': 'Editar guilda',
+        'title': 'Editar comunidade',
         'cancel_url': f'/g/{community.slug}',
         'messages_list': list(messages.get_messages(request)),
     })
@@ -238,9 +253,9 @@ def guild_edit(request, slug):
 @require_POST
 def guild_delete(request, slug):
     if not _can_manage_guild(request.user):
-        messages.error(request, 'Apenas administradores podem excluir guildas.')
+        messages.error(request, 'Apenas administradores podem excluir comunidades.')
         return redirect('/guild')
     community = get_object_or_404(Community, slug=slug)
     community.delete()
-    messages.success(request, 'Guilda excluída com sucesso.')
+    messages.success(request, 'Comunidade excluída com sucesso.')
     return redirect('/guild')

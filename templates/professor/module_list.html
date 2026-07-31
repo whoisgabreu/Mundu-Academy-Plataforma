@@ -3,15 +3,16 @@
 {% block professor_content %}
 <div class="prof-page-head">
   <div>
-    <span class="prof-eyebrow">Conteúdo</span>
-    <h1>Módulos</h1>
+    <span class="prof-eyebrow">Catálogo de aprendizagem</span>
+    <h1>Cursos</h1>
+    <p>Organize módulos, aulas e progressão antes de publicar para os alunos.</p>
   </div>
-  <a href="/professor/modulos/novo/" class="prof-btn primary"><i data-lucide="plus"></i><span>Criar</span></a>
+  <a href="/professor/modulos/novo/" class="prof-btn primary"><i data-lucide="plus"></i><span>Novo curso</span></a>
 </div>
 
 <form class="prof-search" method="get">
   <i data-lucide="search"></i>
-  <input type="search" name="q" value="{{ q }}" placeholder="Pesquisar módulos">
+  <input type="search" name="q" value="{{ q }}" placeholder="Pesquisar no catálogo">
   <button type="submit">Pesquisar</button>
 </form>
 
@@ -31,14 +32,14 @@
         <td class="prof-actions">
           <a class="prof-icon-btn" href="/professor/modulos/{{ mod.id }}/" aria-label="Visualizar"><i data-lucide="eye"></i></a>
           <a class="prof-icon-btn" href="/professor/modulos/{{ mod.id }}/editar/" aria-label="Editar"><i data-lucide="pencil"></i></a>
-          <form method="post" action="/professor/modulos/{{ mod.id }}/excluir/" onsubmit="return confirm('Excluir este módulo?')">
+          <form method="post" action="/professor/modulos/{{ mod.id }}/excluir/" data-confirm="Excluir este módulo?">
             {{ csrf_input }}
             <button class="prof-icon-btn danger" type="submit" aria-label="Excluir"><i data-lucide="trash-2"></i></button>
           </form>
         </td>
       </tr>
       {% else %}
-      <tr><td colspan="7" class="prof-empty">Nenhum módulo encontrado.</td></tr>
+      <tr><td colspan="7" class="prof-empty">Nenhum curso encontrado.</td></tr>
       {% endfor %}
     </tbody>
   </table>
@@ -76,4 +77,3 @@
   })();
 </script>
 {% endblock %}
-

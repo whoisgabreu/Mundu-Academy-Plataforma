@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#F8F9F7">
+  <title>{% block title %}Mundu Academy{% endblock %}</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/mundu-logo-icon.png') }}">
+  <script>
+    (function () {
+      var theme = localStorage.getItem('mundu:theme') || 'light';
+      document.documentElement.dataset.theme = theme === 'dark' ? 'dark' : 'light';
+    }());
+  </script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/auth.css') }}">
+  <script src="https://unpkg.com/lucide@latest" defer></script>
+</head>
+<body class="auth-body">
+  <a class="m-skip-link" href="#auth-content">Ir para o formulário</a>
+  <main class="auth-shell">
+    <section class="auth-story" aria-label="Mundu Academy">
+      <a class="m-brand auth-story__brand" href="/">
+        <img class="m-brand__mark" src="{{ url_for('static', filename='img/mundu-logo-icon.png') }}" alt="">
+        <span class="m-brand__word">Mundu<small>Academy</small></span>
+      </a>
+      <div class="auth-story__copy">
+        <span class="m-eyebrow">Aprender. Aplicar. Evoluir.</span>
+        <h1>Conhecimento ganha valor quando muda a próxima decisão.</h1>
+        <p>Um lugar sereno para estudar com profundidade, organizar ideias e crescer ao lado de pessoas que levam a prática a sério.</p>
+      </div>
+      <div class="auth-story__orbit" aria-hidden="true">
+        <span></span><span></span><span></span>
+        <strong>M</strong>
+      </div>
+      <p class="auth-story__foot">Mundu Academy · Aprendizado de alta performance</p>
+    </section>
+
+    <section class="auth-content" id="auth-content">
+      <div class="auth-content__top">
+        <a class="m-brand auth-content__brand" href="/">
+          <img class="m-brand__mark" src="{{ url_for('static', filename='img/mundu-logo-icon.png') }}" alt="">
+          <span class="m-brand__word">Mundu<small>Academy</small></span>
+        </a>
+        <button class="m-icon-button" type="button" data-theme-toggle aria-label="Alternar tema">
+          <i data-lucide="sun-moon" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="auth-content__inner">
+        {% block auth_content %}{% endblock %}
+      </div>
+    </section>
+  </main>
+  <div class="m-toast" id="munduToast" role="status" aria-live="polite"></div>
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

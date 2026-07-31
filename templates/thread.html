@@ -1,361 +1,479 @@
 {% extends "base.html" %}
 
-{% block title %}{{ post.title }} - r/{{ community.slug }}{% endblock %}
-{% block page_title %}r/{{ community.slug }}{% endblock %}
+{% block title %}{{ post.title }} - {{ community.name }}{% endblock %}
+{% block page_title %}{{ community.name }}{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/community.css') }}">
+{% endblock %}
 
 {% block content %}
+<div class="m-page community-page" data-thread-page data-post-id="{{ post.id }}">
+  <nav class="c-breadcrumb" aria-label="Navegação estrutural">
+    <a href="/guild">Comunidades</a>
+    <i data-lucide="chevron-right" aria-hidden="true"></i>
+    <a href="/g/{{ community.slug }}">{{ community.name }}</a>
+    <i data-lucide="chevron-right" aria-hidden="true"></i>
+    <span class="c-breadcrumb__current" aria-current="page">{{ post.title }}</span>
+  </nav>
 
-<!-- ============ BREADCRUMB ============ -->
-<nav class="thread-breadcrumb">
-  <a href="/guild">Guild</a>
-  <span class="meta-dot">›</span>
-  <a href="/g/{{ community.slug }}">r/{{ community.slug }}</a>
-  <span class="meta-dot">›</span>
-  <span class="breadcrumb-current">{{ post.title|truncate(60) }}</span>
-</nav>
-
-<!-- ============ LAYOUT 2 COLUNAS ============ -->
-<div class="community-layout">
-  <main class="community-main">
-
-    <!-- ============ POST HERO ============ -->
-    <article class="thread-hero">
-      <div class="redd-vote-col redd-vote-col-large">
-        <button class="redd-vote-btn" data-post="{{ post.id }}" data-dir="up" onclick="votePost(this)" aria-label="Upvote">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
-        </button>
-        <span class="redd-vote-score" id="score-{{ post.id }}">{{ post.upvotes }}</span>
-        <button class="redd-vote-btn" data-post="{{ post.id }}" data-dir="down" onclick="votePost(this)" aria-label="Downvote">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
-      </div>
-
-      <div class="thread-hero-body">
-        <div class="thread-hero-meta">
-          <a href="/u/{{ post.author_user.handle }}" class="thread-author">
-            <span class="thread-author-avatar">{{ post.author_user.iniciais }}</span>
-            <div class="thread-author-info">
-              <span class="thread-author-name">u/{{ post.author_user.handle }}</span>
-              <span class="thread-author-role">{{ post.author_user.role }}</span>
-            </div>
+  <div class="c-thread-layout">
+    <main>
+      <article class="c-thread-article">
+        <header class="c-thread-author">
+          <a class="c-thread-author__identity" href="/u/{{ post.author_user.handle }}">
+            <span class="c-avatar">{{ post.author_user.iniciais }}</span>
+            <span class="c-thread-author__copy">
+              <strong>{{ post.author_user.nome_completo }}</strong>
+              <span>@{{ post.author_user.handle }} · {{ post.author_user.role }}</span>
+            </span>
           </a>
-          <button class="thread-author-follow" data-handle="{{ post.author_user.handle }}" data-following="false" onclick="toggleFollow(this)">
-            <span class="follow-state-out">+ Seguir</span>
-            <span class="follow-state-in"><i data-lucide="check" class="inline-icon"></i>Seguindo</span>
+          {% if request.user.is_authenticated and request.user.username != post.author_user.handle %}
+          <button
+            class="m-button m-button--secondary m-button--sm"
+            type="button"
+            data-follow-author
+            data-handle="{{ post.author_user.handle }}"
+            data-following="{{ 'true' if is_following_author else 'false' }}"
+            aria-pressed="{{ 'true' if is_following_author else 'false' }}">
+            <span data-follow-label>{{ 'Seguindo' if is_following_author else 'Seguir' }}</span>
           </button>
-          <span class="thread-meta-secondary">
-            em <a href="/g/{{ community.slug }}" class="thread-meta-community">r/{{ community.slug }}</a>
-            <span class="meta-dot">·</span>
-            {{ post.time_ago }}
-            <span class="redd-post-tag thread-tag-{{ post.tag }}">{{ post.tag }}</span>
-          </span>
-        </div>
+          {% elif not request.user.is_authenticated %}
+          <a class="m-button m-button--quiet m-button--sm" href="/login?next={{ request.path }}">Entre para seguir</a>
+          {% endif %}
+          <p class="c-thread-context">
+            Publicado em <a href="/g/{{ community.slug }}">{{ community.name }}</a>
+            · <time>{{ post.time_ago }}</time>
+            {% if post.tag %} · {{ post.tag }}{% endif %}
+          </p>
+        </header>
 
-        <h1 class="thread-hero-title">{{ post.title }}</h1>
+        <h1 class="c-thread-title">{{ post.title }}</h1>
 
         {% if post.post_type == 'link' and post.url %}
-        <a href="{{ post.url }}" class="thread-link-preview" target="_blank" rel="noopener">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        <a class="c-thread-external" href="{{ post.url }}" target="_blank" rel="noopener noreferrer">
+          <i data-lucide="external-link" aria-hidden="true"></i>
           <span>{{ post.url }}</span>
         </a>
         {% endif %}
 
-        <div class="thread-hero-content">
+        {% if post.body %}
+        <div class="c-thread-body">
           {% for paragraph in post.body.split('\n\n') %}
-          <p>{{ paragraph|replace('**', '__BOLD__')|safe }}</p>
+          <p>{{ paragraph }}</p>
           {% endfor %}
         </div>
+        {% endif %}
 
-        <div class="thread-hero-actions">
-          <span class="redd-post-action">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            {{ total_comments }} comentários
+        <footer class="c-thread-actions">
+          {% if request.user.is_authenticated %}
+          <div class="c-vote" data-vote-widget data-vote-kind="post" data-object-id="{{ post.id }}" data-current="">
+            <button class="c-vote__button" type="button" data-direction="up" aria-label="Apoiar discussão" aria-pressed="false">
+              <i data-lucide="chevron-up" aria-hidden="true"></i>
+            </button>
+            <span class="c-vote__count" data-vote-count>{{ post.upvotes }}</span>
+            <button class="c-vote__button" type="button" data-direction="down" aria-label="Discordar da discussão" aria-pressed="false">
+              <i data-lucide="chevron-down" aria-hidden="true"></i>
+            </button>
+          </div>
+          {% else %}
+          <span class="c-thread-actions__count">
+            <i data-lucide="sparkles" aria-hidden="true"></i>
+            {{ post.upvotes }} apoios
           </span>
-          <button class="redd-post-action" type="button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
-            Salvar
+          {% endif %}
+          <span class="c-thread-actions__count">
+            <i data-lucide="message-circle" aria-hidden="true"></i>
+            {{ total_comments }} respostas
+          </span>
+          <button class="m-button m-button--quiet m-button--sm" type="button" data-copy-thread>
+            <i data-lucide="link-2" aria-hidden="true"></i>
+            Copiar link
           </button>
-          <button class="redd-post-action" type="button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
-            Compartilhar
+          {% if request.user.is_authenticated %}
+          <button
+            class="m-button m-button--quiet m-button--sm"
+            type="button"
+            data-open-quicknote
+            data-note-title="{{ post.title }}"
+            data-note-source="Discussão · {{ community.name }}">
+            <i data-lucide="notebook-pen" aria-hidden="true"></i>
+            Anotar
           </button>
-          <button class="redd-post-action" type="button" onclick="openQuickNote('{{ post.title|e }}', 'Discussão da Guild · r/{{ community.slug }}')">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-            Quick Note
-          </button>
-        </div>
-      </div>
-    </article>
+          {% endif %}
+        </footer>
+      </article>
 
-    <!-- ============ COMPOSER DE COMENTÁRIO ============ -->
-    <section class="comment-composer">
-      <div class="comment-composer-avatar">{{ current_user.perfil.iniciais }}</div>
-      <div class="comment-composer-body">
-        <textarea id="rootCommentBody" rows="3" placeholder="O que você acha? Comente como u/{{ current_user.username }}"></textarea>
-        <div class="comment-composer-footer">
-          <span class="comment-composer-hint">Markdown básico aceito · Seja específico, traga caso</span>
-          <button class="btn-primary btn-primary-sm" onclick="submitComment(null)">Comentar</button>
+      {% if request.user.is_authenticated %}
+      <form class="c-reply-entry" data-comment-form data-parent-id="" novalidate>
+        <div class="c-reply-entry__head">
+          <span class="c-avatar c-avatar--sm">{{ current_user.perfil.iniciais }}</span>
+          <label for="rootCommentBody">Sua resposta</label>
         </div>
-      </div>
-    </section>
-
-    <!-- ============ ÁRVORE DE COMENTÁRIOS ============ -->
-    <section class="comments-section">
-      <div class="comments-header">
-        <span class="comments-count">{{ total_comments }} comentários</span>
-        <div class="comments-sort">
-          <span>Ordenar:</span>
-          <button class="comment-sort-tab active">Melhores</button>
-          <button class="comment-sort-tab">Novos</button>
+        <textarea
+          class="m-textarea"
+          id="rootCommentBody"
+          name="body"
+          rows="4"
+          placeholder="Contribua com uma pergunta, experiência ou contraponto."
+          required></textarea>
+        <div class="c-reply-entry__actions">
+          <span class="c-reply-entry__hint">Seja específico e preserve o contexto da conversa.</span>
+          <button class="m-button m-button--primary m-button--sm" type="submit">Publicar resposta</button>
         </div>
+        <p class="c-request-error" data-comment-error role="alert"></p>
+      </form>
+      {% else %}
+      <div class="c-signin-note c-reply-entry">
+        <p>Entre para responder, apoiar contribuições e continuar esta conversa.</p>
+        <a class="m-button m-button--primary m-button--sm" href="/login?next={{ request.path }}">Entrar para responder</a>
       </div>
+      {% endif %}
 
-      <div class="comments-tree">
-        {% macro render_comment(c, depth=0) %}
-        <article class="comment-node" data-depth="{{ depth }}">
-          <div class="comment-thread-line"></div>
-          <div class="comment-row">
-            <a href="/u/{{ c.author_user.handle }}" class="comment-avatar" title="{{ c.author_user.nome_completo }}">
-              {{ c.author_user.iniciais }}
-            </a>
-            <div class="comment-content">
-              <div class="comment-meta">
-                <a href="/u/{{ c.author_user.handle }}" class="comment-author">u/{{ c.author_user.handle }}</a>
-                <span class="comment-karma">{{ c.author_user.karma }} karma</span>
-                <span class="meta-dot">·</span>
-                <span class="comment-time">{{ c.time_ago }}</span>
-              </div>
-              <div class="comment-body">{{ c.body }}</div>
-              <div class="comment-actions">
-                <button class="comment-vote-btn" data-comment="{{ c.id }}" data-dir="up" onclick="voteComment(this)" aria-label="Upvote">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+      <section class="c-comments" aria-labelledby="comments-heading">
+        <header class="c-comments__heading">
+          <span class="m-section-kicker">Conversa aberta</span>
+          <h2 id="comments-heading">{{ total_comments }} respostas</h2>
+          <p>Contribuições apresentadas na ordem em que a conversa aconteceu.</p>
+        </header>
+
+        <div>
+          {% macro render_comment(comment, depth=0) %}
+          <article class="c-comment" data-comment-id="{{ comment.id }}" data-depth="{{ depth }}">
+            <header class="c-comment__head">
+              <a class="c-avatar c-avatar--sm" href="/u/{{ comment.author_user.handle }}" aria-label="{{ comment.author_user.nome_completo }}">
+                {{ comment.author_user.iniciais }}
+              </a>
+              <a href="/u/{{ comment.author_user.handle }}">@{{ comment.author_user.handle }}</a>
+              <span>{{ comment.author_user.karma }} contribuições</span>
+              <span>·</span>
+              <time>{{ comment.time_ago }}</time>
+            </header>
+            <p class="c-comment__body">{{ comment.body }}</p>
+            <div class="c-comment__actions">
+              {% if request.user.is_authenticated %}
+              <div class="c-comment-vote" data-vote-widget data-vote-kind="comment" data-object-id="{{ comment.id }}" data-current="">
+                <button type="button" data-direction="up" aria-label="Apoiar resposta" aria-pressed="false">
+                  <i data-lucide="chevron-up" aria-hidden="true"></i>
                 </button>
-                <span class="comment-score" id="cscore-{{ c.id }}">{{ c.upvotes }}</span>
-                <button class="comment-vote-btn" data-comment="{{ c.id }}" data-dir="down" onclick="voteComment(this)" aria-label="Downvote">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                <span data-vote-count>{{ comment.upvotes }}</span>
+                <button type="button" data-direction="down" aria-label="Discordar da resposta" aria-pressed="false">
+                  <i data-lucide="chevron-down" aria-hidden="true"></i>
                 </button>
-                <button class="comment-action-btn" onclick="toggleReply('{{ c.id }}')">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
-                  Responder
-                </button>
-                <button class="comment-action-btn">Salvar</button>
-                <button class="comment-action-btn">···</button>
               </div>
-              <div class="reply-composer" id="reply-{{ c.id }}" hidden>
-                <textarea rows="2" placeholder="Responder a u/{{ c.author_user.handle }}..." id="reply-body-{{ c.id }}"></textarea>
-                <div class="reply-composer-actions">
-                  <button class="btn-outline btn-outline-sm" onclick="toggleReply('{{ c.id }}')">Cancelar</button>
-                  <button class="btn-primary btn-primary-sm" onclick="submitComment('{{ c.id }}')">Responder</button>
-                </div>
-              </div>
-              {% if c.children %}
-              <div class="comment-children">
-                {% for child in c.children %}
-                  {{ render_comment(child, depth + 1) }}
-                {% endfor %}
-              </div>
+              <button
+                class="c-comment__reply-button"
+                type="button"
+                data-toggle-reply="{{ comment.id }}"
+                aria-controls="reply-{{ comment.id }}"
+                aria-expanded="false">
+                Responder
+              </button>
+              {% else %}
+              <span class="m-meta">{{ comment.upvotes }} apoios</span>
               {% endif %}
             </div>
+
+            {% if request.user.is_authenticated %}
+            <form
+              class="c-comment__composer"
+              id="reply-{{ comment.id }}"
+              data-comment-form
+              data-parent-id="{{ comment.id }}"
+              hidden
+              novalidate>
+              <label class="m-field__label" for="replyBody{{ comment.id }}">Responder a @{{ comment.author_user.handle }}</label>
+              <textarea
+                class="m-textarea"
+                id="replyBody{{ comment.id }}"
+                name="body"
+                rows="3"
+                placeholder="Escreva sua contribuição."
+                required></textarea>
+              <div class="c-comment__composer-actions">
+                <button class="m-button m-button--quiet m-button--sm" type="button" data-cancel-reply="{{ comment.id }}">Cancelar</button>
+                <button class="m-button m-button--primary m-button--sm" type="submit">Responder</button>
+              </div>
+              <p class="c-request-error" data-comment-error role="alert"></p>
+            </form>
+            {% endif %}
+
+            {% if comment.children %}
+            <div class="c-comment__children">
+              {% for child in comment.children %}
+              {{ render_comment(child, depth + 1) }}
+              {% endfor %}
+            </div>
+            {% endif %}
+          </article>
+          {% endmacro %}
+
+          {% for comment in comments %}
+          {{ render_comment(comment, 0) }}
+          {% else %}
+          <div class="m-empty">
+            <div class="m-empty__inner">
+              <span class="m-empty__icon"><i data-lucide="message-circle" aria-hidden="true"></i></span>
+              <h3>A primeira resposta pode ser sua</h3>
+              <p>Uma boa conversa começa quando alguém compartilha contexto de verdade.</p>
+            </div>
           </div>
-        </article>
-        {% endmacro %}
-
-        {% for c in comments %}
-          {{ render_comment(c, 0) }}
-        {% endfor %}
-
-        {% if not comments %}
-        <div class="empty-state">
-          <p>Seja o primeiro a comentar — a discussão começa com uma boa pergunta.</p>
+          {% endfor %}
         </div>
-        {% endif %}
-      </div>
-    </section>
+      </section>
+    </main>
 
-  </main>
+    <aside class="c-thread-aside" aria-label="Contexto da discussão">
+      <section class="c-aside-section">
+        <span class="m-section-kicker">Onde esta conversa vive</span>
+        <h2>{{ community.name }}</h2>
+        <p>{{ community.description }}</p>
+        <div class="c-number-grid">
+          <div><strong>{{ community.members }}</strong><span>membros</span></div>
+          <div><strong>{{ community.online_now }}</strong><span>online agora</span></div>
+        </div>
+        <a class="m-text-link" href="/g/{{ community.slug }}">
+          Conhecer a comunidade
+          <i data-lucide="arrow-right" aria-hidden="true"></i>
+        </a>
+      </section>
 
-  <!-- ============ SIDEBAR ============ -->
-  <aside class="community-sidebar">
-    <div class="sidebar-card">
-      <h3 class="sidebar-card-title">
-        <i data-lucide="{{ community.icon }}"></i>
-        r/{{ community.slug }}
-      </h3>
-      <p class="sidebar-card-text">{{ community.description }}</p>
-      <div class="sidebar-card-stats">
-        <div><strong>{{ community.members }}</strong><span>Membros</span></div>
-        <div><strong>{{ community.online_now }}</strong><span class="online-dot-meta"><span class="community-pulse"></span>Online</span></div>
-      </div>
-      <a href="/g/{{ community.slug }}" class="sidebar-card-cta">Ver comunidade</a>
-    </div>
+      {% if community.rules %}
+      <section class="c-aside-section">
+        <h3>Acordos de convivência</h3>
+        <ol class="c-rules">
+          {% for rule in community.rules %}<li>{{ rule }}</li>{% endfor %}
+        </ol>
+      </section>
+      {% endif %}
 
-    <div class="sidebar-card">
-      <h3 class="sidebar-card-title">Regras</h3>
-      <ol class="sidebar-rules">
-        {% for r in community.rules %}
-        <li><span class="rule-num">{{ loop.index }}</span><span class="rule-text">{{ r }}</span></li>
-        {% endfor %}
-      </ol>
-    </div>
-
-    <div class="sidebar-card">
-      <h3 class="sidebar-card-title">Moderadores</h3>
-      <ul class="sidebar-mods">
-        {% for m in moderators %}
-        <li>
-          <a href="/u/{{ m.handle }}" class="mod-pill">
-            <span class="mod-avatar">{{ m.iniciais }}</span>
-            <span>u/{{ m.handle }}</span>
+      {% if moderators %}
+      <section class="c-aside-section">
+        <h3>Curadoria</h3>
+        <div class="c-simple-list">
+          {% for moderator in moderators %}
+          <a class="c-person-link" href="/u/{{ moderator.handle }}">
+            <span class="c-avatar c-avatar--sm">{{ moderator.iniciais }}</span>
+            <span>
+              <strong>{{ moderator.nome_completo }}</strong>
+              <span>@{{ moderator.handle }}</span>
+            </span>
           </a>
-        </li>
-        {% endfor %}
-      </ul>
-    </div>
-  </aside>
-</div>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
 
+      {% if related_communities %}
+      <section class="c-aside-section">
+        <h3>Comunidades relacionadas</h3>
+        <div class="c-related">
+          {% for related in related_communities %}
+          <a href="/g/{{ related.slug }}">
+            <span class="c-related__icon"><i data-lucide="{{ related.icon }}" aria-hidden="true"></i></span>
+            <span>
+              <strong>{{ related.name }}</strong>
+              <span>{{ related.members }} membros</span>
+            </span>
+          </a>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+    </aside>
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-  // === Vote post ===
-  var voteState = {};
-  function votePost(btn) {
-    var postId = btn.dataset.post;
-    var dir = btn.dataset.dir;
-    var current = voteState[postId] || null;
-    var next = (current === dir) ? null : dir;
-    voteState[postId] = next;
-    var hero = btn.closest('.thread-hero');
-    if (hero) {
-      hero.querySelectorAll('.redd-vote-btn').forEach(function(b){
-        b.classList.remove('voted-up', 'voted-down');
-      });
-      if (next === 'up') btn.classList.add('voted-up');
-      if (next === 'down') btn.classList.add('voted-down');
-    }
-    var scoreEl = document.getElementById('score-' + postId);
-    if (scoreEl) {
-      var delta = 0;
-      if (current === 'up') delta -= 1;
-      if (current === 'down') delta += 1;
-      if (next === 'up') delta += 1;
-      if (next === 'down') delta -= 1;
-      scoreEl.textContent = (parseInt(scoreEl.textContent, 10) + delta);
-    }
-    fetch('/api/post/' + postId + '/vote', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({direction: next})
-    }).catch(function(){});
-  }
+  (function () {
+    var page = document.querySelector('[data-thread-page]');
+    if (!page) return;
 
-  // === Vote comment ===
-  var commentVote = {};
-  function voteComment(btn) {
-    var id = btn.dataset.comment;
-    var dir = btn.dataset.dir;
-    var current = commentVote[id] || null;
-    var next = (current === dir) ? null : dir;
-    commentVote[id] = next;
+    function notify(message, tone) {
+      if (window.showToast) window.showToast(message, tone);
+    }
 
-    var node = btn.closest('.comment-node');
-    if (node) {
-      // Atualiza só os botões do .comment-row imediato (não dos filhos)
-      var row = btn.closest('.comment-row');
-      if (row) {
-        row.querySelectorAll(':scope > .comment-content > .comment-actions .comment-vote-btn').forEach(function(b){
-          b.classList.remove('voted-up', 'voted-down');
-        });
+    async function readJson(response) {
+      var payload = await response.json().catch(function () { return {}; });
+      if (!response.ok || payload.ok === false) {
+        throw new Error(payload.erro || payload.error || 'Não foi possível concluir a ação.');
       }
-      if (next === 'up') btn.classList.add('voted-up');
-      if (next === 'down') btn.classList.add('voted-down');
+      return payload;
     }
 
-    var scoreEl = document.getElementById('cscore-' + id);
-    if (scoreEl) {
+    function voteDelta(current, next) {
       var delta = 0;
       if (current === 'up') delta -= 1;
       if (current === 'down') delta += 1;
       if (next === 'up') delta += 1;
       if (next === 'down') delta -= 1;
-      scoreEl.textContent = (parseInt(scoreEl.textContent, 10) + delta);
+      return delta;
     }
 
-    fetch('/api/comment/' + id + '/vote', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({direction: next})
-    }).catch(function(){});
-  }
+    {% if request.user.is_authenticated %}
+    document.querySelectorAll('[data-vote-widget]').forEach(function (widget) {
+      widget.querySelectorAll('[data-direction]').forEach(function (button) {
+        button.addEventListener('click', async function () {
+          var current = widget.dataset.current || null;
+          var requested = button.dataset.direction;
+          var next = current === requested ? null : requested;
+          var buttons = widget.querySelectorAll('[data-direction]');
+          var count = widget.querySelector('[data-vote-count]');
+          var endpoint = widget.dataset.voteKind === 'comment' ? 'comment' : 'post';
+          buttons.forEach(function (item) { item.disabled = true; });
 
-  // === Toggle reply box ===
-  function toggleReply(commentId) {
-    var box = document.getElementById('reply-' + commentId);
-    if (!box) return;
-    var was = !box.hidden;
-    box.hidden = was;
-    if (!was) {
-      var ta = document.getElementById('reply-body-' + commentId);
-      if (ta) ta.focus();
-    }
-  }
-
-  // === Submit comment (root ou reply) ===
-  function submitComment(parentId) {
-    var ta = parentId
-      ? document.getElementById('reply-body-' + parentId)
-      : document.getElementById('rootCommentBody');
-    if (!ta) return;
-    var body = ta.value.trim();
-    if (!body) {
-      ta.focus();
-      return;
-    }
-    fetch('/api/comment', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        post_id: '{{ post.id }}',
-        body: body,
-        parent_id: parentId || null,
-      })
-    })
-    .then(function(r){ return r.json(); })
-    .then(function(data){
-      ta.value = '';
-      if (parentId) toggleReply(parentId);
-      showToast(parentId ? 'Resposta enviada' : 'Comentário publicado');
-    })
-    .catch(function(){
-      showToast('Erro ao enviar — tente novamente');
+          try {
+            var response = await fetch('/api/' + endpoint + '/' + widget.dataset.objectId + '/vote', {
+              method: 'POST',
+              headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+              body: JSON.stringify({direction: next})
+            });
+            var payload = await readJson(response);
+            widget.dataset.current = next || '';
+            buttons.forEach(function (item) {
+              var selected = item.dataset.direction === next;
+              item.classList.toggle('is-active', selected);
+              item.setAttribute('aria-pressed', selected ? 'true' : 'false');
+            });
+            if (count) {
+              count.textContent = typeof payload.upvotes === 'number'
+                ? payload.upvotes
+                : parseInt(count.textContent || '0', 10) + voteDelta(current, next);
+            }
+          } catch (error) {
+            notify(error.message, 'danger');
+          } finally {
+            buttons.forEach(function (item) { item.disabled = false; });
+          }
+        });
+      });
     });
-  }
 
-  // === Toggle follow autor ===
-  function toggleFollow(btn) {
-    var handle = btn.dataset.handle;
-    var following = btn.dataset.following === 'true';
-    var next = !following;
-    btn.dataset.following = next ? 'true' : 'false';
-    btn.classList.toggle('is-following', next);
-    fetch('/api/follow/' + handle, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({following: next})
-    }).catch(function(){});
-    showToast(next ? 'Seguindo u/' + handle : 'Deixou de seguir u/' + handle);
-  }
+    document.querySelectorAll('[data-toggle-reply]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        var form = document.getElementById('reply-' + button.dataset.toggleReply);
+        if (!form) return;
+        var willOpen = form.hidden;
+        form.hidden = !willOpen;
+        button.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+        if (willOpen) {
+          var textarea = form.querySelector('textarea');
+          if (textarea) textarea.focus();
+        }
+      });
+    });
 
-  window.votePost = votePost;
-  window.voteComment = voteComment;
-  window.toggleReply = toggleReply;
-  window.submitComment = submitComment;
-  window.toggleFollow = toggleFollow;
+    document.querySelectorAll('[data-cancel-reply]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        var id = button.dataset.cancelReply;
+        var form = document.getElementById('reply-' + id);
+        var trigger = document.querySelector('[data-toggle-reply="' + id + '"]');
+        if (form) form.hidden = true;
+        if (trigger) {
+          trigger.setAttribute('aria-expanded', 'false');
+          trigger.focus();
+        }
+      });
+    });
 
-  // === Render simples de **bold** no body do post ===
-  document.querySelectorAll('.thread-hero-content p').forEach(function(p){
-    p.innerHTML = p.textContent.replace(/__BOLD__([^_]+)__BOLD__/g, '<strong>$1</strong>');
-  });
+    document.querySelectorAll('[data-comment-form]').forEach(function (form) {
+      form.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        var textarea = form.querySelector('textarea[name="body"]');
+        var errorBox = form.querySelector('[data-comment-error]');
+        var submitButton = form.querySelector('button[type="submit"]');
+        var body = textarea ? textarea.value.trim() : '';
+
+        if (!body) {
+          if (errorBox) errorBox.textContent = 'Escreva sua contribuição antes de publicar.';
+          if (textarea) textarea.focus();
+          return;
+        }
+
+        if (errorBox) errorBox.textContent = '';
+        submitButton.disabled = true;
+        submitButton.setAttribute('aria-busy', 'true');
+        try {
+          var response = await fetch('/api/comment', {
+            method: 'POST',
+            headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              post_id: page.dataset.postId,
+              body: body,
+              parent_id: form.dataset.parentId || null
+            })
+          });
+          await readJson(response);
+          notify(form.dataset.parentId ? 'Resposta publicada.' : 'Sua contribuição foi publicada.');
+          window.location.reload();
+        } catch (error) {
+          if (errorBox) errorBox.textContent = error.message;
+        } finally {
+          submitButton.disabled = false;
+          submitButton.removeAttribute('aria-busy');
+        }
+      });
+    });
+
+    var followButton = document.querySelector('[data-follow-author]');
+    if (followButton) {
+      followButton.addEventListener('click', async function () {
+        var following = followButton.dataset.following === 'true';
+        var next = !following;
+        followButton.disabled = true;
+        followButton.setAttribute('aria-busy', 'true');
+        try {
+          var response = await fetch('/api/follow/' + followButton.dataset.handle, {
+            method: 'POST',
+            headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+            body: JSON.stringify({following: next})
+          });
+          var payload = await readJson(response);
+          var confirmed = Boolean(payload.following);
+          followButton.dataset.following = confirmed ? 'true' : 'false';
+          followButton.setAttribute('aria-pressed', confirmed ? 'true' : 'false');
+          followButton.querySelector('[data-follow-label]').textContent = confirmed ? 'Seguindo' : 'Seguir';
+          notify(confirmed ? 'Você agora acompanha esta pessoa.' : 'Você deixou de acompanhar esta pessoa.');
+        } catch (error) {
+          notify(error.message, 'danger');
+        } finally {
+          followButton.disabled = false;
+          followButton.removeAttribute('aria-busy');
+        }
+      });
+    }
+    {% endif %}
+
+    var copyButton = document.querySelector('[data-copy-thread]');
+    if (copyButton) {
+      copyButton.addEventListener('click', function () {
+        var copyPromise;
+        if (navigator.clipboard && window.isSecureContext) {
+          copyPromise = navigator.clipboard.writeText(window.location.href);
+        } else {
+          copyPromise = new Promise(function (resolve, reject) {
+            var input = document.createElement('textarea');
+            input.value = window.location.href;
+            input.setAttribute('readonly', '');
+            input.style.position = 'fixed';
+            input.style.opacity = '0';
+            document.body.appendChild(input);
+            input.select();
+            try {
+              document.execCommand('copy') ? resolve() : reject(new Error());
+            } catch (error) {
+              reject(error);
+            } finally {
+              input.remove();
+            }
+          });
+        }
+        copyPromise
+          .then(function () { notify('Link copiado.'); })
+          .catch(function () { notify('Não foi possível copiar o link.', 'danger'); });
+      });
+    }
+  }());
 </script>
 {% endblock %}

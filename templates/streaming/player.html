@@ -1,144 +1,178 @@
 {% extends "base.html" %}
 
 {% block title %}{{ aula.titulo }} — Mundu Academy{% endblock %}
-{% block page_title %}Player{% endblock %}
-{% block main_class %}player-page{% endblock %}
+{% block meta_description %}Assista {{ aula.titulo }} e registre seu progresso na Mundu Academy.{% endblock %}
+{% block body_class %}learning-immersive-body{% endblock %}
+{% block main_class %}focus-main{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/learning.css') }}">
+{% endblock %}
+
+{% block site_header %}
+<header class="focus-header">
+  <div class="focus-header__inner">
+    <a class="focus-back" href="/conteudos">
+      <i data-lucide="arrow-left" aria-hidden="true"></i>
+      <span>Voltar aos cursos</span>
+    </a>
+    <a class="focus-brand" href="/" aria-label="Mundu Academy — Início">
+      <img src="{{ url_for('static', filename='img/mundu-logo-icon.png') }}" alt="">
+      <span>Mundu Academy</span>
+    </a>
+    <div class="focus-header__course">
+      <i data-lucide="book-open" aria-hidden="true"></i>
+      <span>{{ aula.modulo.titulo }}</span>
+    </div>
+  </div>
+</header>
+{% endblock %}
 
 {% block content %}
-<div class="player-layout">
-  <div class="player-main">
-    <!-- Cabeçalho da Aula -->
-    <div class="mb-4">
-      <a href="/conteudos" class="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-3">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
-        Voltar aos cursos
-      </a>
-      <h1 class="text-2xl font-bold text-foreground">{{ aula.titulo }}</h1>
+{% set video = get_embed_video(aula.url_video) %}
+<div class="focus-shell">
+  <section class="focus-stage" aria-labelledby="lesson-title">
+    <header class="focus-lesson-copy">
+      <span class="m-eyebrow">Sala de foco</span>
+      <h1 id="lesson-title">{{ aula.titulo }}</h1>
       {% if aula.descricao %}
-      <p class="text-muted-foreground mt-1">{{ aula.descricao }}</p>
+      <p>{{ aula.descricao }}</p>
       {% endif %}
-      <div class="flex items-center gap-3 mt-2">
-        <span class="inline-flex items-center gap-1 text-sm text-muted-foreground">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
-          {{ aula.modulo.titulo }}
-        </span>
+      <div class="focus-lesson-copy__meta">
+        <span><i data-lucide="layers-3" aria-hidden="true"></i>{{ aula.modulo.titulo }}</span>
         {% if aula.duracao %}
-        <span class="inline-flex items-center gap-1 text-sm text-muted-foreground">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 16"/></svg>
-          {{ aula.duracao }}
-        </span>
+        <span><i data-lucide="clock-3" aria-hidden="true"></i>{{ aula.duracao }}</span>
         {% endif %}
+        <span><i data-lucide="list-video" aria-hidden="true"></i>Aula {{ aula.ordem }}</span>
       </div>
-    </div>
+    </header>
 
-    {% set video = get_embed_video(aula.url_video) %}
-    <div class="relative bg-black rounded-xl overflow-hidden shadow-2xl" style="aspect-ratio: 16/9; max-height: 65vh;">
+    <div class="focus-video" id="video-stage">
       {% if video %}
-      <div id="player" class="w-full h-full"></div>
+      <div id="player"></div>
 
-      <div id="controls-overlay" class="absolute inset-0 pointer-events-none transition-opacity duration-300">
-        <!-- Topo overlay para tampar título do YouTube -->
-        <div id="top-controls" class="absolute top-0 left-0 w-1/2 flex items-center px-4 py-4 pointer-events-auto z-10 rounded-br-xl" style="background: var(--gradient-primary);">
-          <span class="text-white text-sm font-medium truncate">{{ aula.titulo }}</span>
+      <div class="focus-controls" id="controls-overlay">
+        <div class="focus-controls__top focus-controls__interactive" id="top-controls">
+          <span>{{ aula.titulo }}</span>
         </div>
-        <!-- Botão Play central -->
-        <div id="big-play-btn" class="absolute inset-0 flex items-center justify-center pointer-events-auto">
-          <button onclick="togglePlay()" class="w-20 h-20 rounded-full bg-primary shadow-lg shadow-primary/40 flex items-center justify-center hover:scale-105 transition-all cursor-pointer">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="white"><polygon points="8 5 19 12 8 19 8 5"/></svg>
+
+        <div class="focus-controls__big-play focus-controls__interactive" id="big-play-btn">
+          <button class="focus-play-button" type="button" data-player-action="toggle"
+            aria-label="Reproduzir aula">
+            <i data-lucide="play" aria-hidden="true"></i>
           </button>
         </div>
 
-        <!-- Barra inferior de controlos -->
-        <div id="bottom-controls" class="absolute bottom-0 left-0 right-0 pointer-events-auto" style="background: var(--gradient-primary);">
-          <!-- Progress bar -->
-          <div id="progress-track" class="relative w-full h-1 bg-white/30 cursor-pointer group">
-            <div id="progress-fill" class="absolute left-0 top-0 h-full bg-white rounded-r" style="width: 0%;"></div>
-            <div id="progress-thumb" class="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow opacity-0 group-hover:opacity-100 transition-opacity" style="left: 0%;"></div>
-          </div>
-          <!-- Timestamps + Controls -->
-          <div class="flex items-center justify-between px-4 py-4">
-            <span id="timestamp" class="text-xs text-white/80 font-mono">00:00 / 00:00</span>
-            <div class="flex items-center gap-6">
-              <button onclick="rewind()" class="text-white/80 hover:text-white transition-colors cursor-pointer" title="Voltar 10s">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="1 4 1 10 7 10"/>
-                  <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
-                </svg>
+        <div class="focus-controls__bottom focus-controls__interactive" id="bottom-controls">
+          <label class="m-sr-only" for="progress-track">Posição do vídeo</label>
+          <input class="focus-progress" id="progress-track" type="range" min="0" max="100"
+            value="0" step="0.1" aria-valuetext="00:00 de 00:00">
+          <div class="focus-controls__row">
+            <div class="focus-controls__group">
+              <button class="focus-control-button" type="button" data-player-action="rewind"
+                aria-label="Voltar 10 segundos">
+                <i data-lucide="rotate-ccw" aria-hidden="true"></i>
               </button>
-              <button onclick="togglePlay()" class="text-white hover:text-white transition-colors cursor-pointer" title="Play / Pause">
-                <span id="play-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><polygon points="8 5 19 12 8 19 8 5"/></svg></span>
-                <span id="pause-icon" class="hidden"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg></span>
+              <button class="focus-control-button" type="button" data-player-action="toggle"
+                id="play-control" aria-label="Reproduzir">
+                <span id="play-icon"><i data-lucide="play" aria-hidden="true"></i></span>
+                <span id="pause-icon" hidden><i data-lucide="pause" aria-hidden="true"></i></span>
+              </button>
+              <button class="focus-control-button" type="button" data-player-action="forward"
+                aria-label="Avançar 10 segundos">
+                <i data-lucide="rotate-cw" aria-hidden="true"></i>
+              </button>
+              <span class="focus-timestamp" id="timestamp">00:00 / 00:00</span>
+            </div>
+            <div class="focus-controls__group">
+              <button class="focus-control-button" type="button" data-player-action="mute"
+                id="mute-control" aria-label="Silenciar">
+                <span id="volume-icon"><i data-lucide="volume-2" aria-hidden="true"></i></span>
+                <span id="muted-icon" hidden><i data-lucide="volume-x" aria-hidden="true"></i></span>
+              </button>
+              <button class="focus-control-button" type="button" data-player-action="fullscreen"
+                aria-label="Tela cheia">
+                <i data-lucide="maximize" aria-hidden="true"></i>
               </button>
             </div>
           </div>
         </div>
       </div>
       {% else %}
-      <div class="w-full h-full flex items-center justify-center bg-gray-900 text-white/60 text-sm">
-        URL de vídeo inválida ou não reconhecida.
+      <div class="focus-video__empty">
+        <div>
+          <i data-lucide="video-off" aria-hidden="true"></i>
+          <strong>Vídeo indisponível</strong>
+          <p>A URL desta aula não foi reconhecida. O conteúdo continuará disponível assim que for corrigido.</p>
+        </div>
       </div>
       {% endif %}
     </div>
 
-    <!-- Ações da Aula -->
-    <div class="mt-6 flex flex-wrap items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <button onclick="openQuickNote('{{ aula.titulo|e }}', '{{ aula.modulo.titulo|e }}')" class="btn-outline inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-          Quick Note (+10 XP)
+    <div class="focus-actions">
+      <div class="focus-actions__group">
+        <button class="m-button m-button--secondary" type="button"
+          data-open-quicknote data-note-title="{{ aula.titulo }}"
+          data-note-source="{{ aula.modulo.titulo }}">
+          <i data-lucide="notebook-pen" aria-hidden="true"></i>
+          Quick Note <span aria-hidden="true">·</span> +10 XP
+        </button>
+        {% if aula.material_complementar %}
+        <a class="m-button m-button--quiet" href="{{ aula.material_complementar.url }}" download>
+          <i data-lucide="paperclip" aria-hidden="true"></i>
+          Material da aula
+        </a>
+        {% endif %}
+      </div>
+      <div class="focus-actions__group">
+        <span class="focus-save-status" id="progress-save-status" role="status" aria-live="polite"></span>
+        <button class="m-button m-button--primary" id="complete-lesson" type="button">
+          <i data-lucide="check-circle-2" aria-hidden="true"></i>
+          <span id="complete-lesson-label">Marcar como concluída</span>
         </button>
       </div>
+    </div>
+  </section>
 
-      <a href="/conteudos" class="btn-primary inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/></svg>
-        Marcar como concluída
+  <aside class="focus-outline" aria-labelledby="module-outline-title">
+    <header class="focus-outline__header">
+      <span id="module-outline-title">Conteúdo do módulo</span>
+      <small>{{ aulas_modulo|length }} aulas · {{ aula.modulo.titulo }}</small>
+    </header>
+    <nav class="focus-outline__lessons" aria-label="Aulas do módulo">
+      {% for item in aulas_modulo %}
+      <a class="focus-lesson" href="/watch/{{ item.modulo.slug }}/{{ item.ordem }}/"
+        {% if item.id == aula.id %}aria-current="page"{% endif %}>
+        <span class="focus-lesson__index">
+          {% if item.id == aula.id %}<i data-lucide="play" aria-hidden="true"></i>{% else %}{{ loop.index }}{% endif %}
+        </span>
+        <span class="focus-lesson__copy">{{ item.titulo }}</span>
+        {% if item.duracao %}
+        <span class="focus-lesson__duration">{{ item.duracao }}</span>
+        {% endif %}
       </a>
-    </div>
-  </div>
-
-  <aside class="player-sidebar">
-    <div class="sidebar-section">
-      <h3 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-2">Conteúdo do Módulo</h3>
-      <p class="text-xs text-muted-foreground mb-3">{{ aulas_modulo|length }} aulas</p>
-      {% for a in aulas_modulo %}
-         <a href="/watch/{{ a.modulo.slug }}/{{ a.ordem }}"
-           class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors
-                  {% if a.id == aula.id %}bg-primary/10 text-primary font-medium{% else %}hover:bg-secondary/50{% endif %}">
-          <span class="flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center
-                       {% if a.id == aula.id %}border-primary{% else %}border-muted-foreground/30{% endif %}">
-            {% if a.id == aula.id %}
-              <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
-            {% endif %}
-          </span>
-          <span class="flex-1 min-w-0">
-            <span class="block truncate">{{ a.ordem }}. {{ a.titulo }}</span>
-          </span>
-          {% if a.duracao %}
-            <span class="flex-shrink-0 text-xs text-muted-foreground">{{ a.duracao }}</span>
-          {% endif %}
-        </a>
       {% endfor %}
-    </div>
-    <div class="sidebar-section mt-6 pt-4 border-t border-border">
-      <h3 class="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-2">Quizzes</h3>
+    </nav>
+
+    <div class="focus-outline__quiz">
       {% if quiz %}
-      <a href="/quiz/{{ quiz.id }}"
-         class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-secondary/50">
-        <span class="flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center
-                     {% if quiz_feito %}border-emerald-400 bg-emerald-400/20{% else %}border-muted-foreground/30{% endif %}">
-          {% if quiz_feito %}
-            <i data-lucide="check" class="w-3 h-3 text-emerald-400"></i>
-          {% else %}
-            <i data-lucide="graduation-cap" class="w-3 h-3 text-muted-foreground"></i>
-          {% endif %}
+      <a class="focus-quiz-link" href="/quiz/{{ quiz.id }}">
+        <span class="focus-quiz-link__icon">
+          <i data-lucide="{% if quiz_feito %}check{% else %}graduation-cap{% endif %}" aria-hidden="true"></i>
         </span>
-        <span class="flex-1 min-w-0">
-          <span class="block truncate"><i data-lucide="clipboard-list" class="inline-icon"></i>{{ quiz.titulo }}</span>
+        <span class="focus-quiz-link__copy">
+          <strong>{{ quiz.titulo }}</strong>
+          <span>Etapa de domínio · +{{ quiz.xp_total }} XP</span>
         </span>
-        <span class="flex-shrink-0 text-xs font-semibold text-amber-400">+{{ quiz.xp_total }} XP</span>
+        <span class="focus-quiz-link__state">{% if quiz_feito %}Concluído{% else %}Fazer{% endif %}</span>
       </a>
       {% else %}
-      <p class="text-xs text-muted-foreground">Nenhum quiz neste módulo</p>
+      <div class="focus-quiz-link" aria-disabled="true">
+        <span class="focus-quiz-link__icon"><i data-lucide="graduation-cap" aria-hidden="true"></i></span>
+        <span class="focus-quiz-link__copy">
+          <strong>Etapa de domínio</strong>
+          <span>Nenhum quiz associado a este módulo.</span>
+        </span>
+      </div>
       {% endif %}
     </div>
   </aside>
@@ -147,146 +181,318 @@
 
 {% block scripts %}
 {% set video = get_embed_video(aula.url_video) %}
-<script src="https://www.youtube.com/iframe_api"></script>
 <script>
-var player;
-var controlsTimer;
-var progressInterval;
+(function () {
+  'use strict';
 
-function onYouTubeIframeAPIReady() {
-    player = new YT.Player('player', {
-        videoId: '{{ video.code }}',
+  var aulaId = {{ aula.id }};
+  var hasVideo = {{ 'true' if video else 'false' }};
+  var player = null;
+  var controlsTimer = null;
+  var progressInterval = null;
+  var autoSaveInFlight = false;
+  var lastPersistedProgress = 0;
+  var currentVideoProgress = 0;
+  var stage = document.getElementById('video-stage');
+  var overlay = document.getElementById('controls-overlay');
+  var progressControl = document.getElementById('progress-track');
+  var timestamp = document.getElementById('timestamp');
+  var bigPlay = document.getElementById('big-play-btn');
+  var playControl = document.getElementById('play-control');
+  var playIcon = document.getElementById('play-icon');
+  var pauseIcon = document.getElementById('pause-icon');
+  var muteControl = document.getElementById('mute-control');
+  var volumeIcon = document.getElementById('volume-icon');
+  var mutedIcon = document.getElementById('muted-icon');
+  var completeButton = document.getElementById('complete-lesson');
+  var completeLabel = document.getElementById('complete-lesson-label');
+  var saveStatus = document.getElementById('progress-save-status');
+
+  function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, Number(value) || 0));
+  }
+
+  function formatTime(seconds) {
+    var total = Math.max(0, Math.floor(Number(seconds) || 0));
+    var hours = Math.floor(total / 3600);
+    var minutes = Math.floor((total % 3600) / 60);
+    var secs = total % 60;
+    var clock = (minutes < 10 ? '0' : '') + minutes + ':' + (secs < 10 ? '0' : '') + secs;
+    if (hours > 0) clock = hours + ':' + clock;
+    return clock;
+  }
+
+  function setSaveStatus(message, tone) {
+    if (!saveStatus) return;
+    saveStatus.textContent = message || '';
+    if (tone) saveStatus.dataset.tone = tone;
+    else saveStatus.removeAttribute('data-tone');
+  }
+
+  async function persistProgress(value, options) {
+    var settings = options || {};
+    var progress = Math.round(clamp(value, 0, 100));
+    if (!settings.force) {
+      progress = Math.floor(progress / 5) * 5;
+      if (progress < 5 || progress <= lastPersistedProgress || autoSaveInFlight) return null;
+      autoSaveInFlight = true;
+    }
+
+    try {
+      var response = await fetch('/api/progresso', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({aula_id: aulaId, progresso: progress}),
+        keepalive: Boolean(settings.keepalive)
+      });
+      var payload = await response.json().catch(function () { return {}; });
+      if (!response.ok || payload.ok === false) {
+        throw new Error(payload.erro || payload.error || 'Não foi possível salvar o progresso.');
+      }
+      lastPersistedProgress = Math.max(lastPersistedProgress, Number(payload.progresso) || progress);
+      if (!settings.silent) setSaveStatus('Progresso salvo');
+      return payload;
+    } finally {
+      if (!settings.force) autoSaveInFlight = false;
+    }
+  }
+
+  async function completeLesson(showFeedback) {
+    if (!completeButton) return;
+    completeButton.disabled = true;
+    completeButton.setAttribute('aria-busy', 'true');
+    if (completeLabel) completeLabel.textContent = 'Salvando progresso...';
+    setSaveStatus('');
+
+    try {
+      await persistProgress(100, {force: true, silent: true});
+      lastPersistedProgress = 100;
+      completeButton.classList.remove('m-button--primary');
+      completeButton.classList.add('m-button--secondary');
+      if (completeLabel) completeLabel.textContent = 'Aula concluída';
+      setSaveStatus('Progresso salvo');
+      if (showFeedback !== false && window.showToast) {
+        window.showToast('Aula concluída. Seu progresso foi atualizado.');
+      }
+      if (window.MunduGamification) window.MunduGamification.refresh();
+    } catch (error) {
+      completeButton.disabled = false;
+      if (completeLabel) completeLabel.textContent = 'Tentar concluir novamente';
+      setSaveStatus(error.message || 'Não foi possível salvar o progresso.', 'danger');
+    } finally {
+      completeButton.removeAttribute('aria-busy');
+    }
+  }
+
+  function isPlaying() {
+    return Boolean(
+      player &&
+      window.YT &&
+      player.getPlayerState() === window.YT.PlayerState.PLAYING
+    );
+  }
+
+  function showControls() {
+    if (!overlay) return;
+    window.clearTimeout(controlsTimer);
+    overlay.classList.remove('is-hidden');
+  }
+
+  function hideControls() {
+    if (!overlay || !isPlaying() || overlay.contains(document.activeElement)) return;
+    overlay.classList.add('is-hidden');
+  }
+
+  function startHideTimer() {
+    window.clearTimeout(controlsTimer);
+    controlsTimer = window.setTimeout(hideControls, 4000);
+  }
+
+  function updatePlayState() {
+    var playing = isPlaying();
+    if (playIcon) playIcon.hidden = playing;
+    if (pauseIcon) pauseIcon.hidden = !playing;
+    if (playControl) playControl.setAttribute('aria-label', playing ? 'Pausar' : 'Reproduzir');
+    if (bigPlay) bigPlay.hidden = playing;
+  }
+
+  function updateMuteState() {
+    if (!player || typeof player.isMuted !== 'function') return;
+    var muted = player.isMuted();
+    if (volumeIcon) volumeIcon.hidden = muted;
+    if (mutedIcon) mutedIcon.hidden = !muted;
+    if (muteControl) muteControl.setAttribute('aria-label', muted ? 'Ativar som' : 'Silenciar');
+  }
+
+  function updateProgress() {
+    if (!player || typeof player.getDuration !== 'function') return;
+    var duration = Number(player.getDuration()) || 0;
+    var current = Number(player.getCurrentTime()) || 0;
+    if (duration <= 0) return;
+    currentVideoProgress = clamp((current / duration) * 100, 0, 100);
+
+    if (progressControl) {
+      progressControl.value = String(currentVideoProgress);
+      progressControl.style.setProperty('--video-progress', currentVideoProgress + '%');
+      progressControl.setAttribute(
+        'aria-valuetext',
+        formatTime(current) + ' de ' + formatTime(duration)
+      );
+    }
+    if (timestamp) timestamp.textContent = formatTime(current) + ' / ' + formatTime(duration);
+    persistProgress(currentVideoProgress, {silent: true}).catch(function () {
+      /* The next 5% milestone retries without showing a false success state. */
+    });
+  }
+
+  function startProgressTracking() {
+    window.clearInterval(progressInterval);
+    updateProgress();
+    progressInterval = window.setInterval(updateProgress, 250);
+  }
+
+  function stopProgressTracking() {
+    window.clearInterval(progressInterval);
+    progressInterval = null;
+  }
+
+  function togglePlay() {
+    if (!player) return;
+    if (isPlaying()) player.pauseVideo();
+    else player.playVideo();
+  }
+
+  function seekBy(seconds) {
+    if (!player) return;
+    var duration = Number(player.getDuration()) || 0;
+    var next = clamp((Number(player.getCurrentTime()) || 0) + seconds, 0, duration);
+    player.seekTo(next, true);
+    updateProgress();
+  }
+
+  function toggleMute() {
+    if (!player) return;
+    if (player.isMuted()) player.unMute();
+    else player.mute();
+    updateMuteState();
+  }
+
+  function toggleFullscreen() {
+    if (!stage) return;
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else if (stage.requestFullscreen) {
+      stage.requestFullscreen();
+    }
+  }
+
+  function handlePlayerAction(action) {
+    if (action === 'toggle') togglePlay();
+    if (action === 'rewind') seekBy(-10);
+    if (action === 'forward') seekBy(10);
+    if (action === 'mute') toggleMute();
+    if (action === 'fullscreen') toggleFullscreen();
+    showControls();
+    if (isPlaying()) startHideTimer();
+  }
+
+  document.querySelectorAll('[data-player-action]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      handlePlayerAction(button.dataset.playerAction);
+    });
+  });
+
+  if (progressControl) {
+    progressControl.addEventListener('input', function () {
+      if (!player) return;
+      var duration = Number(player.getDuration()) || 0;
+      var percentage = clamp(progressControl.value, 0, 100);
+      progressControl.style.setProperty('--video-progress', percentage + '%');
+      player.seekTo((percentage / 100) * duration, true);
+      updateProgress();
+    });
+  }
+
+  if (stage) {
+    stage.addEventListener('mousemove', function () {
+      showControls();
+      if (isPlaying()) startHideTimer();
+    });
+    stage.addEventListener('mouseleave', function () {
+      if (isPlaying()) startHideTimer();
+    });
+    stage.addEventListener('touchstart', function () {
+      showControls();
+      if (isPlaying()) startHideTimer();
+    }, {passive: true});
+    stage.addEventListener('contextmenu', function (event) {
+      event.preventDefault();
+    });
+  }
+
+  if (overlay) {
+    overlay.addEventListener('focusin', showControls);
+    overlay.addEventListener('focusout', function () {
+      if (isPlaying()) startHideTimer();
+    });
+  }
+
+  if (completeButton) {
+    completeButton.addEventListener('click', function () {
+      completeLesson(true);
+    });
+  }
+
+  window.addEventListener('pagehide', function () {
+    if (currentVideoProgress > lastPersistedProgress && currentVideoProgress < 100) {
+      persistProgress(currentVideoProgress, {force: true, silent: true, keepalive: true}).catch(function () {});
+    }
+  });
+
+  if (hasVideo) {
+    window.onYouTubeIframeAPIReady = function () {
+      player = new window.YT.Player('player', {
+        videoId: '{{ video.code|e if video else "" }}',
         playerVars: {
-            controls: 0,
-            modestbranding: 1,
-            rel: 0,
-            fs: 0,
-            iv_load_policy: 3,
-            playsinline: 1,
+          controls: 0,
+          modestbranding: 1,
+          rel: 0,
+          fs: 0,
+          iv_load_policy: 3,
+          playsinline: 1
         },
         events: {
-            onReady: onPlayerReady,
-            onStateChange: onPlayerStateChange,
-        }
-    });
-}
-
-function onPlayerReady() {
-    showBigPlay();
-    showControls();
-    var dur = player.getDuration();
-    if (dur > 0) document.getElementById('timestamp').textContent = '00:00 / ' + formatTime(dur);
-    var container = document.querySelector('.relative.bg-black');
-    container.addEventListener('mousemove', function() {
-        if (player.getPlayerState() === YT.PlayerState.PLAYING) {
+          onReady: function () {
             showControls();
-            startHideTimer();
+            updatePlayState();
+            updateMuteState();
+            updateProgress();
+          },
+          onStateChange: function (event) {
+            updatePlayState();
+            if (event.data === window.YT.PlayerState.PLAYING) {
+              startProgressTracking();
+              startHideTimer();
+            } else {
+              stopProgressTracking();
+              showControls();
+              window.clearTimeout(controlsTimer);
+            }
+            if (event.data === window.YT.PlayerState.ENDED) {
+              currentVideoProgress = 100;
+              completeLesson(false);
+            }
+          }
         }
-    });
-    container.addEventListener('mouseleave', function() {
-        if (player.getPlayerState() === YT.PlayerState.PLAYING) {
-            startHideTimer();
-        }
-    });
-    container.addEventListener('contextmenu', function(e) {
-        e.preventDefault();
-    });
-    document.getElementById('progress-track').addEventListener('click', function(e) {
-        if (!player) return;
-        var rect = this.getBoundingClientRect();
-        var pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-        player.seekTo(pct * player.getDuration(), true);
-        updateProgress();
-    });
-}
-
-function onPlayerStateChange(event) {
-    updatePlayButton();
-    if (event.data === YT.PlayerState.PLAYING) {
-        hideBigPlay();
-        startHideTimer();
-        startProgressTracking();
-    } else if (event.data === YT.PlayerState.PAUSED) {
-        showBigPlay();
-        showControls();
-        clearTimeout(controlsTimer);
-        stopProgressTracking();
-    } else if (event.data === YT.PlayerState.ENDED) {
-        stopProgressTracking();
-    }
-}
-
-function togglePlay() {
-    if (!player) return;
-    if (player.getPlayerState() === YT.PlayerState.PLAYING) {
-        player.pauseVideo();
-    } else {
-        player.playVideo();
-    }
-}
-
-function rewind() {
-    if (!player) return;
-    player.seekTo(player.getCurrentTime() - 10, true);
-}
-
-function updatePlayButton() {
-    if (!player) return;
-    var playing = player.getPlayerState() === YT.PlayerState.PLAYING;
-    document.getElementById('play-icon').classList.toggle('hidden', playing);
-    document.getElementById('pause-icon').classList.toggle('hidden', !playing);
-}
-
-function showControls() {
-    clearTimeout(controlsTimer);
-    var overlay = document.getElementById('controls-overlay');
-    overlay.classList.remove('opacity-0');
-}
-
-function hideControls() {
-    var overlay = document.getElementById('controls-overlay');
-    if (player.getPlayerState() !== YT.PlayerState.PAUSED) {
-        overlay.classList.add('opacity-0');
-    }
-}
-
-function startHideTimer() {
-    clearTimeout(controlsTimer);
-    controlsTimer = setTimeout(hideControls, 4000);
-}
-
-function showBigPlay() {
-    document.getElementById('big-play-btn').classList.remove('hidden');
-}
-
-function hideBigPlay() {
-    document.getElementById('big-play-btn').classList.add('hidden');
-}
-
-function formatTime(seconds) {
-    var m = Math.floor(seconds / 60);
-    var s = Math.floor(seconds % 60);
-    return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
-}
-
-function startProgressTracking() {
-    updateProgress();
-    progressInterval = setInterval(updateProgress, 250);
-}
-
-function stopProgressTracking() {
-    clearInterval(progressInterval);
-}
-
-function updateProgress() {
-    if (!player) return;
-    var current = player.getCurrentTime();
-    var duration = player.getDuration();
-    if (duration <= 0) return;
-    var pct = (current / duration) * 100;
-    document.getElementById('progress-fill').style.width = pct + '%';
-    document.getElementById('progress-thumb').style.left = pct + '%';
-    document.getElementById('timestamp').textContent = formatTime(current) + ' / ' + formatTime(duration);
-}
+      });
+    };
+  }
+}());
 </script>
+{% if video %}
+<script src="https://www.youtube.com/iframe_api"></script>
+{% endif %}
 {% endblock %}

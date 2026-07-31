@@ -1,21 +1,19 @@
 {% extends "base.html" %}
 
-{% block title %}Não encontrado - Mundu Academy{% endblock %}
-{% block page_title %}404{% endblock %}
+{% block title %}Caminho não encontrado — Mundu Academy{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/auth.css') }}">
+{% endblock %}
 
 {% block content %}
-<section class="not-found">
-  <div class="not-found-icon">
-    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-  </div>
-  <h1 class="not-found-title">Não achei isso por aqui</h1>
-  <p class="not-found-resource">{{ resource or 'O caminho que você seguiu não existe (mais).' }}</p>
-  <div class="not-found-actions">
-    <a href="/" class="btn-primary">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      Voltar pro Início
-    </a>
-    <a href="/guild" class="btn-outline">Explorar a Guild →</a>
+<section class="system-state">
+  <div class="system-state__orbit" aria-hidden="true"><span>4</span><span>0</span><span>4</span></div>
+  <span class="m-eyebrow">Caminho não encontrado</span>
+  <h1>Esta página saiu da rota.</h1>
+  <p>{{ resource or 'O endereço pode ter mudado ou nunca ter existido.' }} Você pode retomar sua jornada por um destino conhecido.</p>
+  <div class="m-actions">
+    <a class="m-button m-button--primary" href="/"><i data-lucide="house" aria-hidden="true"></i>Voltar ao início</a>
+    <a class="m-button m-button--secondary" href="/explorar">Explorar conteúdos</a>
   </div>
 </section>
 {% endblock %}

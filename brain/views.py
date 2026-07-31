@@ -23,6 +23,7 @@ def my_brain(request):
         tab = 'private'
 
     notes = BrainNote.objects.filter(user=request.user).order_by('-id')
+    public_notes_count = notes.filter(is_public=True).count()
 
     my_brain_karma = 0
     perfil = getattr(request.user, 'perfil', None)
@@ -87,7 +88,7 @@ def my_brain(request):
         'forks': forks,
         'followers': followers_data,
         'public_notes': public_notes_data,
-        'public_notes_count': len(public_notes_data),
+        'public_notes_count': public_notes_count,
         'brain_karma': my_brain_karma,
     }
 

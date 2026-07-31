@@ -3,15 +3,16 @@
 {% block professor_content %}
 <div class="prof-page-head">
   <div>
-    <span class="prof-eyebrow">Conteúdo</span>
+    <span class="prof-eyebrow">Experiências em vídeo</span>
     <h1>Aulas</h1>
+    <p>Revise a sequência, a duração e o acesso de cada aula.</p>
   </div>
   <a href="/professor/aulas/nova/" class="prof-btn primary"><i data-lucide="plus"></i><span>Criar</span></a>
 </div>
 
 <form class="prof-search" method="get">
   <i data-lucide="search"></i>
-  <input type="search" name="q" value="{{ q }}" placeholder="Pesquisar aulas">
+  <input type="search" name="q" value="{{ q }}" placeholder="Pesquisar aulas ou cursos">
   <button type="submit">Pesquisar</button>
 </form>
 
@@ -29,7 +30,7 @@
         <td class="prof-actions">
           <a class="prof-icon-btn" href="/professor/aulas/{{ aula.id }}/" aria-label="Visualizar"><i data-lucide="eye"></i></a>
           <a class="prof-icon-btn" href="/professor/aulas/{{ aula.id }}/editar/" aria-label="Editar"><i data-lucide="pencil"></i></a>
-          <form method="post" action="/professor/aulas/{{ aula.id }}/excluir/" onsubmit="return confirm('Excluir esta aula?')">
+          <form method="post" action="/professor/aulas/{{ aula.id }}/excluir/" data-confirm="Excluir esta aula?">
             {{ csrf_input }}
             <button class="prof-icon-btn danger" type="submit" aria-label="Excluir"><i data-lucide="trash-2"></i></button>
           </form>
@@ -43,4 +44,3 @@
 </div>
 {% include "professor/partials/pagination.html" %}
 {% endblock %}
-

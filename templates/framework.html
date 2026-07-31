@@ -1,326 +1,451 @@
 {% extends "base.html" %}
 
-{% block title %}{{ framework.title }} - The Library{% endblock %}
-{% block page_title %}{{ framework.title }}{% endblock %}
+{% block title %}{{ framework.title }} — Library{% endblock %}
+{% block meta_description %}{{ framework.description }}{% endblock %}
+{% block body_class %}knowledge-page{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/knowledge.css') }}">
+{% endblock %}
 
 {% block content %}
+<div class="k-page">
+  <nav class="k-breadcrumb" aria-label="Navegação estrutural">
+    <a href="/library">Library</a>
+    <i data-lucide="chevron-right" aria-hidden="true"></i>
+    <span>Frameworks</span>
+    <i data-lucide="chevron-right" aria-hidden="true"></i>
+    <span aria-current="page">{{ framework.title }}</span>
+  </nav>
 
-<!-- Breadcrumb -->
-<nav class="thread-breadcrumb">
-  <a href="/library">Library</a>
-  <span class="meta-dot">›</span>
-  <span>Frameworks</span>
-  <span class="meta-dot">›</span>
-  <span class="breadcrumb-current">{{ framework.title }}</span>
-</nav>
-
-<!-- Layout 2 colunas -->
-<div class="community-layout">
-  <main class="community-main">
-
-    <!-- ============ HERO DO FRAMEWORK ============ -->
-    <section class="framework-hero framework-{{ framework.color }}">
-      <div class="framework-hero-top">
-        <div class="framework-hero-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" x2="15" y1="13" y2="13"/><line x1="9" x2="15" y1="17" y2="17"/></svg>
+  <div class="k-product">
+    <div class="k-product__main">
+      <article class="k-product__hero" data-tone="{{ framework.color }}">
+        <div class="k-product__meta">
+          <span class="m-chip m-chip--green">{{ framework.format or 'Framework' }}</span>
+          <span class="k-product__version">{{ framework.version or 'Versão atual' }}</span>
         </div>
-        <div class="framework-hero-meta">
-          <span class="framework-version">{{ framework.version }}</span>
-          <span class="framework-format-pill">{{ framework.format }}</span>
+        <h1 class="k-product__title">{{ framework.title }}</h1>
+        <p class="k-product__promise">
+          {{ framework.long_description or framework.description }}
+        </p>
+        <div class="k-product__actions">
+          {% if request.user.is_authenticated %}
+          <button class="m-button m-button--primary m-button--lg"
+            id="frameworkFork"
+            type="button"
+            data-framework-id="{{ framework.framework_id }}"
+            data-framework-title="{{ framework.title|e }}">
+            <i data-lucide="git-fork" aria-hidden="true"></i>
+            Criar minha versão
+          </button>
+          <button class="m-button m-button--secondary m-button--lg"
+            id="frameworkShare"
+            type="button"
+            data-framework-id="{{ framework.framework_id }}"
+            data-framework-title="{{ framework.title|e }}">
+            <i data-lucide="messages-square" aria-hidden="true"></i>
+            Levar para a Guild
+          </button>
+          {% else %}
+          <a class="m-button m-button--primary m-button--lg"
+            href="/login?next={{ request.path }}">
+            Entrar para criar minha versão
+          </a>
+          {% endif %}
         </div>
-      </div>
+      </article>
 
-      <h1 class="framework-hero-title">{{ framework.title }}</h1>
-      <p class="framework-hero-desc">{{ framework.long_description }}</p>
-
-      <!-- Social meta hero -->
-      <div class="framework-hero-stats">
-        <div class="framework-hero-stat">
+      <div class="k-product__proof" aria-label="Prova social do framework">
+        <div class="k-product__proof-item">
           <strong>{{ framework.rating }}</strong>
-          <span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-            {{ framework.reviews_count }} reviews
-          </span>
+          <span>média em {{ framework.reviews_count }} avaliações</span>
         </div>
-        <div class="framework-hero-stat">
+        <div class="k-product__proof-item">
           <strong>{{ framework.uses }}</strong>
-          <span>usos totais</span>
+          <span>usos registrados</span>
         </div>
-        <div class="framework-hero-stat">
+        <div class="k-product__proof-item">
           <strong>{{ framework.forks }}</strong>
-          <span>forks</span>
+          <span>versões criadas</span>
         </div>
-        <div class="framework-hero-stat live">
-          <span class="reel-live-dot"></span>
+        <div class="k-product__proof-item">
           <strong>{{ framework.active_now }}</strong>
           <span>usando agora</span>
         </div>
       </div>
 
-      <div class="framework-hero-editor">
-        <span class="framework-editor-label">Última edição:</span>
-        <a href="/u/{{ editor.handle }}" class="framework-editor-pill">
-          <span class="framework-editor-avatar">{{ editor.iniciais }}</span>
-          <div>
-            <strong>{{ editor.nome_completo }}</strong>
-            <span>{{ framework.last_edit_at }}</span>
+      <section class="k-section" aria-labelledby="application-title">
+        <header class="k-section__head">
+          <div class="k-section__copy">
+            <span class="k-section__eyebrow">Da ideia à prática</span>
+            <h2 class="k-section__title" id="application-title">Como aplicar este framework</h2>
+            <p class="k-section__description">
+              Comece pelo contexto, adapte à sua realidade e registre o que funcionou.
+            </p>
           </div>
-        </a>
-      </div>
+        </header>
+        <ol class="k-steps">
+          <li class="k-step">
+            <h3>Defina a decisão</h3>
+            <p>Escolha uma situação concreta em que este framework possa melhorar sua próxima ação.</p>
+          </li>
+          <li class="k-step">
+            <h3>Crie sua versão</h3>
+            <p>Faça um fork para guardar uma cópia no My Brain e adapte a linguagem ao seu contexto.</p>
+          </li>
+          <li class="k-step">
+            <h3>Teste e registre</h3>
+            <p>Aplique em uma situação real e volte para compartilhar uma avaliação honesta.</p>
+          </li>
+        </ol>
+      </section>
 
-      <div class="framework-hero-actions">
-        <button class="btn-primary" onclick="openFramework('{{ framework.title|e }}')">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-          Abrir template (+{{ framework.xp }} XP)
-        </button>
-        <button class="btn-outline" onclick="forkFramework('{{ framework.framework_id }}', '{{ framework.title|e }}')">
-
-        <button class="btn-outline" onclick="shareToGuild('framework','{{ framework.framework_id }}','{{ framework.title|e }}')">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><polyline points="9 8 12 11 15 8"/></svg>
-          Compartilhar
-        </button>
-      </div>
-    </section>
-
-    <!-- ============ REVIEWS ============ -->
-    <section class="library-section">
-      <div class="library-section-header">
-        <div>
-          <h2>Reviews</h2>
-          <p>{{ framework.reviews_count }} avaliações · {{ framework.rating }} média</p>
-        </div>
-        <button class="btn-outline btn-outline-sm" onclick="openReviewModal()">
-          Escrever review
-        </button>
-      </div>
-
-      <div class="reviews-list">
-        {% for r in reviews %}
-        <article class="review-card animate-fade-in-up" data-delay="{{ loop.index0 * 0.05 }}">
-          <a href="/u/{{ r.author_handle }}" class="review-author">
-            <span class="review-avatar">{{ r.author_user.iniciais }}</span>
-            <div>
-              <strong>{{ r.author_user.nome_completo }}</strong>
-              <span>{{ r.author_user.role }}</span>
-            </div>
-          </a>
-          <div class="review-meta">
-            <div class="review-stars">
-              {% for i in range(r.rating) %}
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              {% endfor %}
-              {% for i in range(5 - r.rating) %}
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              {% endfor %}
-            </div>
-            <span class="review-time">{{ r.time_ago }}</span>
+      <section class="k-section" aria-labelledby="reviews-title">
+        <header class="k-section__head">
+          <div class="k-section__copy">
+            <span class="k-section__eyebrow">Experiência da comunidade</span>
+            <h2 class="k-section__title" id="reviews-title">O que muda na prática</h2>
+            <p class="k-section__description">
+              {{ framework.reviews_count }} avaliações · média {{ framework.rating }} de 5
+            </p>
           </div>
-          <p class="review-text">{{ r.text }}</p>
-          <div class="review-actions">
-            <button class="review-helpful">
-              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H7"/></svg>
-              {{ r.helpful }} útil
-            </button>
-            <button class="review-helpful">Responder</button>
-          </div>
-        </article>
-        {% endfor %}
-
-        {% if not reviews %}
-        <div class="empty-state">
-          <p>Esse framework ainda não tem reviews. <button class="author-link" onclick="openReviewModal()" type="button">Seja o primeiro</button>.</p>
-        </div>
-        {% endif %}
-      </div>
-    </section>
-
-    <!-- Related -->
-    {% if related %}
-    <section class="library-section">
-      <div class="library-section-header">
-        <div>
-          <h2>Frameworks relacionados</h2>
-          <p>Outros do mesmo tema que combinam com esse</p>
-        </div>
-      </div>
-      <div class="frameworks-grid">
-        {% for rf in related %}
-        <a href="/library/framework/{{ rf.slug }}" class="framework-card framework-{{ rf.color }} animate-fade-in-up" data-delay="{{ loop.index0 * 0.05 }}">
-          <div class="framework-card-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          </div>
-          <span class="framework-card-format">{{ rf.format }}</span>
-          <h3 class="framework-card-title">{{ rf.title }}</h3>
-          <p class="framework-card-desc">{{ rf.description }}</p>
-          <div class="framework-card-footer">
-            <span class="framework-rating">
-              <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              <strong>{{ rf.rating }}</strong>
-            </span>
-            <span class="framework-card-uses">{{ rf.uses }} usos</span>
-          </div>
-        </a>
-        {% endfor %}
-      </div>
-    </section>
-    {% endif %}
-  </main>
-
-  <!-- Sidebar -->
-  <aside class="community-sidebar">
-    <div class="sidebar-card">
-      <h3 class="sidebar-card-title">Como usar</h3>
-      <ol class="sidebar-rules">
-        <li><span class="rule-num">1</span><span class="rule-text">Clique em "Abrir template" para receber a versão pronta no Notion ou PDF.</span></li>
-        <li><span class="rule-num">2</span><span class="rule-text">Preenche e usa numa situação real essa semana.</span></li>
-        <li><span class="rule-num">3</span><span class="rule-text">Se quiser adaptar à sua realidade, faça um <em>fork</em> e ele vai pra seu Brain.</span></li>
-        <li><span class="rule-num">4</span><span class="rule-text">Volta aqui e deixa review pra ajudar quem vem depois.</span></li>
-      </ol>
-    </div>
-
-    <div class="sidebar-card">
-      <h3 class="sidebar-card-title">Detalhes</h3>
-      <div class="sidebar-detail-list">
-        <div><span>Formato</span><strong>{{ framework.format }}</strong></div>
-        <div><span>Versão</span><strong>{{ framework.version }}</strong></div>
-        <div><span>XP</span><strong>+{{ framework.xp }}</strong></div>
-        <div><span>Forks</span><strong>{{ framework.forks }}</strong></div>
-        <div><span>Última edição</span><strong>{{ framework.last_edit_at }}</strong></div>
-      </div>
-    </div>
-
-    <div class="sidebar-card sidebar-explore-cta">
-      <h3 class="sidebar-card-title">Discutir na Guild</h3>
-      <p>Já aplicou este framework? Compartilhe seu caso na comunidade.</p>
-      <button class="sidebar-card-cta" onclick="shareToGuild('framework','{{ framework.framework_id }}','{{ framework.title|e }}')">
-        Compartilhar caso →
-      </button>
-    </div>
-  </aside>
-</div>
-
-<!-- Review Modal -->
-<div class="composer-backdrop" id="reviewBackdrop" onclick="closeReviewModal(event)">
-  <div class="composer-modal review-modal" onclick="event.stopPropagation()">
-    <div class="composer-header">
-      <div>
-        <div class="composer-eyebrow">Escrever review</div>
-        <h3 class="composer-title">Como foi sua experiência com {{ framework.title }}?</h3>
-      </div>
-      <button class="composer-close" onclick="closeReviewModal()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-      </button>
-    </div>
-
-    <div class="composer-body">
-      <div class="star-rating-input">
-        <label>Nota:</label>
-        <div id="starRating" data-rating="0">
-          {% for i in range(1, 6) %}
-          <button type="button" class="star-btn" data-value="{{ i }}" onclick="setStarRating({{ i }})">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          {% if request.user.is_authenticated %}
+          <button class="m-button m-button--secondary"
+            id="openReviewDialog"
+            type="button">
+            Escrever avaliação
           </button>
+          {% else %}
+          <a class="m-button m-button--secondary" href="/login?next={{ request.path }}">
+            Entrar para avaliar
+          </a>
+          {% endif %}
+        </header>
+
+        {% if reviews %}
+        <div class="k-review-list">
+          {% for review in reviews %}
+          <article class="k-review">
+            <a class="k-person" href="/u/{{ review.author_handle }}">
+              <span class="k-person__avatar">{{ review.author_user.iniciais }}</span>
+              <span>
+                <strong>{{ review.author_user.nome_completo }}</strong>
+                <span>{{ review.author_user.role }}</span>
+              </span>
+            </a>
+            <div>
+              <div class="k-review__stars" aria-label="{{ review.rating }} de 5 estrelas">
+                {% for i in range(review.rating) %}
+                <i class="is-filled" data-lucide="star" aria-hidden="true"></i>
+                {% endfor %}
+                {% for i in range(5 - review.rating) %}
+                <i data-lucide="star" aria-hidden="true"></i>
+                {% endfor %}
+              </div>
+              <time class="k-review__time">{{ review.time_ago }}</time>
+              <p class="k-review__text">{{ review.text }}</p>
+              {% if review.helpful %}
+              <p class="k-review__time">{{ review.helpful }} pessoas acharam esta avaliação útil</p>
+              {% endif %}
+            </div>
+          </article>
           {% endfor %}
         </div>
-      </div>
-      <textarea id="reviewText" class="composer-textarea" rows="5" placeholder="Como você aplicou? O que funcionou ou não? Seja específico — outros estão decidindo se vão investir tempo nisso."></textarea>
+        {% else %}
+        <div class="m-empty">
+          <div class="m-empty__inner">
+            <span class="m-empty__icon"><i data-lucide="message-circle" aria-hidden="true"></i></span>
+            <h3>Ainda não há avaliações</h3>
+            <p>Depois de aplicar o framework, registre o que funcionou para orientar outras pessoas.</p>
+          </div>
+        </div>
+        {% endif %}
+      </section>
+
+      {% if related_frameworks %}
+      <section class="k-section" aria-labelledby="related-title">
+        <header class="k-section__head">
+          <div class="k-section__copy">
+            <span class="k-section__eyebrow">Continue explorando</span>
+            <h2 class="k-section__title" id="related-title">Frameworks relacionados</h2>
+          </div>
+        </header>
+        <div class="k-related">
+          {% for related in related_frameworks %}
+          <a class="k-related__item" href="/library/framework/{{ related.slug }}">
+            <span class="k-related__format">{{ related.format or 'Framework' }}</span>
+            <h3 class="k-related__title">{{ related.title }}</h3>
+            <p class="k-related__description">{{ related.description }}</p>
+          </a>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
     </div>
 
-    <div class="composer-footer">
-      <span class="composer-hint">Reviews honestas ajudam mais que reviews bonzinhas.</span>
-      <div class="composer-footer-actions">
-        <button class="btn-outline" onclick="closeReviewModal()">Cancelar</button>
-        <button class="btn-primary" onclick="submitReview()">Publicar</button>
-      </div>
-    </div>
+    <aside class="k-product__aside" aria-label="Detalhes do framework">
+      <section class="k-aside-card">
+        <h2 class="k-aside-card__title">Curadoria e versão</h2>
+        {% if editor.handle %}
+        <a class="k-editor" href="/u/{{ editor.handle }}">
+          <span class="k-editor__avatar">{{ editor.iniciais }}</span>
+          <span>
+            <strong>{{ editor.nome_completo }}</strong>
+            <span>Última edição {{ framework.last_edit_at }}</span>
+          </span>
+        </a>
+        {% else %}
+        <div class="k-editor">
+          <span class="k-editor__avatar">M</span>
+          <span>
+            <strong>Curadoria Mundu</strong>
+            <span>{{ framework.last_edit_at }}</span>
+          </span>
+        </div>
+        {% endif %}
+        <dl class="k-detail-list">
+          <div>
+            <dt>Formato</dt>
+            <dd>{{ framework.format or 'Framework' }}</dd>
+          </div>
+          <div>
+            <dt>Versão</dt>
+            <dd>{{ framework.version or 'Atual' }}</dd>
+          </div>
+          <div>
+            <dt>Usos</dt>
+            <dd>{{ framework.uses }}</dd>
+          </div>
+          <div>
+            <dt>Forks</dt>
+            <dd>{{ framework.forks }}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="k-aside-card">
+        <h2 class="k-aside-card__title">Seu próximo passo</h2>
+        <p class="k-section__description">
+          Capture a decisão que este framework pode ajudar você a tomar.
+        </p>
+        <button class="m-button m-button--quiet m-button--sm"
+          type="button"
+          data-open-quicknote
+          data-note-title="{{ framework.title|e }}"
+          data-note-source="Framework: {{ framework.title|e }}">
+          <i data-lucide="notebook-pen" aria-hidden="true"></i>
+          Registrar insight
+        </button>
+      </section>
+    </aside>
   </div>
 </div>
 
+{% if request.user.is_authenticated %}
+<div class="k-dialog-backdrop" id="reviewDialog" aria-hidden="true" hidden>
+  <section class="k-dialog" role="dialog" aria-modal="true" aria-labelledby="reviewDialogTitle">
+    <form id="reviewForm">
+      <header class="k-dialog__header">
+        <div>
+          <span class="k-section__eyebrow">Avaliação honesta</span>
+          <h2 class="k-dialog__title" id="reviewDialogTitle">Como foi aplicar {{ framework.title }}?</h2>
+        </div>
+        <button class="m-icon-button" id="closeReviewDialog" type="button" aria-label="Fechar">
+          <i data-lucide="x" aria-hidden="true"></i>
+        </button>
+      </header>
+      <div class="k-dialog__body">
+        <div class="m-field">
+          <span class="m-field__label" id="ratingLabel">Sua nota</span>
+          <div class="k-stars-input" id="reviewRating" role="group" aria-labelledby="ratingLabel">
+            {% for rating in range(1, 6) %}
+            <button class="k-star-button"
+              type="button"
+              data-rating="{{ rating }}"
+              aria-label="{{ rating }} estrela{% if rating != 1 %}s{% endif %}"
+              aria-pressed="false">
+              <i data-lucide="star" aria-hidden="true"></i>
+            </button>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="m-field">
+          <label for="reviewText">O que funcionou — ou não?</label>
+          <textarea class="m-textarea" id="reviewText" rows="6" required
+            placeholder="Conte qual situação você enfrentou e o que este framework mudou."></textarea>
+        </div>
+        <p class="k-dialog__error" id="reviewError" role="alert"></p>
+      </div>
+      <footer class="k-dialog__footer">
+        <button class="m-button m-button--quiet" id="cancelReview" type="button">Cancelar</button>
+        <button class="m-button m-button--primary" id="submitReview" type="submit">
+          Publicar avaliação
+        </button>
+      </footer>
+    </form>
+  </section>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
 <script>
-  function openFramework(title) {
-    showToast('Template "' + title + '" copiado pro seu workspace (+{{ framework.xp }} XP)');
-  }
+  (function () {
+    async function requestJSON(url, options) {
+      var response = await fetch(url, options);
+      var payload = await response.json().catch(function () { return {}; });
+      if (response.redirected && response.url.indexOf('/login') !== -1) {
+        throw new Error('Sua sessão expirou. Entre novamente para continuar.');
+      }
+      if (!response.ok || payload.ok !== true) {
+        throw new Error(payload.erro || payload.error || 'Não foi possível concluir esta ação.');
+      }
+      return payload;
+    }
 
-  function forkFramework(fwId, title) {
-    fetch('/api/framework/' + fwId + '/fork', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({})
-    })
-    .then(function(r){ return r.json(); })
-    .then(function(){
-      showToast('"' + title + '" forkado para o seu Brain');
-    })
-    .catch(function(){ showToast('Erro ao forkar'); });
-  }
+    var forkButton = document.getElementById('frameworkFork');
+    if (forkButton) {
+      forkButton.addEventListener('click', async function () {
+        forkButton.disabled = true;
+        forkButton.setAttribute('aria-busy', 'true');
+        try {
+          await requestJSON('/api/framework/' + forkButton.dataset.frameworkId + '/fork', {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({})
+          });
+          showToast('Sua versão foi criada no My Brain');
+        } catch (error) {
+          showToast(error.message, 'danger');
+        } finally {
+          forkButton.disabled = false;
+          forkButton.removeAttribute('aria-busy');
+        }
+      });
+    }
 
-  function shareToGuild(sourceType, sourceId, title) {
-    fetch('/api/share-to-guild', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({source_type: sourceType, source_id: sourceId, community_slug: 'gestao-pessoas'})
-    })
-    .then(function(r){ return r.json(); })
-    .then(function(){ showToast('"' + title + '" compartilhado na Guild'); })
-    .catch(function(){ showToast('Erro ao compartilhar'); });
-  }
+    var shareButton = document.getElementById('frameworkShare');
+    if (shareButton) {
+      shareButton.addEventListener('click', async function () {
+        shareButton.disabled = true;
+        shareButton.setAttribute('aria-busy', 'true');
+        try {
+          await requestJSON('/api/share-to-guild', {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              source_type: 'framework',
+              source_id: shareButton.dataset.frameworkId,
+              community_slug: 'gestao-pessoas'
+            })
+          });
+          showToast('Framework compartilhado na Guild');
+        } catch (error) {
+          showToast(error.message, 'danger');
+        } finally {
+          shareButton.disabled = false;
+          shareButton.removeAttribute('aria-busy');
+        }
+      });
+    }
 
-  // Review modal
-  var currentRating = 0;
-  function setStarRating(n) {
-    currentRating = n;
-    document.getElementById('starRating').dataset.rating = n;
-    document.querySelectorAll('.star-btn').forEach(function(b){
-      var v = parseInt(b.dataset.value, 10);
-      b.classList.toggle('star-filled', v <= n);
+    var dialog = document.getElementById('reviewDialog');
+    var openDialogButton = document.getElementById('openReviewDialog');
+    var closeDialogButton = document.getElementById('closeReviewDialog');
+    var cancelButton = document.getElementById('cancelReview');
+    var reviewForm = document.getElementById('reviewForm');
+    var reviewText = document.getElementById('reviewText');
+    var reviewError = document.getElementById('reviewError');
+    var submitButton = document.getElementById('submitReview');
+    var rating = 0;
+
+    function setRating(value) {
+      rating = value;
+      document.querySelectorAll('[data-rating]').forEach(function (button) {
+        var selected = Number(button.dataset.rating) <= value;
+        button.classList.toggle('is-selected', selected);
+        button.setAttribute('aria-pressed', selected ? 'true' : 'false');
+      });
+    }
+
+    function openDialog() {
+      if (!dialog) return;
+      dialog.hidden = false;
+      dialog.setAttribute('aria-hidden', 'false');
+      var firstStar = dialog.querySelector('[data-rating]');
+      if (firstStar) firstStar.focus();
+    }
+
+    function closeDialog() {
+      if (!dialog) return;
+      dialog.hidden = true;
+      dialog.setAttribute('aria-hidden', 'true');
+      if (openDialogButton) openDialogButton.focus();
+    }
+
+    document.querySelectorAll('[data-rating]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        setRating(Number(button.dataset.rating));
+      });
     });
-  }
-  function openReviewModal() {
-    var bd = document.getElementById('reviewBackdrop');
-    if (bd) bd.classList.add('open');
-  }
-  function closeReviewModal(ev) {
-    if (ev && ev.currentTarget !== ev.target) return;
-    var bd = document.getElementById('reviewBackdrop');
-    if (bd) bd.classList.remove('open');
-  }
-  function submitReview() {
-    var text = (document.getElementById('reviewText').value || '').trim();
-    if (!currentRating) { showToast('Escolha uma nota de 1 a 5'); return; }
-    if (!text) {
-      document.getElementById('reviewText').focus();
-      return;
-    }
-    fetch('/api/framework/{{ framework.framework_id }}/review', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({rating: currentRating, text: text})
-    })
-    .then(function(r){ return r.json(); })
-    .then(function(){
-      closeReviewModal();
-      document.getElementById('reviewText').value = '';
-      setStarRating(0);
-      showToast('Review publicada — obrigado!');
-    })
-    .catch(function(){ showToast('Erro ao publicar review'); });
-  }
-  window.openFramework = openFramework;
-  window.forkFramework = forkFramework;
-  window.shareToGuild = shareToGuild;
-  window.setStarRating = setStarRating;
-  window.openReviewModal = openReviewModal;
-  window.closeReviewModal = closeReviewModal;
-  window.submitReview = submitReview;
 
-  document.addEventListener('keydown', function(e){
-    if (e.key === 'Escape') {
-      var bd = document.getElementById('reviewBackdrop');
-      if (bd && bd.classList.contains('open')) closeReviewModal();
+    if (openDialogButton) openDialogButton.addEventListener('click', openDialog);
+    if (closeDialogButton) closeDialogButton.addEventListener('click', closeDialog);
+    if (cancelButton) cancelButton.addEventListener('click', closeDialog);
+    if (dialog) {
+      dialog.addEventListener('click', function (event) {
+        if (event.target === dialog) closeDialog();
+      });
     }
-  });
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape' && dialog && !dialog.hidden) closeDialog();
+    });
+
+    if (reviewForm) {
+      reviewForm.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        var text = reviewText.value.trim();
+
+        if (!rating) {
+          reviewError.textContent = 'Escolha uma nota de 1 a 5.';
+          return;
+        }
+        if (!text) {
+          reviewError.textContent = 'Conte brevemente como foi sua experiência.';
+          reviewText.focus();
+          return;
+        }
+
+        reviewError.textContent = '';
+        submitButton.disabled = true;
+        submitButton.setAttribute('aria-busy', 'true');
+
+        try {
+          await requestJSON('/api/framework/{{ framework.framework_id }}/review', {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({rating: rating, text: text})
+          });
+          closeDialog();
+          showToast('Avaliação publicada. Obrigado por contribuir.');
+          window.setTimeout(function () { window.location.reload(); }, 650);
+        } catch (error) {
+          reviewError.textContent = error.message;
+        } finally {
+          submitButton.disabled = false;
+          submitButton.removeAttribute('aria-busy');
+        }
+      });
+    }
+  }());
 </script>
 {% endblock %}

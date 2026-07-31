@@ -1,306 +1,281 @@
 {% extends "base.html" %}
 
-{% block title %}Ao Vivo - Mundu Academy{% endblock %}
-{% block page_title %}Ao Vivo{% endblock %}
+{% block title %}Ao vivo — Mundu Academy{% endblock %}
+{% block meta_description %}Transmissões, agenda e replays de aprendizado da Mundu Academy.{% endblock %}
+{% block body_class %}learning-body{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/learning.css') }}">
+{% endblock %}
 
 {% block content %}
-<div class="px-4 md:px-8 py-4 md:py-6 space-y-6 pb-20 md:pb-6 w-full max-w-7xl mx-auto">
-  
-  <!-- Header -->
-  <div class="flex items-center gap-3">
-    <div class="p-2 rounded-lg bg-live/20">
-      <i data-lucide="radio" class="h-6 w-6 text-live"></i>
-    </div>
+<div class="m-page learning-page">
+  <header class="live-page__intro">
     <div>
-      <h1 class="text-2xl font-bold text-foreground">Ao Vivo</h1>
-      <p class="text-muted-foreground text-sm">Lives, replays e interações em tempo real</p>
-    </div>
-  </div>
-
-  <!-- Tabs Navigation -->
-  <div class="w-full">
-    <div class="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground w-full flex bg-card/50 border border-border/50">
-      <button onclick="switchTab('ao-vivo')" id="tab-btn-ao-vivo" class="tab-btn inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 gap-1 md:gap-2 px-2 sm:px-4 md:px-8 flex-1 text-xs sm:text-sm bg-background text-foreground shadow">
-        <i data-lucide="radio" class="h-3 w-3 md:h-4 md:w-4"></i>
-        <span class="hidden sm:inline">Ao Vivo Agora</span>
-        <span class="sm:hidden">Ao Vivo</span>
-      </button>
-      <button onclick="switchTab('agenda')" id="tab-btn-agenda" class="tab-btn inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 gap-1 md:gap-2 px-2 sm:px-4 md:px-8 flex-1 text-xs sm:text-sm">
-        <i data-lucide="calendar" class="h-3 w-3 md:h-4 md:w-4"></i> Agenda
-      </button>
-      <button onclick="switchTab('replays')" id="tab-btn-replays" class="tab-btn inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 gap-1 md:gap-2 px-2 sm:px-4 md:px-8 flex-1 text-xs sm:text-sm">
-        <i data-lucide="play" class="h-3 w-3 md:h-4 md:w-4"></i> Replays
-      </button>
+      <span class="m-eyebrow">Encontros Mundu</span>
+      <h1 class="m-display m-display--sm">Aprendizado que acontece junto.</h1>
+      <p class="m-lead">Entre no palco ao vivo, acompanhe a agenda e reveja conversas que merecem permanecer.</p>
     </div>
 
-    <!-- Tab Content: Ao Vivo -->
-    <div id="tab-content-ao-vivo" class="tab-content mt-6 space-y-6">
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-        
-        <!-- Player Principal -->
-        <div class="lg:col-span-2 space-y-4">
-          <div class="rounded-xl border bg-card text-card-foreground shadow bg-card/50 border-border/50 overflow-hidden">
-            <!-- Mock Player -->
-            <div class="aspect-video bg-gradient-to-br from-primary/20 to-accent/20 relative">
-              {% if live_now %}
-              <div class="absolute inset-0 flex items-center justify-center">
-                {% if live_now.url_embed %}
-                <iframe src="{{ live_now.url_embed }}" class="w-full h-full" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-                {% else %}
-                <div class="text-center space-y-4">
-                  <div class="w-20 h-20 rounded-full bg-live/20 flex items-center justify-center mx-auto animate-pulse">
-                    <i data-lucide="radio" class="h-10 w-10 text-live"></i>
-                  </div>
-                  <p class="text-muted-foreground">{{ live_now.titulo }}</p>
-                </div>
-                {% endif %}
-              </div>
-              <div class="absolute top-4 left-4 flex items-center gap-2">
-                <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-live text-live-foreground gap-1.5 animate-pulse border-transparent"><span class="w-2 h-2 rounded-full bg-live-foreground"></span> AO VIVO</span>
-              </div>
-              {% else %}
-              <div class="absolute inset-0 flex items-center justify-center">
-                <div class="text-center space-y-4">
-                  <div class="w-20 h-20 rounded-full bg-muted/20 flex items-center justify-center mx-auto">
-                    <i data-lucide="radio" class="h-10 w-10 text-muted-foreground"></i>
-                  </div>
-                  <p class="text-muted-foreground">Nenhuma live no momento</p>
-                  <p class="text-xs text-muted-foreground">Verifique a aba Agenda para as próximas transmissões</p>
-                </div>
-              </div>
-              {% endif %}
-            </div>
+    <div class="live-tabs" role="tablist" aria-label="Conteúdo ao vivo">
+      <button class="live-tab" id="live-tab-now" type="button" role="tab"
+        aria-controls="live-panel-now" aria-selected="true" tabindex="0" data-live-tab="now">
+        <i data-lucide="radio" aria-hidden="true"></i>
+        Ao vivo
+      </button>
+      <button class="live-tab" id="live-tab-schedule" type="button" role="tab"
+        aria-controls="live-panel-schedule" aria-selected="false" tabindex="-1" data-live-tab="schedule">
+        <i data-lucide="calendar-days" aria-hidden="true"></i>
+        Agenda
+      </button>
+      <button class="live-tab" id="live-tab-replays" type="button" role="tab"
+        aria-controls="live-panel-replays" aria-selected="false" tabindex="-1" data-live-tab="replays">
+        <i data-lucide="play" aria-hidden="true"></i>
+        Replays
+      </button>
+    </div>
+  </header>
 
-            <!-- Header Info -->
-            <div class="p-4 space-y-4">
-              <div class="flex items-start justify-between gap-4">
-                <div class="flex items-start gap-3">
-                  <span class="relative flex shrink-0 overflow-hidden rounded-full h-12 w-12 border-2 border-primary/50">
-                    <img class="aspect-square h-full w-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop" />
-                  </span>
-                  <div>
-                    <h2 class="text-lg font-bold text-foreground">{{ live_now.titulo if live_now else 'Nenhuma transmissão ativa' }}</h2>
-                    {% if live_now %}
-                    <p class="text-muted-foreground text-sm">{{ live_now.descricao }}</p>
-                    <div class="flex items-center gap-3 mt-1">
-                      {% if live_now.modulo %}
-                      <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-foreground text-xs">{{ live_now.modulo.titulo }}</span>
-                      {% endif %}
-                      {% if live_now.data_inicio %}
-                      <span class="text-xs text-muted-foreground flex items-center gap-1"><i data-lucide="clock" class="h-3 w-3"></i> Iniciou às {{ live_now.data_inicio.strftime('%H:%M') }}</span>
-                      {% endif %}
-                    </div>
-                    {% endif %}
-                  </div>
-                </div>
-                <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-xs bg-primary/20 text-primary border-primary/30 border-transparent">+150 XP</span>
-              </div>
-
-              <!-- Lista Presença -->
-              <div class="rounded-xl border bg-card text-card-foreground shadow bg-muted/30 border-border/30">
-                <div class="p-4">
-                  <div class="flex items-center justify-between mb-3">
-                    <div class="flex items-center gap-2">
-                      <i data-lucide="check-circle" class="h-5 w-5 text-muted-foreground"></i>
-                      <span class="font-medium text-foreground">Lista de Presença</span>
-                    </div>
-                    <span class="text-sm text-muted-foreground">Mínimo: 75%</span>
-                  </div>
-                  <div class="space-y-2">
-                    <div class="flex justify-between text-sm">
-                      <span class="text-muted-foreground">42 min de 90 min</span>
-                      <span class="font-medium text-foreground">47%</span>
-                    </div>
-                    <div class="h-2 w-full bg-secondary/20 rounded-full overflow-hidden">
-                      <div class="h-full bg-primary transition-all" style="width: 47%;"></div>
-                    </div>
-                    <p class="text-xs text-muted-foreground">Assista mais 26 min para confirmar presença.</p>
-                  </div>
-                </div>
-              </div>
+  <section class="live-panel" id="live-panel-now" role="tabpanel"
+    aria-labelledby="live-tab-now" tabindex="0">
+    <div class="live-stage-layout">
+      <div class="live-stage">
+        <div class="live-video">
+          {% if live_now and live_now.url_embed %}
+          <iframe src="{{ live_now.url_embed }}" title="Transmissão ao vivo: {{ live_now.titulo }}"
+            allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+          <span class="live-badge">Ao vivo</span>
+          {% elif live_now %}
+          <div class="live-video__empty">
+            <div>
+              <i data-lucide="radio" aria-hidden="true"></i>
+              <strong>{{ live_now.titulo }}</strong>
+              <span>A transmissão foi publicada, mas o vídeo ainda não está disponível.</span>
             </div>
           </div>
-
-          <!-- Enquete -->
-          {% if active_poll %}
-          <div class="rounded-xl border bg-card text-card-foreground shadow bg-card/50 border-border/50">
-            <div class="p-4 space-y-4">
-              <div class="flex items-center gap-2">
-                <i data-lucide="bar-chart-3" class="h-5 w-5 text-primary"></i>
-                <h3 class="font-semibold text-foreground">Enquete Ativa</h3>
-              </div>
-              <p class="text-foreground font-medium">{{ active_poll.pergunta }}</p>
-              <div class="space-y-2">
-                {% for o in active_poll.opcoes %}
-                <button class="w-full relative overflow-hidden rounded-lg border transition-all border-border/50 bg-muted/30 hover:border-border cursor-pointer">
-                  <div class="relative p-3 flex items-center justify-between z-10">
-                    <span class="text-sm font-medium text-foreground">{{ o.text }}</span>
-                    <span class="text-xs text-muted-foreground">{{ o.votos }} votos</span>
-                  </div>
-                </button>
-                {% endfor %}
-              </div>
+          <span class="live-badge">Ao vivo</span>
+          {% else %}
+          <div class="live-video__empty">
+            <div>
+              <i data-lucide="radio" aria-hidden="true"></i>
+              <strong>O palco está em intervalo</strong>
+              <span>Nenhuma transmissão acontece agora. Consulte a agenda para encontrar o próximo encontro.</span>
             </div>
           </div>
           {% endif %}
         </div>
 
-        <!-- Sidebar Chat -->
-        <div class="space-y-4">
-          <div class="w-full">
-            <div class="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground w-full bg-card/50 border border-border/50">
-              <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all bg-background text-foreground shadow flex-1 gap-1.5"><i data-lucide="message-square" class="h-4 w-4"></i> Chat</button>
-              <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all flex-1 gap-1.5"><i data-lucide="help-circle" class="h-4 w-4"></i> Q&A</button>
-            </div>
-            
-            <div class="mt-4 rounded-xl border bg-card text-card-foreground shadow bg-card/50 border-border/50 h-[500px] flex flex-col">
-              <div class="flex-1 p-4 overflow-y-auto">
-                <div class="space-y-3">
-                  {% if chat_messages %}
-                  {% for m in chat_messages %}
-                  <div class="flex items-start gap-2">
-                    <span class="relative flex shrink-0 overflow-hidden rounded-full h-8 w-8 text-xs bg-primary/20 text-primary items-center justify-center font-bold">{{ m.usuario.username[:2].upper() }}</span>
-                    <div class="flex-1">
-                      <div class="flex items-center gap-2">
-                        <span class="text-sm font-medium text-foreground">{{ m.usuario.username }}</span>
-                        <span class="text-xs text-muted-foreground">{{ m.created_at.strftime('%H:%M') }}</span>
-                      </div>
-                      <p class="text-sm text-muted-foreground">{{ m.mensagem }}</p>
-                    </div>
-                  </div>
-                  {% endfor %}
-                  {% else %}
-                  <div class="text-center py-8">
-                    <p class="text-sm text-muted-foreground">Nenhuma mensagem ainda. Seja o primeiro!</p>
-                  </div>
-                  {% endif %}
-                </div>
-              </div>
-              <div class="p-3 border-t border-border/50 space-y-3">
-                <div class="flex justify-center gap-4 mb-2">
-                  <button class="p-2 rounded-full bg-primary/10 text-primary hover:bg-primary/20"><i data-lucide="heart" class="w-4 h-4"></i></button>
-                  <button class="p-2 rounded-full bg-accent/10 text-accent hover:bg-accent/20"><i data-lucide="flame" class="w-4 h-4"></i></button>
-                  <button class="p-2 rounded-full bg-secondary/10 text-secondary hover:bg-secondary/20"><i data-lucide="thumbs-up" class="w-4 h-4"></i></button>
-                </div>
-                <div class="flex gap-2">
-                  <input type="text" class="flex h-10 w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 bg-muted/30 border-border/50" placeholder="Digite sua mensagem...">
-                  <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 w-10 shrink-0"><i data-lucide="send" class="h-4 w-4"></i></button>
-                </div>
-              </div>
-            </div>
+        <div class="live-stage__copy">
+          <h2>{{ live_now.titulo if live_now else 'Nenhuma transmissão ativa agora' }}</h2>
+          {% if live_now and live_now.descricao %}
+          <p>{{ live_now.descricao }}</p>
+          {% elif not live_now %}
+          <p>Os próximos encontros aparecem na agenda assim que são publicados pela equipe Mundu.</p>
+          {% endif %}
+          {% if live_now %}
+          <div class="live-stage__meta">
+            {% if live_now.modulo %}
+            <span><i data-lucide="book-open" aria-hidden="true"></i>{{ live_now.modulo.titulo }}</span>
+            {% endif %}
+            {% if live_now.data_inicio %}
+            <span>
+              <i data-lucide="clock-3" aria-hidden="true"></i>
+              Iniciou às {{ live_now.data_inicio.strftime('%H:%M') }}
+            </span>
+            {% endif %}
           </div>
+          {% endif %}
         </div>
       </div>
-    </div> <!-- Fim de Ao Vivo -->
 
-    <!-- Tab Content: Agenda -->
-    <div id="tab-content-agenda" class="tab-content mt-4 space-y-4 hidden">
-      {% if upcoming %}
-      {% for p in upcoming %}
-      <div class="rounded-xl border bg-card text-card-foreground shadow bg-card/50 border-border/50 hover:border-primary/30 transition-all">
-        <div class="p-4">
-          <div class="flex items-center gap-4">
-            <div class="text-center shrink-0 w-16">
-              <div class="text-2xl font-bold text-primary">{{ p.data_agendamento.strftime('%d') }}</div>
-              <div class="text-xs text-muted-foreground uppercase">{{ p.data_agendamento.strftime('%b') }}</div>
-              <div class="text-sm font-medium text-foreground mt-1">{{ p.data_agendamento.strftime('%H:%M') }}</div>
-            </div>
-            <div class="w-px h-16 bg-border/50"></div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-start gap-3">
-                <span class="relative flex shrink-0 overflow-hidden rounded-full h-10 w-10 border border-border/50 bg-primary/20 text-primary items-center justify-center font-bold">
-                  {{ p.titulo[0] }}
-                </span>
-                <div class="flex-1 min-w-0">
-                  <h3 class="font-semibold text-foreground truncate">{{ p.titulo }}</h3>
-                  {% if p.descricao %}
-                  <p class="text-sm text-muted-foreground">{{ p.descricao[:100] }}</p>
-                  {% endif %}
+      <aside class="live-side" aria-label="Participação na transmissão">
+        <section class="live-readonly" aria-labelledby="live-chat-title">
+          <header class="live-readonly__header">
+            <strong id="live-chat-title">
+              <i data-lucide="messages-square" aria-hidden="true"></i>
+              Conversa
+            </strong>
+            <span class="live-readonly__state">Somente leitura</span>
+          </header>
+          <div class="live-messages">
+            {% if chat_messages %}
+              {% for message in chat_messages %}
+              <article class="live-message">
+                <span class="live-message__avatar" aria-hidden="true">{{ message.usuario.username[:2]|upper }}</span>
+                <div>
+                  <header class="live-message__head">
+                    <strong>{{ message.usuario.username }}</strong>
+                    <time datetime="{{ message.created_at.isoformat() }}">{{ message.created_at.strftime('%H:%M') }}</time>
+                  </header>
+                  <p>{{ message.mensagem }}</p>
                 </div>
+              </article>
+              {% endfor %}
+            {% else %}
+            <div class="m-empty">
+              <div class="m-empty__inner">
+                <span class="m-empty__icon"><i data-lucide="message-circle" aria-hidden="true"></i></span>
+                <p>Nenhuma mensagem foi registrada nesta transmissão.</p>
               </div>
             </div>
-            <div class="flex items-center gap-2 shrink-0">
-              <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors bg-secondary text-secondary-foreground hover:bg-secondary/80 h-10 px-4 py-2 gap-2">
-                <i data-lucide="calendar" class="h-4 w-4"></i> Agendar
-              </button>
-            </div>
+            {% endif %}
           </div>
-        </div>
+          <p class="live-readonly__note">O envio de mensagens permanece indisponível até existir um fluxo de persistência para o chat.</p>
+        </section>
+
+        {% if active_poll %}
+        <section class="live-poll" aria-labelledby="live-poll-title">
+          <div class="live-poll__head">
+            <span>Resultados da enquete</span>
+            <small>Somente leitura</small>
+          </div>
+          <h3 id="live-poll-title">{{ active_poll.pergunta }}</h3>
+          <div class="live-poll__options">
+            {% for option in active_poll.opcoes %}
+            <div class="live-poll__option">
+              <span>{{ option.text }}</span>
+              <strong>{{ option.votos }} voto{% if option.votos != 1 %}s{% endif %}</strong>
+            </div>
+            {% endfor %}
+          </div>
+        </section>
+        {% endif %}
+      </aside>
+    </div>
+  </section>
+
+  <section class="live-panel" id="live-panel-schedule" role="tabpanel"
+    aria-labelledby="live-tab-schedule" tabindex="0" hidden>
+    <div class="m-section-head">
+      <div class="m-section-head__copy">
+        <span class="m-section-kicker">Próximos encontros</span>
+        <h2 class="m-section-title">Reserve espaço para aprender junto</h2>
+        <p class="m-section-description">Datas e horários publicados pela equipe Mundu.</p>
       </div>
-      {% endfor %}
-      {% else %}
-      <div class="text-center py-12">
-        <i data-lucide="calendar" class="h-12 w-12 text-muted-foreground mx-auto mb-3"></i>
-        <p class="text-muted-foreground">Nenhuma transmissão agendada ainda.</p>
-      </div>
-      {% endif %}
+      <span class="m-chip">{{ upcoming|length }} agendado{% if upcoming|length != 1 %}s{% endif %}</span>
     </div>
 
-    <!-- Tab Content: Replays -->
-    <div id="tab-content-replays" class="tab-content mt-4 space-y-4 hidden">
-      {% if replays %}
-      {% for r in replays %}
-      <div class="rounded-xl border bg-card text-card-foreground shadow bg-card/50 border-border/50 hover:border-primary/30 transition-all cursor-pointer">
-        <div class="p-4">
-          <div class="flex items-center gap-4">
-            <div class="relative shrink-0">
-              <div class="w-40 aspect-video rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center overflow-hidden">
-                {% if r.thumbnail %}
-                <img src="{{ r.thumbnail }}" class="w-full h-full object-cover" />
-                {% else %}
-                <i data-lucide="play" class="h-8 w-8 text-primary/50"></i>
-                {% endif %}
-              </div>
-              <span class="absolute bottom-1 right-1 inline-flex items-center rounded border px-1.5 py-0.5 text-xs font-semibold bg-black/70 text-white border-transparent">{{ r.titulo[:20] }}</span>
-            </div>
-            <div class="flex-1 min-w-0">
-              <h3 class="font-semibold text-foreground truncate">{{ r.titulo }}</h3>
-              {% if r.descricao %}
-              <p class="text-sm text-muted-foreground truncate">{{ r.descricao[:80] }}</p>
-              {% endif %}
-              <div class="flex items-center gap-3 mt-1">
-                {% if r.modulo %}
-                <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold text-foreground text-xs">{{ r.modulo.titulo }}</span>
-                {% endif %}
-                <span class="text-xs text-muted-foreground flex items-center gap-1"><i data-lucide="eye" class="h-3 w-3"></i> {{ r.visualizacoes or 0 }} visualizações</span>
-                {% if r.data_fim %}
-                <span class="text-xs text-muted-foreground">{{ r.data_fim.strftime('%d %b %Y') }}</span>
-                {% endif %}
-              </div>
-            </div>
-            <button class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-6 py-2 gap-2 shrink-0">
-              <i data-lucide="play" class="h-4 w-4"></i> Assistir
-            </button>
+    {% if upcoming %}
+    <div class="live-schedule">
+      {% for stream in upcoming %}
+      <article class="live-schedule-item">
+        <time class="live-schedule-item__date" datetime="{{ stream.data_agendamento.isoformat() }}">
+          <strong>{{ stream.data_agendamento.strftime('%d') }}</strong>
+          <span>{{ stream.data_agendamento.strftime('%b') }}</span>
+          <span>{{ stream.data_agendamento.strftime('%H:%M') }}</span>
+        </time>
+        <div class="live-schedule-item__copy">
+          <h3>{{ stream.titulo }}</h3>
+          {% if stream.descricao %}
+          <p>{{ stream.descricao }}</p>
+          {% endif %}
+          {% if stream.modulo %}
+          <div class="m-meta"><span>{{ stream.modulo.titulo }}</span></div>
+          {% endif %}
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="m-empty">
+      <div class="m-empty__inner">
+        <span class="m-empty__icon"><i data-lucide="calendar-days" aria-hidden="true"></i></span>
+        <h2>Nenhum encontro agendado</h2>
+        <p>A próxima transmissão aparecerá aqui assim que a data for confirmada.</p>
+      </div>
+    </div>
+    {% endif %}
+  </section>
+
+  <section class="live-panel" id="live-panel-replays" role="tabpanel"
+    aria-labelledby="live-tab-replays" tabindex="0" hidden>
+    <div class="m-section-head">
+      <div class="m-section-head__copy">
+        <span class="m-section-kicker">Arquivo ao vivo</span>
+        <h2 class="m-section-title">Conversas para rever no seu ritmo</h2>
+        <p class="m-section-description">Replays publicados e disponíveis para assistir.</p>
+      </div>
+      <span class="m-chip">{{ replays|length }} replay{% if replays|length != 1 %}s{% endif %}</span>
+    </div>
+
+    {% if replays %}
+    <div class="live-replay-list">
+      {% for replay in replays %}
+      <article class="live-replay">
+        <div class="live-replay__media">
+          {% if replay.thumbnail %}
+          <img src="{{ replay.thumbnail }}" alt="Capa do replay {{ replay.titulo }}" loading="lazy">
+          {% else %}
+          <span class="live-replay__media-fallback"><i data-lucide="play" aria-hidden="true"></i></span>
+          {% endif %}
+        </div>
+        <div class="live-replay__copy">
+          <h3>{{ replay.titulo }}</h3>
+          {% if replay.descricao %}
+          <p>{{ replay.descricao }}</p>
+          {% endif %}
+          <div class="m-meta">
+            {% if replay.modulo %}<span>{{ replay.modulo.titulo }}</span>{% endif %}
+            {% if replay.data_fim %}<span>{{ replay.data_fim.strftime('%d/%m/%Y') }}</span>{% endif %}
           </div>
         </div>
-      </div>
+        <a class="m-button m-button--secondary" href="{{ replay.url_embed }}" target="_blank" rel="noopener noreferrer">
+          <i data-lucide="play" aria-hidden="true"></i>
+          Assistir replay
+        </a>
+      </article>
       {% endfor %}
-      {% else %}
-      <div class="text-center py-12">
-        <i data-lucide="history" class="h-12 w-12 text-muted-foreground mx-auto mb-3"></i>
-        <p class="text-muted-foreground">Nenhum replay disponível ainda.</p>
+    </div>
+    {% else %}
+    <div class="m-empty">
+      <div class="m-empty__inner">
+        <span class="m-empty__icon"><i data-lucide="history" aria-hidden="true"></i></span>
+        <h2>Nenhum replay disponível</h2>
+        <p>As transmissões encerradas aparecerão aqui quando forem publicadas.</p>
       </div>
-      {% endif %}
-      </div>
-    </div> <!-- Fim de Replays -->
-
-  </div> <!-- Fim de Tabs -->
+    </div>
+    {% endif %}
+  </section>
 </div>
+{% endblock %}
 
+{% block scripts %}
 <script>
-  function switchTab(tabId) {
-    // Hide all contents
-    document.querySelectorAll('.tab-content').forEach(function(el) {
-      el.classList.add('hidden');
+(function () {
+  'use strict';
+
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('[data-live-tab]'));
+  if (!tabs.length) return;
+
+  function selectTab(tab, focusPanel) {
+    tabs.forEach(function (item) {
+      var selected = item === tab;
+      var panel = document.getElementById(item.getAttribute('aria-controls'));
+      item.setAttribute('aria-selected', selected ? 'true' : 'false');
+      item.setAttribute('tabindex', selected ? '0' : '-1');
+      if (panel) panel.hidden = !selected;
     });
-    // Remove active styles from buttons
-    document.querySelectorAll('.tab-btn').forEach(function(el) {
-      el.classList.remove('bg-background', 'text-foreground', 'shadow');
-    });
-    // Add active styles to clicked button
-    document.getElementById('tab-btn-' + tabId).classList.add('bg-background', 'text-foreground', 'shadow');
-    // Show selected content
-    document.getElementById('tab-content-' + tabId).classList.remove('hidden');
+
+    var activePanel = document.getElementById(tab.getAttribute('aria-controls'));
+    if (focusPanel && activePanel) activePanel.focus();
   }
+
+  tabs.forEach(function (tab, index) {
+    tab.addEventListener('click', function () {
+      selectTab(tab, false);
+    });
+    tab.addEventListener('keydown', function (event) {
+      var nextIndex = index;
+      if (event.key === 'ArrowRight') nextIndex = (index + 1) % tabs.length;
+      else if (event.key === 'ArrowLeft') nextIndex = (index - 1 + tabs.length) % tabs.length;
+      else if (event.key === 'Home') nextIndex = 0;
+      else if (event.key === 'End') nextIndex = tabs.length - 1;
+      else return;
+
+      event.preventDefault();
+      tabs[nextIndex].focus();
+      selectTab(tabs[nextIndex], false);
+    });
+  });
+}());
 </script>
 {% endblock %}

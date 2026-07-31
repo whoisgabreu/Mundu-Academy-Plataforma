@@ -1,182 +1,272 @@
 {% extends "base.html" %}
 
-{% block title %}u/{{ user.handle }} - Mundu Academy{% endblock %}
-{% block page_title %}u/{{ user.handle }}{% endblock %}
+{% block title %}{{ user.nome_completo }} - Mundu Academy{% endblock %}
+{% block page_title %}@{{ user.handle }}{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/community.css') }}">
+{% endblock %}
 
 {% block content %}
-
-<!-- ============ PROFILE HEADER ============ -->
-<section class="profile-header">
-  <div class="profile-header-bg"></div>
-  <div class="profile-header-row">
-    <div class="profile-avatar-large">
-      <span>{{ user.iniciais }}</span>
+<div class="m-page community-page">
+  <header class="c-profile-hero">
+    <div class="c-profile-hero__banner" aria-hidden="true">
+      {% if user.banner %}<img src="{{ user.banner }}" alt="">{% endif %}
     </div>
-    <div class="profile-header-info">
-      <h1 class="profile-name">{{ user.nome_completo }}</h1>
-      <p class="profile-handle">u/{{ user.handle }} · {{ user.role }}</p>
-      {% if user.bio %}
-      <p class="profile-bio">{{ user.bio }}</p>
-      {% endif %}
-      <div class="profile-stats-row">
-        <span><strong>{{ user.karma }}</strong> karma</span>
-        <span class="meta-dot">·</span>
-        <span><strong>{{ user.followers }}</strong> seguidores</span>
-        <span class="meta-dot">·</span>
-        <span><strong>{{ user.following }}</strong> seguindo</span>
-        <span class="meta-dot">·</span>
-        <span>desde {{ user.joined_at }}</span>
+    <div class="c-profile-hero__body">
+      <span class="c-avatar c-profile-hero__avatar">
+        {% if user.foto %}<img src="{{ user.foto }}" alt="">{% else %}{{ user.iniciais }}{% endif %}
+      </span>
+      <div class="c-profile-hero__identity">
+        <h1>{{ user.nome_completo }}</h1>
+        <span class="c-profile-hero__handle">@{{ user.handle }}</span>
+        {% if user.role %}<p class="c-profile-hero__role">{{ user.role }}</p>{% endif %}
+      </div>
+      <div class="c-profile-hero__actions">
+        {% if is_self %}
+        <a class="m-button m-button--secondary" href="/my-brain">
+          <i data-lucide="brain" aria-hidden="true"></i>
+          Meu Brain
+        </a>
+        <a class="m-button m-button--primary" href="/config">
+          <i data-lucide="settings-2" aria-hidden="true"></i>
+          Editar perfil
+        </a>
+        {% elif request.user.is_authenticated %}
+        <button
+          class="m-button {% if user.is_following %}m-button--secondary{% else %}m-button--primary{% endif %}"
+          type="button"
+          data-profile-follow
+          data-handle="{{ user.handle }}"
+          data-following="{{ 'true' if user.is_following else 'false' }}"
+          aria-pressed="{{ 'true' if user.is_following else 'false' }}">
+          <span data-profile-follow-label>{{ 'Seguindo' if user.is_following else 'Seguir' }}</span>
+        </button>
+        {% else %}
+        <a class="m-button m-button--primary" href="/login?next={{ request.path }}">Entre para seguir</a>
+        {% endif %}
       </div>
     </div>
-    <div class="profile-header-actions">
-      {% if is_self %}
-      <a href="/my-brain" class="btn-outline">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4.5 4.5 0 0 0-4.5 4.5c0 .56.1 1.1.28 1.6A4.5 4.5 0 0 0 5 12.5c0 1.18.46 2.27 1.21 3.07A4.5 4.5 0 0 0 7.5 22h9a4.5 4.5 0 0 0 1.29-6.43A4.49 4.49 0 0 0 19 12.5a4.5 4.5 0 0 0-2.78-4.4c.18-.5.28-1.04.28-1.6A4.5 4.5 0 0 0 12 2z"/></svg>
-        Meu Brain
-      </a>
-      <a href="/config" class="btn-outline">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-        Editar
-      </a>
+  </header>
+
+  <section class="c-profile-summary" aria-label="Resumo do perfil">
+    <div class="c-profile-summary__bio">
+      <h2>Sobre</h2>
+      {% if user.bio %}
+      <p>{{ user.bio }}</p>
       {% else %}
-      <button class="profile-follow-btn" data-handle="{{ user.handle }}" data-following="false" onclick="toggleFollow(this)">
-        <span class="follow-state-out">+ Seguir</span>
-        <span class="follow-state-in"><i data-lucide="check" class="inline-icon"></i>Seguindo</span>
-      </button>
-      <button class="btn-outline">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        Mensagem
-      </button>
+      <p>Este perfil ainda não publicou uma apresentação.</p>
       {% endif %}
-    </div>
-  </div>
-</section>
-
-<!-- ============ TABS ============ -->
-<nav class="profile-tabs">
-  <a href="?tab=posts" class="profile-tab {% if tab == 'posts' %}active{% endif %}">
-    Posts <span class="tab-count">{{ posts|length }}</span>
-  </a>
-  <a href="?tab=comments" class="profile-tab {% if tab == 'comments' %}active{% endif %}">
-    Comentários <span class="tab-count">{{ comments|length }}</span>
-  </a>
-  <a href="?tab=communities" class="profile-tab {% if tab == 'communities' %}active{% endif %}">
-    Comunidades
-  </a>
-  {% if is_self %}
-  <a href="?tab=saved" class="profile-tab {% if tab == 'saved' %}active{% endif %}">
-    Salvos
-  </a>
-  {% endif %}
-</nav>
-
-<!-- ============ TAB CONTENT ============ -->
-<section class="profile-content">
-
-  {% if tab == 'posts' %}
-    {% if posts %}
-    <div class="community-posts-list">
-      {% for p in posts %}
-      <article class="redd-post-card animate-fade-in-up" data-delay="{{ loop.index0 * 0.04 }}">
-        <div class="redd-vote-col">
-          <button class="redd-vote-btn" aria-label="Upvote">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
-          </button>
-          <span class="redd-vote-score">{{ p.upvotes }}</span>
-          <button class="redd-vote-btn" aria-label="Downvote">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-          </button>
+      <div class="c-profile-summary__stats">
+        <div>
+          <strong>{{ user.karma }}</strong>
+          <span>pontos de contribuição</span>
         </div>
-        <div class="redd-post-body">
-          <div class="redd-post-meta">
-            <a href="/g/{{ p.community_slug }}" class="redd-post-community">r/{{ p.community_slug }}</a>
-            <span class="meta-dot">·</span>
-            <span>{{ p.time_ago }}</span>
-            <span class="redd-post-tag thread-tag-{{ p.tag }}">{{ p.tag }}</span>
+        <div>
+          <strong data-follower-count>{{ user.followers }}</strong>
+          <span>seguidores</span>
+        </div>
+        <div>
+          <strong>{{ user.following }}</strong>
+          <span>pessoas acompanhadas</span>
+        </div>
+      </div>
+    </div>
+
+    <aside class="c-profile-experience">
+      <h2>Experiência</h2>
+      <dl>
+        <div>
+          <dt>Nível na Mundu</dt>
+          <dd>{{ user.nivel }} · {{ user.nome_nivel }}</dd>
+        </div>
+        {% if user.cargo or user.empresa %}
+        <div>
+          <dt>Atuação</dt>
+          <dd>
+            {% if user.cargo %}{{ user.cargo }}{% endif %}
+            {% if user.cargo and user.empresa %} · {% endif %}
+            {% if user.empresa %}{{ user.empresa }}{% endif %}
+          </dd>
+        </div>
+        {% endif %}
+        {% if user.localizacao %}
+        <div>
+          <dt>Localização</dt>
+          <dd>{{ user.localizacao }}</dd>
+        </div>
+        {% endif %}
+        {% if user.joined_at %}
+        <div>
+          <dt>Na Mundu desde</dt>
+          <dd>{{ user.joined_at }}</dd>
+        </div>
+        {% endif %}
+        {% if user.linkedin %}
+        <div>
+          <dt>Perfil profissional</dt>
+          <dd><a href="{{ user.linkedin }}" target="_blank" rel="noopener noreferrer">LinkedIn</a></dd>
+        </div>
+        {% endif %}
+        {% if user.instagram %}
+        <div>
+          <dt>Instagram</dt>
+          <dd>{{ user.instagram }}</dd>
+        </div>
+        {% endif %}
+      </dl>
+    </aside>
+  </section>
+
+  <nav class="c-profile-tabs" aria-label="Contribuições do perfil">
+    <a class="c-profile-tab" href="?tab=posts" {% if tab == 'posts' %}aria-current="page"{% endif %}>
+      Discussões · {{ posts|length }}
+    </a>
+    <a class="c-profile-tab" href="?tab=comments" {% if tab == 'comments' %}aria-current="page"{% endif %}>
+      Respostas · {{ comments|length }}
+    </a>
+    <a class="c-profile-tab" href="?tab=communities" {% if tab == 'communities' %}aria-current="page"{% endif %}>
+      Comunidades · {{ communities|length }}
+    </a>
+  </nav>
+
+  <section class="c-profile-content">
+    {% if tab == 'posts' %}
+      {% if posts %}
+      <div class="c-discussion-list">
+        {% for post in posts %}
+        <article class="c-discussion">
+          <div class="c-vote c-vote--readonly" aria-label="{{ post.upvotes }} apoios">
+            <span class="c-vote__count">{{ post.upvotes }}</span>
           </div>
-          <a href="/g/{{ p.community_slug }}/post/{{ p.slug }}" class="redd-post-titlelink">
-            <h2 class="redd-post-title">{{ p.title }}</h2>
-            <p class="redd-post-preview">{{ p.preview }}</p>
-          </a>
-          <div class="redd-post-footer">
-            <a href="/g/{{ p.community_slug }}/post/{{ p.slug }}" class="redd-post-action">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              {{ p.replies }} comentários
-            </a>
+          <div class="c-discussion__body">
+            <div class="c-discussion__context">
+              <a href="/g/{{ post.community_slug }}">{{ post.community_obj.name }}</a>
+              <span>·</span>
+              <time>{{ post.time_ago }}</time>
+              {% if post.tag %}<span class="m-chip">{{ post.tag }}</span>{% endif %}
+            </div>
+            <h2 class="c-discussion__title">
+              <a href="/g/{{ post.community_slug }}/post/{{ post.slug }}">{{ post.title }}</a>
+            </h2>
+            {% if post.preview %}<p class="c-discussion__excerpt">{{ post.preview }}</p>{% endif %}
+            <div class="c-discussion__foot">
+              <a href="/g/{{ post.community_slug }}/post/{{ post.slug }}">
+                <i data-lucide="message-circle" aria-hidden="true"></i>
+                {{ post.replies }} respostas
+              </a>
+            </div>
           </div>
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="m-empty">
+        <div class="m-empty__inner">
+          <span class="m-empty__icon"><i data-lucide="square-pen" aria-hidden="true"></i></span>
+          <h2>Nenhuma discussão publicada</h2>
+          <p>{% if is_self %}Quando você iniciar uma conversa, ela aparecerá aqui.{% else %}Este perfil ainda não iniciou discussões.{% endif %}</p>
+          {% if is_self %}<a class="m-button m-button--secondary" href="/guild">Explorar comunidades</a>{% endif %}
         </div>
-      </article>
-      {% endfor %}
-    </div>
-    {% else %}
-    <div class="empty-state">
-      <p>{% if is_self %}Você ainda não publicou nenhum post na Guild.{% else %}u/{{ user.handle }} ainda não publicou posts.{% endif %}</p>
-    </div>
-    {% endif %}
-  {% endif %}
-
-  {% if tab == 'comments' %}
-    {% if comments %}
-    <div class="profile-comments-list">
-      {% for c in comments %}
-      <article class="profile-comment-card animate-fade-in-up" data-delay="{{ loop.index0 * 0.04 }}">
-        <div class="profile-comment-context">
-          {% if c.post %}
-          <a href="/g/{{ c.post.community_slug }}/post/{{ c.post.slug }}" class="profile-comment-postlink">
-            <span class="profile-comment-eyebrow">{{ c.author }} comentou em <strong>r/{{ c.post.community_slug }}</strong></span>
-            <span class="profile-comment-postname">{{ c.post.title }}</span>
-          </a>
-          {% endif %}
+      </div>
+      {% endif %}
+    {% elif tab == 'comments' %}
+      {% if comments %}
+      <div>
+        {% for comment in comments %}
+        <article class="c-profile-comment">
+          <p class="c-profile-comment__context">
+            Resposta em
+            <a href="/g/{{ comment.post.community_slug }}/post/{{ comment.post.slug }}">{{ comment.post.title }}</a>
+            · {{ comment.time_ago }} · {{ comment.upvotes }} apoios
+          </p>
+          <p>{{ comment.body }}</p>
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="m-empty">
+        <div class="m-empty__inner">
+          <span class="m-empty__icon"><i data-lucide="message-circle" aria-hidden="true"></i></span>
+          <h2>Nenhuma resposta publicada</h2>
+          <p>{% if is_self %}Suas contribuições às conversas aparecerão aqui.{% else %}Este perfil ainda não respondeu a discussões.{% endif %}</p>
         </div>
-        <div class="profile-comment-body">
-          <span class="comment-meta">
-            <span class="comment-score-sm">↑ {{ c.upvotes }}</span>
-            <span class="meta-dot">·</span>
-            <span class="comment-time">{{ c.time_ago }}</span>
+      </div>
+      {% endif %}
+    {% elif tab == 'communities' %}
+      {% if communities %}
+      <div>
+        {% for membership in communities %}
+        <a class="c-membership" href="/g/{{ membership.community.slug }}">
+          <span class="c-related__icon"><i data-lucide="{{ membership.community.icon }}" aria-hidden="true"></i></span>
+          <span class="c-membership__copy">
+            <strong>{{ membership.community.name }}</strong>
+            <span>{{ membership.get_role_display() }} · desde {{ membership.joined_at.strftime('%b %Y') }}</span>
           </span>
-          <p>{{ c.body }}</p>
+          <span class="c-membership__xp">{{ membership.xp }} XP</span>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="m-empty">
+        <div class="m-empty__inner">
+          <span class="m-empty__icon"><i data-lucide="users" aria-hidden="true"></i></span>
+          <h2>Nenhuma comunidade vinculada</h2>
+          <p>{% if is_self %}Escolha uma comunidade para começar a participar.{% else %}Este perfil ainda não participa de uma comunidade.{% endif %}</p>
+          {% if is_self %}<a class="m-button m-button--secondary" href="/guild">Conhecer comunidades</a>{% endif %}
         </div>
-      </article>
-      {% endfor %}
-    </div>
-    {% else %}
-    <div class="empty-state">
-      <p>{% if is_self %}Você ainda não comentou nenhuma thread.{% else %}u/{{ user.handle }} ainda não comentou nada.{% endif %}</p>
-    </div>
+      </div>
+      {% endif %}
     {% endif %}
-  {% endif %}
-
-  {% if tab == 'communities' %}
-    <div class="empty-state">
-      <p>Em breve: lista de comunidades em que u/{{ user.handle }} participa.</p>
-    </div>
-  {% endif %}
-
-  {% if tab == 'saved' and is_self %}
-    <div class="empty-state">
-      <p>Itens salvos aparecem aqui — vai pro <a href="/my-brain">My Brain</a> pra ver tudo organizado.</p>
-    </div>
-  {% endif %}
-
-</section>
-
+  </section>
+</div>
 {% endblock %}
 
 {% block scripts %}
+{% if request.user.is_authenticated and not is_self %}
 <script>
-  function toggleFollow(btn) {
-    var handle = btn.dataset.handle;
-    var following = btn.dataset.following === 'true';
-    var next = !following;
-    btn.dataset.following = next ? 'true' : 'false';
-    btn.classList.toggle('is-following', next);
-    fetch('/api/follow/' + handle, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({following: next})
-    }).catch(function(){});
-    showToast(next ? 'Seguindo u/' + handle : 'Deixou de seguir u/' + handle);
-  }
-  window.toggleFollow = toggleFollow;
+  (function () {
+    var button = document.querySelector('[data-profile-follow]');
+    if (!button) return;
+
+    button.addEventListener('click', async function () {
+      var following = button.dataset.following === 'true';
+      var next = !following;
+      button.disabled = true;
+      button.setAttribute('aria-busy', 'true');
+      try {
+        var response = await fetch('/api/follow/' + button.dataset.handle, {
+          method: 'POST',
+          headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+          body: JSON.stringify({following: next})
+        });
+        var payload = await response.json().catch(function () { return {}; });
+        if (!response.ok || payload.ok === false) {
+          throw new Error(payload.erro || payload.error || 'Não foi possível atualizar esta conexão.');
+        }
+
+        var confirmed = Boolean(payload.following);
+        button.dataset.following = confirmed ? 'true' : 'false';
+        button.setAttribute('aria-pressed', confirmed ? 'true' : 'false');
+        button.classList.toggle('m-button--secondary', confirmed);
+        button.classList.toggle('m-button--primary', !confirmed);
+        button.querySelector('[data-profile-follow-label]').textContent = confirmed ? 'Seguindo' : 'Seguir';
+
+        var followerCount = document.querySelector('[data-follower-count]');
+        if (followerCount) {
+          var value = parseInt(followerCount.textContent || '0', 10);
+          followerCount.textContent = Math.max(value + (confirmed ? 1 : -1), 0);
+        }
+        if (window.showToast) {
+          window.showToast(confirmed ? 'Você agora acompanha @' + button.dataset.handle + '.' : 'Você deixou de acompanhar @' + button.dataset.handle + '.');
+        }
+      } catch (error) {
+        if (window.showToast) window.showToast(error.message, 'danger');
+      } finally {
+        button.disabled = false;
+        button.removeAttribute('aria-busy');
+      }
+    });
+  }());
 </script>
+{% endif %}
 {% endblock %}

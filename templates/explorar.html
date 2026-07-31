@@ -1,306 +1,214 @@
 {% extends "base.html" %}
 
-{% block title %}Mundu Academy - Explorar{% endblock %}
-{% block page_title %}Explorar{% endblock %}
+{% block title %}Explorar — Mundu Academy{% endblock %}
+{% block meta_description %}Descubra cursos, collabs, casos e ferramentas selecionadas pela Mundu.{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/lobby.css') }}">
+{% endblock %}
 
 {% block content %}
+<div class="m-page discover">
+  <header class="discover-intro m-reveal">
+    <span class="m-eyebrow">Descobrir com intenção</span>
+    <h1 class="m-display">Encontre a próxima ideia que merece sua atenção.</h1>
+    <p class="m-lead">Conteúdo curado por objetivo, aplicação e momento da jornada — sem uma prateleira infinita disputando seu foco.</p>
+  </header>
 
-<!-- ============ PILAR HEADER ============ -->
-<section class="pillar-header">
-  <div class="pillar-header-content">
-    <div class="pillar-eyebrow">
-      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-      <span>Explorar</span>
+  {% if recommended %}
+  {% set feature = recommended[0] %}
+  <section class="discover-feature m-reveal" aria-labelledby="feature-title">
+    <div class="discover-feature__media">
+      {% if feature.thumbnail %}<img src="{{ feature.thumbnail }}" alt="" loading="eager">{% endif %}
+      <span class="discover-feature__veil"></span>
     </div>
-    <h1 class="pillar-title">Conteúdo curado pela Mundu</h1>
-    <p class="pillar-subtitle">Hero cinemáticos, masterclasses, cases premiados e collabs exclusivas — tudo o que era a "estante de cursos", agora num lugar só pra quando você quer descobrir.</p>
-  </div>
-</section>
+    <div class="discover-feature__content">
+      <span class="m-chip m-chip--green">{{ feature.badge or 'Escolha da Mundu' }}</span>
+      <h2 id="feature-title">{{ feature.title }}</h2>
+      <p>{{ feature.subtitle }}</p>
+      <div class="m-meta">
+        {% if feature.duration %}<span>{{ feature.duration }}</span>{% endif %}
+        <span>{{ feature.xp }} XP</span>
+        {% if feature.participants %}<span>{{ feature.participants }} participantes</span>{% endif %}
+      </div>
+      <a class="m-button m-button--primary m-button--lg" href="{{ feature.url }}">
+        <i data-lucide="play" aria-hidden="true"></i>Explorar conteúdo
+      </a>
+    </div>
+    <span class="discover-feature__signature" aria-hidden="true">M</span>
+  </section>
+  {% endif %}
 
-<!-- ============ HERO CARROSSEL ============ -->
-<section class="hero-section" id="heroSection">
-  <div class="hero-slide" id="heroSlide">
-    <div class="hero-bg" id="heroBg">
-      <img src="" alt="Hero" id="heroImg">
-      <div class="hero-overlay-lr"></div>
-      <div class="hero-overlay-bt"></div>
-      <div class="hero-overlay-accent"></div>
-    </div>
-    <div class="hero-content animate-fade-in-up" id="heroContent">
-      <div class="hero-badge" id="heroBadge">
-        <span class="badge-dot"></span>
-        <span id="heroBadgeText"></span>
-      </div>
-      <h1 class="hero-title" id="heroTitle"></h1>
-      <p class="hero-description" id="heroDesc"></p>
-      <div class="hero-stats" id="heroStats">
-        <div class="hero-stat">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <span id="heroDuration"></span>
-        </div>
-        <div class="hero-stat">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-          <span id="heroXp"></span>
-        </div>
-        <div class="hero-stat">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          <span id="heroStudents"></span>
-        </div>
-      </div>
-      <div class="hero-actions">
-        <button class="btn-primary" id="heroCta">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          <span id="heroCtaText"></span>
-        </button>
-        <button class="btn-outline">
-          Ver Detalhes
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-        </button>
+  {% if continue_watching %}
+  <section class="m-section m-reveal" aria-labelledby="continue-title">
+    <div class="m-section-head">
+      <div>
+        <span class="m-section-kicker">Retomar</span>
+        <h2 class="m-section-title" id="continue-title">Continue de onde parou</h2>
       </div>
     </div>
-  </div>
-
-  <button class="hero-nav-btn prev" onclick="heroGo(-1)">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-  </button>
-  <button class="hero-nav-btn next" onclick="heroGo(1)">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-  </button>
-
-  <div class="hero-dots" id="heroDots"></div>
-</section>
-
-<!-- ============ CONTINUE ASSISTINDO ============ -->
-<section class="carousel-section">
-  <div class="carousel-header">
-    <div>
-      <h2>Continue Assistindo</h2>
-      <p>Retome de onde parou</p>
+    <div class="discover-continue">
+      {% for item in continue_watching %}
+      <a class="discover-continue__item" href="{{ item.url }}">
+        <span class="discover-continue__media">
+          {% if item.thumbnail %}<img src="{{ item.thumbnail }}" alt="" loading="lazy">{% endif %}
+          <span class="discover-continue__play"><i data-lucide="play" aria-hidden="true"></i></span>
+        </span>
+        <span class="discover-continue__copy">
+          <small>{{ item.subtitle }}</small>
+          <strong>{{ item.title }}</strong>
+          <span class="m-progress" role="progressbar" aria-label="{{ item.progress }}% concluído"
+            aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ item.progress }}">
+            <span class="m-progress__fill" data-progress="{{ item.progress }}"></span>
+          </span>
+        </span>
+        <span class="discover-continue__percent">{{ item.progress }}%</span>
+      </a>
+      {% endfor %}
     </div>
-    <div class="carousel-nav-btns">
-      <button class="carousel-nav-btn" onclick="scrollCarousel('continueTrack', -320)">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <button class="carousel-nav-btn" onclick="scrollCarousel('continueTrack', 320)">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
+  </section>
+  {% endif %}
+
+  <section class="m-section m-reveal" aria-labelledby="recommended-title">
+    <div class="m-section-head">
+      <div class="m-section-head__copy">
+        <span class="m-section-kicker">Selecionados para você</span>
+        <h2 class="m-section-title" id="recommended-title">Conhecimento para o próximo passo</h2>
+      </div>
+      <a class="m-text-link m-section-head__action" href="/conteudos">Ver cursos <i data-lucide="arrow-right" aria-hidden="true"></i></a>
     </div>
-  </div>
-  <div class="carousel-track scrollbar-none" id="continueTrack">
-    {% for item in continue_watching %}
-    <div class="content-card animate-fade-in-up" data-delay="{{ loop.index0 * 0.05 }}">
-      <div class="card-thumbnail">
-        <img src="{{ item.thumbnail }}" alt="{{ item.title }}">
-        <div class="card-thumbnail-overlay"></div>
-        <div class="card-play-overlay"><div class="card-play-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></div></div>
-        <span class="card-type-badge {{ item.type }}">{{ item.type }}</span>
-        {% if item.duration %}
-        <div class="card-duration">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          {{ item.duration }}
-        </div>
+    <div class="discover-editorial-grid">
+      {% for item in recommended %}
+      <a class="discover-editorial {% if loop.index == 2 %}discover-editorial--text{% endif %}" href="{{ item.url }}">
+        {% if loop.index != 2 %}
+        <span class="discover-editorial__media">
+          {% if item.thumbnail %}<img src="{{ item.thumbnail }}" alt="" loading="lazy">{% endif %}
+        </span>
         {% endif %}
-        {% if item.progress is defined %}
-        <div class="card-progress"><div class="card-progress-fill" data-pct="{{ item.progress }}"></div></div>
-        {% endif %}
-      </div>
-      <div class="card-body">
-        <h3 class="card-title">{{ item.title }}</h3>
-        <p class="card-subtitle">{{ item.subtitle }}</p>
-        <div class="card-footer">
-          <div class="card-xp">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-            +{{ item.xp }}
-          </div>
-        </div>
-      </div>
+        <span class="discover-editorial__copy">
+          <small>{{ item.badge or 'Recomendado' }}</small>
+          <strong>{{ item.title }}</strong>
+          <span>{{ item.subtitle }}</span>
+          <span class="m-meta">
+            {% if item.duration %}<span>{{ item.duration }}</span>{% endif %}
+            <span>{{ item.xp }} XP</span>
+          </span>
+        </span>
+        <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+      </a>
+      {% else %}
+      <div class="m-empty"><div class="m-empty__inner"><h3>A curadoria está sendo preparada</h3><p>Novas recomendações aparecerão aqui em breve.</p></div></div>
+      {% endfor %}
     </div>
-    {% endfor %}
-  </div>
-</section>
+  </section>
 
-<!-- ============ RECOMENDADO ============ -->
-<section class="carousel-section">
-  <div class="carousel-header">
+  {% if challenges %}
+  <section class="discover-missions m-reveal" aria-labelledby="discover-missions-title">
     <div>
-      <h2>Recomendado para Você</h2>
-      <p>Baseado no seu perfil e interesses</p>
+      <span class="m-section-kicker">Praticar</span>
+      <h2 id="discover-missions-title">Transforme descoberta em movimento.</h2>
+      <p>Missões ativas ajudam a levar o conteúdo para a rotina.</p>
     </div>
-    <div class="carousel-nav-btns">
-      <button class="carousel-nav-btn" onclick="scrollCarousel('recommendedTrack', -320)">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <button class="carousel-nav-btn" onclick="scrollCarousel('recommendedTrack', 320)">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
+    <div class="discover-missions__list">
+      {% for challenge in challenges %}
+      <a href="/desafios" class="discover-mission">
+        <span class="discover-mission__type">{{ challenge.label }}</span>
+        <strong>{{ challenge.title }}</strong>
+        <small>{{ challenge.progress_text }}</small>
+        <span class="m-progress" role="progressbar" aria-label="{{ challenge.progress_text }}"
+          aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ challenge.progress_pct }}">
+          <span class="m-progress__fill" data-progress="{{ challenge.progress_pct }}"></span>
+        </span>
+        <span class="discover-mission__xp">+{{ challenge.xp }} XP</span>
+      </a>
+      {% endfor %}
     </div>
-  </div>
-  <div class="carousel-track scrollbar-none" id="recommendedTrack">
-    {% for item in recommended %}
-    <div class="content-card animate-fade-in-up" data-delay="{{ loop.index0 * 0.05 }}">
-      <div class="card-thumbnail">
-        <img src="{{ item.thumbnail }}" alt="{{ item.title }}">
-        <div class="card-thumbnail-overlay"></div>
-        <div class="card-play-overlay"><div class="card-play-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></div></div>
-        <span class="card-type-badge {{ item.type }}">{{ item.type }}</span>
-        {% if item.duration %}
-        <div class="card-duration">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          {{ item.duration }}
-        </div>
-        {% endif %}
-      </div>
-      <div class="card-body">
-        <h3 class="card-title">{{ item.title }}</h3>
-        <p class="card-subtitle">{{ item.subtitle }}</p>
-        <div class="card-footer">
-          <div class="card-xp">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-            +{{ item.xp }}
-          </div>
-          {% if item.participants %}
-          <div class="card-participants">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            {{ item.participants }}
-          </div>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-</section>
+  </section>
+  {% endif %}
 
-<!-- ============ DESAFIOS ============ -->
-<section class="challenges-section">
-  <h2>Desafios da Semana</h2>
-  <p class="section-subtitle">Complete desafios e evolua mais rápido</p>
-  <div class="challenges-grid">
-    {% for challenge in challenges %}
-    <div class="challenge-card animate-fade-in-up" data-delay="{{ loop.index0 * 0.1 }}">
-      <div class="challenge-card-header">
-        <span class="challenge-type-badge {{ challenge.type }}">{{ challenge.label }}</span>
-        <span class="challenge-xp">+{{ challenge.xp }} XP</span>
+  <section class="m-section discover-collections m-reveal" aria-labelledby="collabs-title">
+    <div class="m-section-head">
+      <div>
+        <span class="m-section-kicker">Encontros improváveis</span>
+        <h2 class="m-section-title" id="collabs-title">Collabs que ampliam repertório</h2>
       </div>
-      <h3 class="challenge-title">{{ challenge.title }}</h3>
-      <p class="challenge-description">{{ challenge.description }}</p>
-      <div class="challenge-progress-bar">
-        <div class="challenge-progress-fill" data-pct="{{ challenge.progress }}"></div>
-      </div>
-      <span class="challenge-progress-text">{{ challenge.progress_text }}</span>
     </div>
-    {% endfor %}
-  </div>
-</section>
+    <div class="m-rail" id="collabsRail">
+      {% for item in collabs %}
+      <a class="discover-poster" href="{{ item.url }}">
+        <span class="discover-poster__media">
+          {% if item.thumbnail %}<img src="{{ item.thumbnail }}" alt="" loading="lazy">{% endif %}
+          <span class="discover-poster__veil"></span>
+        </span>
+        <span class="discover-poster__copy">
+          <small>{{ item.badge or 'Collab' }}</small>
+          <strong>{{ item.title }}</strong>
+          <span>{{ item.subtitle }}</span>
+        </span>
+      </a>
+      {% else %}
+      <div class="m-empty"><div class="m-empty__inner"><p>Nenhuma collab disponível agora.</p></div></div>
+      {% endfor %}
+    </div>
+  </section>
 
-<!-- ============ COLLABS ============ -->
-<section class="carousel-section">
-  <div class="carousel-header">
+  <section class="m-section discover-split m-reveal">
     <div>
-      <h2>Collabs da Semana</h2>
-      <p>Conteúdos exclusivos com parceiros estratégicos</p>
-    </div>
-    <div class="carousel-nav-btns">
-      <button class="carousel-nav-btn" onclick="scrollCarousel('collabsTrack', -320)">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <button class="carousel-nav-btn" onclick="scrollCarousel('collabsTrack', 320)">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
-    </div>
-  </div>
-  <div class="carousel-track scrollbar-none" id="collabsTrack">
-    {% for item in collabs %}
-    <div class="content-card animate-fade-in-up" data-delay="{{ loop.index0 * 0.05 }}">
-      <div class="card-thumbnail">
-        <img src="{{ item.thumbnail }}" alt="{{ item.title }}">
-        <div class="card-thumbnail-overlay"></div>
-        <div class="card-play-overlay"><div class="card-play-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></div></div>
-        <span class="card-type-badge {{ item.type }}">{{ item.type }}</span>
-        {% if item.duration %}
-        <div class="card-duration">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          {{ item.duration }}
-        </div>
-        {% endif %}
-      </div>
-      <div class="card-body">
-        <h3 class="card-title">{{ item.title }}</h3>
-        <p class="card-subtitle">{{ item.subtitle }}</p>
-        <div class="card-footer">
-          <div class="card-xp">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-            +{{ item.xp }}
-          </div>
-          {% if item.badge %}
-          <div class="card-badge-info">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 9 7 12 7s5-3 7.5-3a2.5 2.5 0 0 1 0 5H18"/></svg>
-            {{ item.badge }}
-          </div>
-          {% endif %}
+      <div class="m-section-head">
+        <div>
+          <span class="m-section-kicker">Casos reais</span>
+          <h2 class="m-section-title">Veja o conhecimento em ação</h2>
         </div>
       </div>
-    </div>
-    {% endfor %}
-  </div>
-</section>
-
-<!-- ============ WIDGET IA ============ -->
-<section class="ai-widget animate-fade-in-up">
-  <div class="ai-widget-content">
-    <h3><i data-lucide="brain" class="inline-icon"></i>Salomão IA - Seu Assistente Inteligente</h3>
-    <p>Receba recomendações personalizadas, tire dúvidas sobre os conteúdos e acelere seu aprendizado com inteligência artificial.</p>
-  </div>
-  <button class="ai-widget-btn" onclick="toggleChatbot()">
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
-    Falar com Salomão
-  </button>
-</section>
-
-<!-- ============ CASES DA COMUNIDADE ============ -->
-<section class="carousel-section">
-  <div class="carousel-header">
-    <div>
-      <h2>Cases da Comunidade</h2>
-      <p>Aprenda com quem está fazendo acontecer</p>
-    </div>
-    <div class="carousel-nav-btns">
-      <button class="carousel-nav-btn" onclick="scrollCarousel('casesTrack', -320)">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <button class="carousel-nav-btn" onclick="scrollCarousel('casesTrack', 320)">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
-    </div>
-  </div>
-  <div class="carousel-track scrollbar-none" id="casesTrack">
-    {% for item in cases %}
-    <div class="content-card animate-fade-in-up" data-delay="{{ loop.index0 * 0.05 }}">
-      <div class="card-thumbnail">
-        <img src="{{ item.thumbnail }}" alt="{{ item.title }}">
-        <div class="card-thumbnail-overlay"></div>
-        <div class="card-play-overlay"><div class="card-play-btn"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg></div></div>
-        <span class="card-type-badge {{ item.type }}">{{ item.type }}</span>
-      </div>
-      <div class="card-body">
-        <h3 class="card-title">{{ item.title }}</h3>
-        <p class="card-subtitle">{{ item.subtitle }}</p>
-        <div class="card-footer">
-          <div class="card-xp">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-            +{{ item.xp }}
-          </div>
-          {% if item.badge %}
-          <div class="card-badge-info">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 9 7 12 7s5-3 7.5-3a2.5 2.5 0 0 1 0 5H18"/></svg>
-            {{ item.badge }}
-          </div>
-          {% endif %}
-        </div>
+      <div class="discover-case-list">
+        {% for item in cases %}
+        <a class="discover-case" href="{{ item.url }}">
+          <span class="discover-case__index">0{{ loop.index }}</span>
+          <span><strong>{{ item.title }}</strong><small>{{ item.subtitle }}</small></span>
+          <span class="m-chip">{{ item.badge or 'Case' }}</span>
+          <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+        </a>
+        {% else %}
+        <p class="m-section-description">Novos casos estão sendo documentados.</p>
+        {% endfor %}
       </div>
     </div>
-    {% endfor %}
-  </div>
-</section>
 
+    <aside class="discover-library">
+      <span class="m-section-kicker">The Library</span>
+      <h2>Modelos mentais para levar com você</h2>
+      <div class="discover-library__list">
+        {% for framework in library_frameworks_top %}
+        <a href="/library/framework/{{ framework.slug }}">
+          <span>{{ framework.title }}</span>
+          <small>{{ framework.uses }} usos</small>
+          <i data-lucide="arrow-right" aria-hidden="true"></i>
+        </a>
+        {% else %}
+        <p class="m-section-description">A biblioteca está sendo organizada.</p>
+        {% endfor %}
+      </div>
+      <a class="m-button m-button--secondary" href="/library">Explorar a Library</a>
+    </aside>
+  </section>
+
+  {% if guild_hot %}
+  <section class="m-section discover-guild m-reveal" aria-labelledby="guild-hot-title">
+    <div class="discover-guild__intro">
+      <span class="m-section-kicker">The Guild</span>
+      <h2 class="m-section-title" id="guild-hot-title">Conversas que continuam depois da aula</h2>
+      <p>Discussões selecionadas por utilidade, profundidade e aplicação.</p>
+      <a class="m-text-link" href="/guild">Entrar nas comunidades <i data-lucide="arrow-right" aria-hidden="true"></i></a>
+    </div>
+    <div class="discover-guild__threads">
+      {% for thread in guild_hot %}
+      <a href="/g/{{ thread.community_slug }}/post/{{ thread.slug }}">
+        <small>{{ thread.community }}</small>
+        <strong>{{ thread.title }}</strong>
+        <span>{{ thread.upvotes }} reconhecimentos · {{ thread.replies }} respostas</span>
+      </a>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+</div>
 {% endblock %}

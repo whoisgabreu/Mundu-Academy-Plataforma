@@ -1,427 +1,577 @@
 {% extends "base.html" %}
 
-{% block title %}r/{{ community.slug }} - Mundu Guild{% endblock %}
-{% block page_title %}r/{{ community.slug }}{% endblock %}
+{% block title %}{{ community.name }} - Mundu Academy{% endblock %}
+{% block page_title %}{{ community.name }}{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/community.css') }}">
+{% endblock %}
 
 {% block content %}
-
-<!-- ============ COMMUNITY HEADER ============ -->
-<section class="community-header community-banner-{{ community.color }}">
-  <div class="community-banner" {% if community.banner %}style="background-image:url('{{ community.banner }}')"{% endif %}></div>
-  <div class="community-header-row">
-    <div class="community-icon-large">
-      <i data-lucide="{{ community.icon }}"></i>
-    </div>
-    <div class="community-header-info">
-      <h1 class="community-title">
-        <span class="community-prefix">r/</span>{{ community.slug }}
-      </h1>
-      <p class="community-headline">{{ community.name }} · {{ community.description }}</p>
-      <div class="community-meta">
-        <span><strong>{{ community.members }}</strong> membros</span>
-        <span class="meta-dot">·</span>
-        <span class="online-dot-meta"><span class="community-pulse"></span><strong>{{ community.online_now }}</strong> online</span>
-        <span class="meta-dot">·</span>
-        <span>desde {{ community.created_at }}</span>
-      </div>
-    </div>
-    <div class="community-header-actions">
-      {% if can_manage_guild %}
-      <a class="community-create-btn" href="/g/{{ community.slug }}/editar">
-        <i data-lucide="settings"></i>
-        Editar
-      </a>
-      <form method="post" action="/g/{{ community.slug }}/excluir" onsubmit="return confirm('Excluir esta guilda?')">
-        {{ csrf_input }}
-        <button type="submit" class="community-create-btn">
-          <i data-lucide="trash-2"></i>
-          Excluir
-        </button>
-      </form>
-      {% endif %}
-      <button class="community-join-btn" id="joinBtn" data-slug="{{ community.slug }}" data-joined="{{ 'true' if membership else 'false' }}" onclick="toggleJoin(this)">
-        <span class="join-state-out">+ Entrar</span>
-        <span class="join-state-in"><i data-lucide="check" class="inline-icon"></i>Membro</span>
-      </button>
-      <button class="community-create-btn" onclick="openComposer('{{ community.slug }}')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-        Criar post
-      </button>
-    </div>
-  </div>
-</section>
-
-<!-- ============ LAYOUT 2 COLUNAS ============ -->
-<div class="community-layout">
-  <main class="community-main">
-
-    <!-- Sort tabs -->
-    <div class="community-sort-bar">
-      <a href="?sort=hot" class="sort-tab {% if sort == 'hot' %}active{% endif %}">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
-        Hot
-      </a>
-      <a href="?sort=new" class="sort-tab {% if sort == 'new' %}active{% endif %}">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        Novos
-      </a>
-      <a href="?sort=top" class="sort-tab {% if sort == 'top' %}active{% endif %}">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-        Top
-      </a>
-      <a href="?sort=rising" class="sort-tab {% if sort == 'rising' %}active{% endif %}">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-        Em alta
-      </a>
-    </div>
-
-    <!-- Posts list -->
-    <div class="community-posts-list">
-      {% for p in posts %}
-      <article class="redd-post-card animate-fade-in-up" data-delay="{{ loop.index0 * 0.04 }}">
-        <div class="redd-vote-col">
-          <button class="redd-vote-btn" data-post="{{ p.id }}" data-dir="up" onclick="votePost(this)" aria-label="Upvote">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
-          </button>
-          <span class="redd-vote-score" id="score-{{ p.id }}">{{ p.upvotes }}</span>
-          <button class="redd-vote-btn" data-post="{{ p.id }}" data-dir="down" onclick="votePost(this)" aria-label="Downvote">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-          </button>
-        </div>
-
-        <div class="redd-post-body">
-          <div class="redd-post-meta">
-            <span>por</span>
-            <a href="/u/{{ p.author }}" class="redd-post-author author-link"><strong>u/{{ p.author }}</strong></a>
-            <span class="meta-dot">·</span>
-            <span>{{ p.time_ago }}</span>
-            <span class="redd-post-tag thread-tag-{{ p.tag }}">{{ p.tag }}</span>
-          </div>
-          <a href="/g/{{ p.community_slug }}/post/{{ p.slug }}" class="redd-post-titlelink">
-            <h2 class="redd-post-title">{{ p.title }}</h2>
-            <p class="redd-post-preview">{{ p.preview }}</p>
-          </a>
-          <div class="redd-post-footer">
-            <a href="/g/{{ p.community_slug }}/post/{{ p.slug }}" class="redd-post-action">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              {{ p.replies }} comentários
-            </a>
-            <button type="button" class="redd-post-action" onclick="openQuickNote('{{ p.title|e }}', 'Guild · r/{{ community.slug }}')">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
-              Salvar
-            </button>
-            <button type="button" class="redd-post-action" onclick="navigator.clipboard.writeText(location.origin + '/g/{{ p.community_slug }}/post/{{ p.slug }}').then(function(){ showToast('Link copiado'); })">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
-              Compartilhar
-            </button>
-          </div>
-        </div>
-      </article>
-      {% endfor %}
-
-      {% if not posts %}
-      <div class="empty-state">
-        <p>Nenhum post nesta ordenação ainda. <a href="?sort=hot">Voltar pro Hot</a>.</p>
-      </div>
+<div class="m-page community-page">
+  <header class="c-community-hero">
+    <div class="c-community-hero__media" aria-hidden="true">
+      {% if community.banner %}
+      <img src="{{ community.banner }}" alt="">
+      {% elif community.image %}
+      <img src="{{ community.image }}" alt="">
       {% endif %}
     </div>
-
-  </main>
-
-  <!-- ============ SIDEBAR DA COMUNIDADE ============ -->
-  <aside class="community-sidebar">
-    <div class="sidebar-card">
-      <h3 class="sidebar-card-title">Sobre r/{{ community.slug }}</h3>
-      <p class="sidebar-card-text">{{ community.description_long }}</p>
-      <div class="sidebar-card-stats">
-        <div>
-          <strong>{{ community.members }}</strong>
-          <span>Membros</span>
-        </div>
-        <div>
-          <strong>{{ community.online_now }}</strong>
-          <span class="online-dot-meta"><span class="community-pulse"></span>Online</span>
-        </div>
-        <div>
-          <strong>{{ community.nivel }}</strong>
-          <span>Nível</span>
-        </div>
-        <div>
-          <strong>{{ community.xp_total }}</strong>
-          <span>XP total</span>
+    <div class="c-community-hero__body">
+      <span class="c-community-hero__mark" aria-hidden="true">
+        <i data-lucide="{{ community.icon }}"></i>
+      </span>
+      <div class="c-community-hero__identity">
+        <span class="m-section-kicker">Comunidade Mundu</span>
+        <h1>{{ community.name }}</h1>
+        <p>{{ community.description }}</p>
+        <div class="c-community-hero__meta">
+          <span><strong data-member-count>{{ community.members }}</strong> membros</span>
+          <span class="c-online"><strong>{{ community.online_now }}</strong> online</span>
+          {% if community.created_at %}<span>desde {{ community.created_at }}</span>{% endif %}
         </div>
       </div>
-    </div>
-
-    <div class="sidebar-card">
-      <h3 class="sidebar-card-title">Missões</h3>
-      <div class="guild-side-list">
-        {% for mission in missions %}
-        <div>
-          <strong>{{ mission.titulo }}</strong>
-          <span>{{ mission.meta }} ações · +{{ mission.xp }} XP</span>
-        </div>
-        {% else %}
-        <p class="prof-empty">Nenhuma missão ativa.</p>
-        {% endfor %}
-      </div>
-    </div>
-
-    <div class="sidebar-card">
-      <h3 class="sidebar-card-title">Integrantes</h3>
-      <div class="guild-side-list">
-        {% for member in members %}
-        <a href="/u/{{ member.usuario.username }}">
-          <strong>{{ member.usuario.get_full_name() or member.usuario.username }}</strong>
-          <span>{{ member.xp }} XP · {{ member.get_role_display() }}</span>
+      <div class="c-community-hero__actions">
+        {% if can_manage_guild %}
+        <a class="m-button m-button--secondary m-button--sm" href="/g/{{ community.slug }}/editar">
+          <i data-lucide="settings-2" aria-hidden="true"></i>
+          Editar
         </a>
+        <form method="post" action="/g/{{ community.slug }}/excluir" data-delete-community>
+          {{ csrf_input }}
+          <button class="m-button m-button--danger m-button--sm" type="submit">
+            <i data-lucide="trash-2" aria-hidden="true"></i>
+            Excluir
+          </button>
+        </form>
+        {% endif %}
+
+        {% if request.user.is_authenticated %}
+        <button
+          class="m-button {% if membership %}m-button--secondary{% else %}m-button--primary{% endif %}"
+          id="communityJoin"
+          type="button"
+          data-community-slug="{{ community.slug }}"
+          data-joined="{{ 'true' if membership else 'false' }}"
+          aria-pressed="{{ 'true' if membership else 'false' }}">
+          <i data-lucide="{{ 'check' if membership else 'user-plus' }}" aria-hidden="true"></i>
+          <span data-join-label>{{ 'Participando' if membership else 'Participar' }}</span>
+        </button>
+        <button class="m-button m-button--primary" type="button" data-open-composer>
+          <i data-lucide="square-pen" aria-hidden="true"></i>
+          Nova discussão
+        </button>
         {% else %}
-        <p class="prof-empty">Nenhum integrante ainda.</p>
-        {% endfor %}
+        <a class="m-button m-button--primary" href="/login?next={{ request.path }}">
+          Entre para participar
+        </a>
+        {% endif %}
       </div>
     </div>
+  </header>
 
-    <div class="sidebar-card">
-      <h3 class="sidebar-card-title">Regras</h3>
-      <ol class="sidebar-rules">
-        {% for r in community.rules %}
-        <li><span class="rule-num">{{ loop.index }}</span><span class="rule-text">{{ r }}</span></li>
-        {% endfor %}
-      </ol>
-    </div>
+  <div class="c-community-layout">
+    <main>
+      <div class="c-feed-head">
+        <div>
+          <span class="m-section-kicker">Conversas abertas</span>
+          <h2>Discussões da comunidade</h2>
+        </div>
+        <nav class="m-tabs" aria-label="Ordenar discussões">
+          <a class="m-tab" href="?sort=hot" {% if sort == 'hot' %}aria-current="page"{% endif %}>Em destaque</a>
+          <a class="m-tab" href="?sort=new" {% if sort == 'new' %}aria-current="page"{% endif %}>Recentes</a>
+          <a class="m-tab" href="?sort=top" {% if sort == 'top' %}aria-current="page"{% endif %}>Mais apoiadas</a>
+        </nav>
+      </div>
 
-    <div class="sidebar-card">
-      <h3 class="sidebar-card-title">Moderadores</h3>
-      <ul class="sidebar-mods">
-        {% for m in moderators %}
-        <li>
-          <a href="/u/{{ m.handle }}" class="mod-pill">
-            <span class="mod-avatar">{{ m.iniciais }}</span>
-            <span>u/{{ m.handle }}</span>
-          </a>
-        </li>
-        {% endfor %}
-      </ul>
-    </div>
+      {% if posts %}
+      <div class="c-discussion-list">
+        {% for post in posts %}
+        <article class="c-discussion">
+          {% if request.user.is_authenticated %}
+          <div class="c-vote" data-vote-widget data-object-id="{{ post.id }}" data-current="">
+            <button class="c-vote__button" type="button" data-direction="up" aria-label="Apoiar discussão" aria-pressed="false">
+              <i data-lucide="chevron-up" aria-hidden="true"></i>
+            </button>
+            <span class="c-vote__count" data-vote-count>{{ post.upvotes }}</span>
+            <button class="c-vote__button" type="button" data-direction="down" aria-label="Discordar da discussão" aria-pressed="false">
+              <i data-lucide="chevron-down" aria-hidden="true"></i>
+            </button>
+          </div>
+          {% else %}
+          <div class="c-vote c-vote--readonly" aria-label="{{ post.upvotes }} apoios">
+            <span class="c-vote__count">{{ post.upvotes }}</span>
+          </div>
+          {% endif %}
 
-    {% if related %}
-    <div class="sidebar-card">
-      <h3 class="sidebar-card-title">Comunidades relacionadas</h3>
-      <ul class="sidebar-related">
-        {% for r in related %}
-        <li>
-          <a href="/g/{{ r.slug }}" class="related-pill">
-            <i data-lucide="{{ r.icon }}"></i>
-            <div>
-              <div class="related-name">r/{{ r.slug }}</div>
-              <div class="related-members">{{ r.members }} membros</div>
+          <div class="c-discussion__body">
+            <div class="c-discussion__context">
+              <a href="/u/{{ post.author }}">@{{ post.author }}</a>
+              <span>·</span>
+              <time>{{ post.time_ago }}</time>
+              {% if post.tag %}<span class="m-chip">{{ post.tag }}</span>{% endif %}
             </div>
-          </a>
-        </li>
+            <h3 class="c-discussion__title">
+              <a href="/g/{{ post.community_slug }}/post/{{ post.slug }}">{{ post.title }}</a>
+            </h3>
+            {% if post.preview %}<p class="c-discussion__excerpt">{{ post.preview }}</p>{% endif %}
+            <div class="c-discussion__foot">
+              <a href="/g/{{ post.community_slug }}/post/{{ post.slug }}">
+                <i data-lucide="message-circle" aria-hidden="true"></i>
+                {{ post.replies }} respostas
+              </a>
+              {% if post.post_type == 'link' and post.url %}
+              <a href="{{ post.url }}" target="_blank" rel="noopener noreferrer">
+                <i data-lucide="external-link" aria-hidden="true"></i>
+                Abrir referência
+              </a>
+              {% endif %}
+              {% if request.user.is_authenticated %}
+              <button
+                type="button"
+                data-open-quicknote
+                data-note-title="{{ post.title }}"
+                data-note-source="Comunidade · {{ community.name }}">
+                <i data-lucide="notebook-pen" aria-hidden="true"></i>
+                Anotar
+              </button>
+              {% endif %}
+              <button type="button" data-copy-path="/g/{{ post.community_slug }}/post/{{ post.slug }}">
+                <i data-lucide="link-2" aria-hidden="true"></i>
+                Copiar link
+              </button>
+            </div>
+          </div>
+        </article>
         {% endfor %}
-      </ul>
-    </div>
-    {% endif %}
-  </aside>
-</div>
-
-<!-- ============ COMPOSER MODAL ============ -->
-<div class="composer-backdrop" id="composerBackdrop" onclick="closeComposer(event)">
-  <div class="composer-modal" onclick="event.stopPropagation()">
-    <div class="composer-header">
-      <div>
-        <div class="composer-eyebrow">Novo post em <strong id="composerCommunity">r/{{ community.slug }}</strong></div>
-        <h3 class="composer-title">O que você quer trazer pra discussão?</h3>
       </div>
-      <button class="composer-close" onclick="closeComposer()" aria-label="Fechar">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-      </button>
-    </div>
-
-    <div class="composer-tabs">
-      <button class="composer-tab active" data-type="text" onclick="setComposerType('text')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="14" y1="18" y2="18"/></svg>
-        Texto
-      </button>
-      <button class="composer-tab" data-type="link" onclick="setComposerType('link')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        Link
-      </button>
-      <button class="composer-tab disabled" type="button" disabled title="Em breve">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-        Imagem
-      </button>
-      <button class="composer-tab disabled" type="button" disabled title="Em breve">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.4 9.4a2 2 0 1 1-2.83-2.82"/><path d="M14 14a4 4 0 1 1-5.66-5.65"/></svg>
-        Enquete
-      </button>
-    </div>
-
-    <div class="composer-body">
-      <input type="text" id="composerTitle" class="composer-input" placeholder="Título do post (claro e específico)" maxlength="280">
-      <textarea id="composerBody" class="composer-textarea" rows="8" placeholder="Caso, pergunta ou framework — o que vai gerar boa discussão?"></textarea>
-      <input type="url" id="composerUrl" class="composer-input composer-url" placeholder="https://..." style="display:none">
-    </div>
-
-    <div class="composer-footer">
-      <span class="composer-hint">Markdown básico: **negrito**, *itálico*, [link](url)</span>
-      <div class="composer-footer-actions">
-        <button class="btn-outline" onclick="closeComposer()">Cancelar</button>
-        <button class="btn-primary" onclick="submitPost()">Publicar</button>
+      {% else %}
+      <div class="m-empty">
+        <div class="m-empty__inner">
+          <span class="m-empty__icon"><i data-lucide="messages-square" aria-hidden="true"></i></span>
+          <h3>A conversa ainda não começou</h3>
+          <p>Traga um caso, uma pergunta ou um aprendizado para abrir a primeira discussão.</p>
+          {% if request.user.is_authenticated %}
+          <button class="m-button m-button--primary" type="button" data-open-composer>Iniciar discussão</button>
+          {% else %}
+          <a class="m-button m-button--primary" href="/login?next={{ request.path }}">Entrar para participar</a>
+          {% endif %}
+        </div>
       </div>
-    </div>
+      {% endif %}
+    </main>
+
+    <aside class="c-community-aside" aria-label="Sobre a comunidade">
+      <section class="c-aside-section">
+        <h2>Manifesto</h2>
+        <p>{{ community.description_long or community.description }}</p>
+        <div class="c-number-grid" aria-label="Indicadores da comunidade">
+          <div><strong data-member-count>{{ community.members }}</strong><span>membros</span></div>
+          <div><strong>{{ community.online_now }}</strong><span>online agora</span></div>
+          <div><strong>{{ community.nivel }}</strong><span>nível coletivo</span></div>
+          <div><strong>{{ community.xp_total }}</strong><span>XP total</span></div>
+        </div>
+      </section>
+
+      <section class="c-aside-section">
+        <h3>Missões em andamento</h3>
+        {% if missions %}
+        <div class="c-simple-list">
+          {% for mission in missions %}
+          <div>
+            <strong>{{ mission.titulo }}</strong>
+            {% if mission.descricao %}<p>{{ mission.descricao }}</p>{% endif %}
+            <span>{{ mission.meta }} ações · +{{ mission.xp }} XP</span>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p>Nenhuma missão ativa no momento.</p>
+        {% endif %}
+      </section>
+
+      <section class="c-aside-section">
+        <h3>Pessoas ativas</h3>
+        {% if members %}
+        <div class="c-simple-list">
+          {% for member in members[:6] %}
+          <a class="c-person-link" href="/u/{{ member.usuario.username }}">
+            <span class="c-avatar c-avatar--sm">{{ member.usuario.perfil.iniciais }}</span>
+            <span>
+              <strong>{{ member.usuario.get_full_name() or member.usuario.username }}</strong>
+              <span>{{ member.xp }} XP · {{ member.get_role_display() }}</span>
+            </span>
+          </a>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p>Os primeiros participantes aparecerão aqui.</p>
+        {% endif %}
+      </section>
+
+      <section class="c-aside-section">
+        <h3>Acordos de convivência</h3>
+        {% if community.rules %}
+        <ol class="c-rules">
+          {% for rule in community.rules %}<li>{{ rule }}</li>{% endfor %}
+        </ol>
+        {% else %}
+        <p>As regras desta comunidade ainda não foram publicadas.</p>
+        {% endif %}
+      </section>
+
+      {% if moderators %}
+      <section class="c-aside-section">
+        <h3>Curadoria</h3>
+        <div class="c-simple-list">
+          {% for moderator in moderators %}
+          <a class="c-person-link" href="/u/{{ moderator.handle }}">
+            <span class="c-avatar c-avatar--sm">{{ moderator.iniciais }}</span>
+            <span>
+              <strong>{{ moderator.nome_completo }}</strong>
+              <span>@{{ moderator.handle }}</span>
+            </span>
+          </a>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+
+      {% if related_communities %}
+      <section class="c-aside-section">
+        <h3>Continue explorando</h3>
+        <div class="c-related">
+          {% for related in related_communities %}
+          <a href="/g/{{ related.slug }}">
+            <span class="c-related__icon"><i data-lucide="{{ related.icon }}" aria-hidden="true"></i></span>
+            <span>
+              <strong>{{ related.name }}</strong>
+              <span>{{ related.members }} membros</span>
+            </span>
+          </a>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
+    </aside>
   </div>
 </div>
 
+{% if request.user.is_authenticated %}
+<div class="m-dialog-backdrop" id="communityComposer" aria-hidden="true">
+  <section class="m-dialog" role="dialog" aria-modal="true" aria-labelledby="communityComposerTitle">
+    <form id="communityComposerForm">
+      <header class="m-dialog__header">
+        <div>
+          <span class="m-section-kicker">Em {{ community.name }}</span>
+          <h2 id="communityComposerTitle">Iniciar uma boa discussão</h2>
+        </div>
+        <button class="m-icon-button" type="button" data-close-composer aria-label="Fechar">
+          <i data-lucide="x" aria-hidden="true"></i>
+        </button>
+      </header>
+      <div class="m-dialog__body">
+        <div class="c-composer-format" role="tablist" aria-label="Formato da discussão">
+          <button type="button" role="tab" data-composer-type="text" aria-selected="true">Texto</button>
+          <button type="button" role="tab" data-composer-type="link" aria-selected="false">Link</button>
+        </div>
+        <div class="m-field">
+          <label for="communityComposerPostTitle">Título</label>
+          <input
+            class="m-input"
+            id="communityComposerPostTitle"
+            name="title"
+            type="text"
+            maxlength="280"
+            autocomplete="off"
+            placeholder="Uma pergunta clara ou um caso específico"
+            required>
+        </div>
+        <div class="m-field">
+          <label for="communityComposerBody">Contexto</label>
+          <textarea
+            class="m-textarea"
+            id="communityComposerBody"
+            name="body"
+            rows="8"
+            placeholder="Conte o que aconteceu, o que você já tentou e onde está a dúvida."></textarea>
+          <span class="m-field__hint">O conteúdo será publicado como texto simples.</span>
+        </div>
+        <div class="m-field" id="communityComposerUrlField" hidden>
+          <label for="communityComposerUrl">Link de referência</label>
+          <input class="m-input" id="communityComposerUrl" name="url" type="url" placeholder="https://">
+        </div>
+        <p class="c-request-error" id="communityComposerError" role="alert"></p>
+      </div>
+      <footer class="m-dialog__footer">
+        <button class="m-button m-button--quiet" type="button" data-close-composer>Cancelar</button>
+        <button class="m-button m-button--primary" id="communityComposerSubmit" type="submit">Publicar discussão</button>
+      </footer>
+    </form>
+  </section>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
 <script>
-  // === Join / Leave comunidade ===
-  var initialJoinBtn = document.getElementById('joinBtn');
-  if (initialJoinBtn && initialJoinBtn.dataset.joined === 'true') {
-    initialJoinBtn.classList.add('is-joined');
-  }
-
-  function toggleJoin(btn) {
-    var slug = btn.dataset.slug;
-    var joined = btn.dataset.joined === 'true';
-    var newJoined = !joined;
-    btn.dataset.joined = newJoined ? 'true' : 'false';
-    btn.classList.toggle('is-joined', newJoined);
-    fetch('/api/community/' + slug + '/join', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({joined: newJoined})
-    }).catch(function(){});
-    showToast(newJoined ? 'Você entrou em r/' + slug : 'Você saiu de r/' + slug);
-  }
-
-  // === Vote em post ===
-  // Estado local: {postId: 'up'|'down'|null}
-  var voteState = {};
-  function votePost(btn) {
-    var postId = btn.dataset.post;
-    var dir = btn.dataset.dir;
-    var current = voteState[postId] || null;
-    var next = (current === dir) ? null : dir;
-    voteState[postId] = next;
-
-    // Atualiza visual dos 2 botões do mesmo post
-    var card = btn.closest('.redd-post-card');
-    if (card) {
-      card.querySelectorAll('.redd-vote-btn').forEach(function(b){
-        b.classList.remove('voted-up', 'voted-down');
-      });
-      if (next === 'up') btn.classList.add('voted-up');
-      if (next === 'down') btn.classList.add('voted-down');
+  (function () {
+    function notify(message, tone) {
+      if (window.showToast) window.showToast(message, tone);
     }
 
-    // Atualiza contagem visual (delta = transição current→next)
-    var scoreEl = document.getElementById('score-' + postId);
-    if (scoreEl) {
+    async function readJson(response) {
+      var payload = await response.json().catch(function () { return {}; });
+      if (!response.ok || payload.ok === false) {
+        throw new Error(payload.erro || payload.error || 'Não foi possível concluir a ação.');
+      }
+      return payload;
+    }
+
+    function copyText(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text);
+      }
+      return new Promise(function (resolve, reject) {
+        var input = document.createElement('textarea');
+        input.value = text;
+        input.setAttribute('readonly', '');
+        input.style.position = 'fixed';
+        input.style.opacity = '0';
+        document.body.appendChild(input);
+        input.select();
+        try {
+          document.execCommand('copy') ? resolve() : reject(new Error());
+        } catch (error) {
+          reject(error);
+        } finally {
+          input.remove();
+        }
+      });
+    }
+
+    document.querySelectorAll('[data-copy-path]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        copyText(window.location.origin + button.dataset.copyPath)
+          .then(function () { notify('Link copiado.'); })
+          .catch(function () { notify('Não foi possível copiar o link.', 'danger'); });
+      });
+    });
+
+    var deleteForm = document.querySelector('[data-delete-community]');
+    if (deleteForm) {
+      deleteForm.addEventListener('submit', function (event) {
+        if (!window.confirm('Excluir esta comunidade e todas as suas discussões?')) {
+          event.preventDefault();
+        }
+      });
+    }
+
+    {% if request.user.is_authenticated %}
+    var joinButton = document.getElementById('communityJoin');
+    if (joinButton) {
+      joinButton.addEventListener('click', async function () {
+        var joined = joinButton.dataset.joined === 'true';
+        var next = !joined;
+        joinButton.disabled = true;
+        joinButton.setAttribute('aria-busy', 'true');
+        try {
+          var response = await fetch('/api/community/' + joinButton.dataset.communitySlug + '/join', {
+            method: 'POST',
+            headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+            body: JSON.stringify({joined: next})
+          });
+          var payload = await readJson(response);
+          var confirmed = Boolean(payload.joined);
+
+          joinButton.dataset.joined = confirmed ? 'true' : 'false';
+          joinButton.setAttribute('aria-pressed', confirmed ? 'true' : 'false');
+          joinButton.classList.toggle('m-button--secondary', confirmed);
+          joinButton.classList.toggle('m-button--primary', !confirmed);
+          joinButton.querySelector('[data-join-label]').textContent = confirmed ? 'Participando' : 'Participar';
+
+          document.querySelectorAll('[data-member-count]').forEach(function (count) {
+            var value = parseInt(count.textContent || '0', 10);
+            count.textContent = Math.max(value + (confirmed ? 1 : -1), 0);
+          });
+          notify(confirmed ? 'Você entrou na comunidade.' : 'Você saiu da comunidade.');
+        } catch (error) {
+          notify(error.message, 'danger');
+        } finally {
+          joinButton.disabled = false;
+          joinButton.removeAttribute('aria-busy');
+        }
+      });
+    }
+
+    function voteDelta(current, next) {
       var delta = 0;
       if (current === 'up') delta -= 1;
       if (current === 'down') delta += 1;
       if (next === 'up') delta += 1;
       if (next === 'down') delta -= 1;
-      var n = parseInt(scoreEl.textContent, 10) + delta;
-      scoreEl.textContent = n;
+      return delta;
     }
 
-    fetch('/api/post/' + postId + '/vote', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({direction: next})
-    }).catch(function(){});
-  }
-  // Expor pra o card body (que tem onclick inline acessar via window)
-  window.votePost = votePost;
-  window.toggleJoin = toggleJoin;
+    document.querySelectorAll('[data-vote-widget]').forEach(function (widget) {
+      widget.querySelectorAll('[data-direction]').forEach(function (button) {
+        button.addEventListener('click', async function () {
+          var current = widget.dataset.current || null;
+          var requested = button.dataset.direction;
+          var next = current === requested ? null : requested;
+          var buttons = widget.querySelectorAll('[data-direction]');
+          var count = widget.querySelector('[data-vote-count]');
+          buttons.forEach(function (item) { item.disabled = true; });
 
-  // === Composer ===
-  var composerType = 'text';
-
-  function openComposer(slug) {
-    var bd = document.getElementById('composerBackdrop');
-    if (!bd) return;
-    bd.classList.add('open');
-    setTimeout(function(){
-      var t = document.getElementById('composerTitle');
-      if (t) t.focus();
-    }, 220);
-  }
-  function closeComposer(ev) {
-    if (ev && ev.currentTarget !== ev.target) return;
-    var bd = document.getElementById('composerBackdrop');
-    if (bd) bd.classList.remove('open');
-  }
-  function setComposerType(type) {
-    composerType = type;
-    document.querySelectorAll('.composer-tab').forEach(function(t){
-      t.classList.toggle('active', t.dataset.type === type);
+          try {
+            var response = await fetch('/api/post/' + widget.dataset.objectId + '/vote', {
+              method: 'POST',
+              headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+              body: JSON.stringify({direction: next})
+            });
+            var payload = await readJson(response);
+            widget.dataset.current = next || '';
+            buttons.forEach(function (item) {
+              var selected = item.dataset.direction === next;
+              item.classList.toggle('is-active', selected);
+              item.setAttribute('aria-pressed', selected ? 'true' : 'false');
+            });
+            if (count) {
+              count.textContent = typeof payload.upvotes === 'number'
+                ? payload.upvotes
+                : parseInt(count.textContent || '0', 10) + voteDelta(current, next);
+            }
+          } catch (error) {
+            notify(error.message, 'danger');
+          } finally {
+            buttons.forEach(function (item) { item.disabled = false; });
+          }
+        });
+      });
     });
-    var url = document.getElementById('composerUrl');
-    var body = document.getElementById('composerBody');
-    if (type === 'link') {
-      if (url) url.style.display = '';
-      if (body) body.placeholder = 'Comentário (opcional) sobre o link';
-    } else {
-      if (url) url.style.display = 'none';
-      if (body) body.placeholder = 'Caso, pergunta ou framework — o que vai gerar boa discussão?';
-    }
-  }
-  function submitPost() {
-    var titleEl = document.getElementById('composerTitle');
-    var bodyEl = document.getElementById('composerBody');
-    var urlEl = document.getElementById('composerUrl');
-    var title = (titleEl && titleEl.value || '').trim();
-    var body = (bodyEl && bodyEl.value || '').trim();
-    var url = (urlEl && urlEl.value || '').trim();
 
-    if (!title) {
-      if (titleEl) titleEl.focus();
-      return;
-    }
-    if (composerType === 'link' && !url) {
-      if (urlEl) urlEl.focus();
-      return;
+    var composer = document.getElementById('communityComposer');
+    var composerForm = document.getElementById('communityComposerForm');
+    var titleInput = document.getElementById('communityComposerPostTitle');
+    var bodyInput = document.getElementById('communityComposerBody');
+    var urlField = document.getElementById('communityComposerUrlField');
+    var urlInput = document.getElementById('communityComposerUrl');
+    var errorBox = document.getElementById('communityComposerError');
+    var submitButton = document.getElementById('communityComposerSubmit');
+    var composerType = 'text';
+    var lastFocused = null;
+
+    function setComposerType(type) {
+      composerType = type;
+      document.querySelectorAll('[data-composer-type]').forEach(function (button) {
+        button.setAttribute('aria-selected', button.dataset.composerType === type ? 'true' : 'false');
+      });
+      if (urlField) urlField.hidden = type !== 'link';
+      if (urlInput) urlInput.required = type === 'link';
     }
 
-    fetch('/api/post', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        community_slug: '{{ community.slug }}',
-        title: title,
-        post_type: composerType,
-        body: body,
-        url: url,
-      })
-    })
-    .then(function(r){ return r.json(); })
-    .then(function(data){
-      closeComposer();
-      showToast('Post publicado em r/{{ community.slug }}');
-      if (titleEl) titleEl.value = '';
-      if (bodyEl) bodyEl.value = '';
-      if (urlEl) urlEl.value = '';
-    })
-    .catch(function(){
-      showToast('Erro ao publicar — tente novamente');
+    function openComposer() {
+      if (!composer) return;
+      lastFocused = document.activeElement;
+      composer.classList.add('is-open');
+      composer.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('m-nav-open');
+      window.setTimeout(function () { if (titleInput) titleInput.focus(); }, 60);
+    }
+
+    function closeComposer() {
+      if (!composer) return;
+      composer.classList.remove('is-open');
+      composer.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('m-nav-open');
+      if (errorBox) errorBox.textContent = '';
+      if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus();
+    }
+
+    document.querySelectorAll('[data-open-composer]').forEach(function (button) {
+      button.addEventListener('click', openComposer);
     });
-  }
-  window.openComposer = openComposer;
-  window.closeComposer = closeComposer;
-  window.setComposerType = setComposerType;
-  window.submitPost = submitPost;
-
-  // Esc fecha composer
-  document.addEventListener('keydown', function(e){
-    if (e.key === 'Escape') {
-      var bd = document.getElementById('composerBackdrop');
-      if (bd && bd.classList.contains('open')) closeComposer();
+    document.querySelectorAll('[data-close-composer]').forEach(function (button) {
+      button.addEventListener('click', closeComposer);
+    });
+    document.querySelectorAll('[data-composer-type]').forEach(function (button) {
+      button.addEventListener('click', function () { setComposerType(button.dataset.composerType); });
+    });
+    if (composer) {
+      composer.addEventListener('click', function (event) {
+        if (event.target === composer) closeComposer();
+      });
     }
-  });
+
+    document.addEventListener('keydown', function (event) {
+      if (!composer || !composer.classList.contains('is-open')) return;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeComposer();
+        return;
+      }
+      if (event.key === 'Tab') {
+        var focusable = Array.from(composer.querySelectorAll(
+          'button:not([disabled]), input:not([disabled]):not([hidden]), textarea:not([disabled]), a[href]'
+        )).filter(function (item) { return item.offsetParent !== null; });
+        if (!focusable.length) return;
+        var first = focusable[0];
+        var last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    });
+
+    if (composerForm) {
+      composerForm.addEventListener('submit', async function (event) {
+        event.preventDefault();
+        var title = titleInput ? titleInput.value.trim() : '';
+        var body = bodyInput ? bodyInput.value.trim() : '';
+        var url = urlInput ? urlInput.value.trim() : '';
+
+        if (!title) {
+          errorBox.textContent = 'Escreva um título para a discussão.';
+          titleInput.focus();
+          return;
+        }
+        if (composerType === 'link' && !url) {
+          errorBox.textContent = 'Informe o link de referência.';
+          urlInput.focus();
+          return;
+        }
+
+        errorBox.textContent = '';
+        submitButton.disabled = true;
+        submitButton.setAttribute('aria-busy', 'true');
+        try {
+          var response = await fetch('/api/post', {
+            method: 'POST',
+            headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              community_slug: '{{ community.slug }}',
+              title: title,
+              post_type: composerType,
+              body: body,
+              url: url
+            })
+          });
+          var payload = await readJson(response);
+          var post = payload.post || {};
+          if (!post.slug || !post.community_slug) throw new Error('A discussão foi criada, mas não pôde ser aberta.');
+          window.location.assign('/g/' + post.community_slug + '/post/' + post.slug);
+        } catch (error) {
+          errorBox.textContent = error.message;
+        } finally {
+          submitButton.disabled = false;
+          submitButton.removeAttribute('aria-busy');
+        }
+      });
+    }
+    {% endif %}
+  }());
 </script>
 {% endblock %}

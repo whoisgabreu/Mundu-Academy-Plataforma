@@ -1,535 +1,479 @@
-/* ============================================
-   MUNDU ACADEMY - JavaScript Principal
-   Interatividade sem frameworks
-   ============================================ */
+/* Mundu Academy — shared product behavior, no framework and no mock content. */
+(function () {
+  'use strict';
 
-// ============ SIDEBAR ============
+  var lastFocusedElement = null;
+  var toastTimer = null;
+  var quicknoteSourceTitle = '';
 
-function toggleSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  const mainWrapper = document.getElementById('mainWrapper');
-  
-  sidebar.classList.toggle('collapsed');
-  mainWrapper.classList.toggle('sidebar-collapsed');
-  
-  // Salvar estado no localStorage
-  const isCollapsed = sidebar.classList.contains('collapsed');
-  localStorage.setItem('sidebarCollapsed', isCollapsed);
-}
-
-// Restaurar estado da sidebar ao carregar a página
-document.addEventListener('DOMContentLoaded', function() {
-  const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-  if (isCollapsed) {
-    const sidebar = document.getElementById('sidebar');
-    const mainWrapper = document.getElementById('mainWrapper');
-    if (sidebar) sidebar.classList.add('collapsed');
-    if (mainWrapper) mainWrapper.classList.add('sidebar-collapsed');
+  function clampPercentage(value) {
+    var number = Number(value);
+    if (!Number.isFinite(number)) return 0;
+    return Math.min(100, Math.max(0, number));
   }
-  
-  // Inicializar o hero se existir na página
-  if (document.getElementById('heroSection')) {
-    initHero();
-  }
-});
 
-// ============ HERO CARROSSEL ============
-
-const heroBanners = [
-  {
-    id: "1",
-    badge: "COLLAB EXCLUSIVA",
-    badgeType: "collab",
-    title: 'Domine o <span class="highlight">Growth Marketing</span> em 30 dias',
-    description: "Trilha completa com Thiago Nigro. Do zero ao avançado em estratégias de crescimento que geraram mais de R$ 50M em vendas.",
-    duration: "12 horas",
-    xp: "+800 XP",
-    students: "2.4k alunos",
-    image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1920&q=80",
-    ctaText: "Começar Trilha"
-  },
-  {
-    id: "2",
-    badge: "MASTERCLASS",
-    badgeType: "masterclass",
-    title: 'Aprenda <span class="highlight">Vendas B2B</span> com Aaron Ross',
-    description: "O criador do Predictable Revenue ensina como escalar vendas de forma previsível e construir times de alta performance.",
-    duration: "4 horas",
-    xp: "+500 XP",
-    students: "1.8k alunos",
-    image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=1920&q=80",
-    ctaText: "Assistir Masterclass"
-  },
-  {
-    id: "3",
-    badge: "CURSO COMPLETO",
-    badgeType: "curso",
-    title: 'Construa sua <span class="highlight">Marca Pessoal</span> de sucesso',
-    description: "8 módulos práticos para você se posicionar como autoridade no mercado e atrair oportunidades de forma orgânica.",
-    duration: "6 horas",
-    xp: "+450 XP",
-    students: "3.2k alunos",
-    image: "https://images.unsplash.com/photo-1493612276216-ee3925520721?w=1920&q=80",
-    ctaText: "Começar Curso"
-  },
-  {
-    id: "4",
-    badge: "AO VIVO HOJE",
-    badgeType: "live",
-    title: 'Workshop: <span class="highlight">Pitch Perfeito</span> para Investidores',
-    description: "Aprenda a estruturar e apresentar seu pitch de forma convincente. Sessão ao vivo com feedback em tempo real.",
-    duration: "2 horas",
-    xp: "+200 XP",
-    students: "456 inscritos",
-    image: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=1920&q=80",
-    ctaText: "Participar Agora"
-  },
-  {
-    id: "5",
-    badge: "WORKSHOP",
-    badgeType: "workshop",
-    title: 'Domine as <span class="highlight">Técnicas de Negociação</span> avançadas',
-    description: "Workshop intensivo com exercícios práticos. Aprenda a negociar como os melhores executivos do mercado.",
-    duration: "3 horas",
-    xp: "+350 XP",
-    students: "890 alunos",
-    image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=1920&q=80",
-    ctaText: "Entrar no Workshop"
-  }
-];
-
-let heroIndex = 0;
-let heroInterval = null;
-
-function initHero() {
-  renderHero(0);
-  renderDots();
-  startHeroAutoplay();
-}
-
-function renderHero(index) {
-  const banner = heroBanners[index];
-  const content = document.getElementById('heroContent');
-  
-  // Animação de transição
-  content.style.opacity = '0';
-  content.style.transform = 'translateY(20px)';
-  
-  setTimeout(() => {
-    document.getElementById('heroImg').src = banner.image;
-    document.getElementById('heroBadgeText').textContent = banner.badge;
-    
-    // Atualizar classe do badge
-    const badgeEl = document.getElementById('heroBadge');
-    badgeEl.className = 'hero-badge ' + banner.badgeType;
-    
-    document.getElementById('heroTitle').innerHTML = banner.title;
-    document.getElementById('heroDesc').textContent = banner.description;
-    document.getElementById('heroDuration').textContent = banner.duration;
-    document.getElementById('heroXp').textContent = banner.xp;
-    document.getElementById('heroStudents').textContent = banner.students;
-    document.getElementById('heroCtaText').textContent = banner.ctaText;
-    
-    // Atualizar dots
-    updateDots(index);
-    
-    // Animar entrada
-    content.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-    content.style.opacity = '1';
-    content.style.transform = 'translateY(0)';
-  }, 200);
-}
-
-function renderDots() {
-  const dotsContainer = document.getElementById('heroDots');
-  dotsContainer.innerHTML = '';
-  
-  heroBanners.forEach((_, i) => {
-    const dot = document.createElement('button');
-    dot.className = 'hero-dot' + (i === 0 ? ' active' : '');
-    dot.onclick = () => heroGoTo(i);
-    dotsContainer.appendChild(dot);
-  });
-}
-
-function updateDots(index) {
-  const dots = document.querySelectorAll('.hero-dot');
-  dots.forEach((dot, i) => {
-    dot.classList.toggle('active', i === index);
-  });
-}
-
-function heroGo(direction) {
-  heroIndex = (heroIndex + direction + heroBanners.length) % heroBanners.length;
-  renderHero(heroIndex);
-  restartHeroAutoplay();
-}
-
-function heroGoTo(index) {
-  heroIndex = index;
-  renderHero(heroIndex);
-  restartHeroAutoplay();
-}
-
-function startHeroAutoplay() {
-  heroInterval = setInterval(() => {
-    heroIndex = (heroIndex + 1) % heroBanners.length;
-    renderHero(heroIndex);
-  }, 8000);
-}
-
-function restartHeroAutoplay() {
-  clearInterval(heroInterval);
-  startHeroAutoplay();
-}
-
-// ============ CARROSSÉIS DE CONTEÚDO ============
-
-function scrollCarousel(trackId, amount) {
-  const track = document.getElementById(trackId);
-  if (track) {
-    track.scrollBy({ left: amount, behavior: 'smooth' });
-  }
-}
-
-// ============ ANIMAÇÕES DE SCROLL ============
-
-// Observador para animar elementos quando entram na viewport
-const observerOptions = {
-  threshold: 0.1,
-  rootMargin: '0px 0px -50px 0px'
-};
-
-const animateObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.style.opacity = '1';
-      entry.target.style.transform = 'translateY(0)';
-      animateObserver.unobserve(entry.target);
+  function refreshIcons() {
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
     }
-  });
-}, observerOptions);
-
-document.addEventListener('DOMContentLoaded', () => {
-  // Observar elementos com animação
-  document.querySelectorAll('.animate-fade-in-up').forEach(el => {
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(20px)';
-    el.style.transition = 'opacity 0.4s ease-out, transform 0.4s ease-out';
-    animateObserver.observe(el);
-  });
-});
-
-// ============ SALOMÃO IA CHATBOT ============
-
-function toggleChatbot() {
-  const chatWindow = document.getElementById('chatbotWindow');
-  if (!chatWindow) return;
-
-  chatWindow.classList.toggle('open');
-
-  if (chatWindow.classList.contains('open')) {
-    // Focar no input quando abrir com pequeno delay para a transição
-    setTimeout(() => {
-      const input = document.getElementById('chatbotInput');
-      if (input) input.focus();
-    }, 300);
-  }
-}
-
-function handleChatKeypress(event) {
-  if (event.key === 'Enter') {
-    sendChatMessage();
-  }
-}
-
-function sendChatMessage() {
-  const input = document.getElementById('chatbotInput');
-  const text = input.value.trim();
-
-  if (!text) return;
-
-  const messagesContainer = document.getElementById('chatbotMessages');
-
-  // Adicionar mensagem do usuário
-  const userMsg = document.createElement('div');
-  userMsg.className = 'chat-message user animate-fade-in-up';
-  userMsg.textContent = text;
-  messagesContainer.appendChild(userMsg);
-
-  input.value = '';
-
-  // Rolar para o final
-  messagesContainer.scrollTop = messagesContainer.scrollHeight;
-
-  // Simular resposta do bot (mockup)
-  setTimeout(() => {
-    const botMsg = document.createElement('div');
-    botMsg.className = 'chat-message bot animate-fade-in-up';
-    botMsg.textContent = "Excelente pergunta! Estou analisando seu histórico na Mundu Academy. Note que neste mockup de interface, ainda não estou conectado à API do GPT, mas logo poderei te entregar respostas personalizadas reais.";
-    messagesContainer.appendChild(botMsg);
-
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
-  }, 1200);
-}
-
-// ============ QUICK NOTE MODAL (Segundo Cérebro) ============
-
-let _quicknoteSourceTitle = '';
-
-function openQuickNote(title, source) {
-  const backdrop = document.getElementById('quicknoteBackdrop');
-  if (!backdrop) return;
-
-  _quicknoteSourceTitle = title || '';
-  const sourceText = document.getElementById('quicknoteSourceText');
-  if (sourceText) sourceText.textContent = source || title || '—';
-
-  const titleInput = document.getElementById('quicknoteTitle');
-  const contentInput = document.getElementById('quicknoteContent');
-  if (titleInput) titleInput.value = title ? 'Sobre: ' + title : '';
-  if (contentInput) contentInput.value = '';
-
-  backdrop.classList.add('open');
-  setTimeout(function(){
-    if (contentInput) contentInput.focus();
-  }, 220);
-}
-
-function closeQuickNote(event) {
-  // Quando chamado via backdrop click, garante que só fecha se clicou no backdrop
-  if (event && event.currentTarget !== event.target) return;
-  const backdrop = document.getElementById('quicknoteBackdrop');
-  if (backdrop) backdrop.classList.remove('open');
-}
-
-function saveQuickNote() {
-  const titleInput = document.getElementById('quicknoteTitle');
-  const contentInput = document.getElementById('quicknoteContent');
-  const title = (titleInput && titleInput.value || '').trim();
-  const content = (contentInput && contentInput.value || '').trim();
-
-  if (!content) {
-    if (contentInput) {
-      contentInput.style.borderColor = 'hsl(0 90% 60%)';
-      contentInput.focus();
-      setTimeout(function(){ contentInput.style.borderColor = ''; }, 1200);
-    }
-    return;
   }
 
-  const payload = {
-    title: title || 'Nota rápida',
-    content: content,
-    source: _quicknoteSourceTitle
-  };
-
-  // Tenta persistir; se falhar, ainda dá feedback positivo (mockup)
-  try {
-    fetch('/api/quick-note', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    }).then(function(){
-      if (window.MunduGamification) window.MunduGamification.refresh();
-    }).catch(function(){ /* silencioso — é mockup */ });
-  } catch (_) { /* noop */ }
-
-  closeQuickNote();
-  showToast('🧠 Nota salva no My Brain (+10 XP)');
-}
-
-// Atalho Ctrl+Enter para salvar
-document.addEventListener('keydown', function(e){
-  const backdrop = document.getElementById('quicknoteBackdrop');
-  if (!backdrop || !backdrop.classList.contains('open')) return;
-  if (e.key === 'Escape') {
-    closeQuickNote();
-  } else if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-    e.preventDefault();
-    saveQuickNote();
-  }
-});
-
-// ============ NOTIFICATIONS DROPDOWN ============
-
-function toggleNotifications(event) {
-  if (event) event.stopPropagation();
-  const dropdown = document.getElementById('notifDropdown');
-  const btn = document.getElementById('notifBtn');
-  if (!dropdown) return;
-  const isOpen = dropdown.classList.toggle('open');
-  if (btn) btn.classList.toggle('is-active', isOpen);
-}
-
-function markNotificationRead(linkEl, notifId) {
-  // Não previne navegação — só marca como lida em background
-  if (linkEl) {
-    linkEl.classList.remove('is-unread');
-    const dot = linkEl.querySelector('.notif-unread-dot');
-    if (dot) dot.remove();
-  }
-  // Decrementa badge se estava unread
-  const badge = document.getElementById('notifBadge');
-  if (badge) {
-    const n = Math.max(0, parseInt(badge.textContent, 10) - 1);
-    if (n === 0) badge.remove();
-    else badge.textContent = n;
-  }
-  fetch('/api/notifications/' + notifId + '/read', {method: 'POST'}).catch(function(){});
-}
-
-function markAllNotificationsRead() {
-  document.querySelectorAll('.notif-item.is-unread').forEach(function(el){
-    el.classList.remove('is-unread');
-    const dot = el.querySelector('.notif-unread-dot');
-    if (dot) dot.remove();
-  });
-  const badge = document.getElementById('notifBadge');
-  if (badge) badge.remove();
-  // remove o botão "Marcar todas como lidas"
-  const markAllBtn = document.querySelector('.notif-mark-all');
-  if (markAllBtn) markAllBtn.remove();
-  fetch('/api/notifications/read-all', {method: 'POST'}).catch(function(){});
-  showToast('✓ Todas marcadas como lidas');
-}
-
-// Fecha dropdown ao clicar fora
-document.addEventListener('click', function(e){
-  const dropdown = document.getElementById('notifDropdown');
-  const btn = document.getElementById('notifBtn');
-  if (!dropdown || !dropdown.classList.contains('open')) return;
-  if (dropdown.contains(e.target)) return;
-  if (btn && btn.contains(e.target)) return;
-  dropdown.classList.remove('open');
-  if (btn) btn.classList.remove('is-active');
-});
-
-// Esc fecha dropdown
-document.addEventListener('keydown', function(e){
-  if (e.key !== 'Escape') return;
-  const dropdown = document.getElementById('notifDropdown');
-  if (dropdown && dropdown.classList.contains('open')) {
-    dropdown.classList.remove('open');
-    const btn = document.getElementById('notifBtn');
-    if (btn) btn.classList.remove('is-active');
-  }
-});
-
-// ============ TOAST ============
-
-let _toastTimer = null;
-
-function showToast(message) {
-  const toast = document.getElementById('munduToast');
-  if (!toast) return;
-  toast.textContent = message;
-  toast.classList.add('show');
-  if (_toastTimer) clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(function(){
-    toast.classList.remove('show');
-  }, 2800);
-}
-
-// ============ GAMIFICATION ============
-
-const MunduGamification = (function(){
-  const storageKey = 'mundu:last-level';
-  const xpKey = 'mundu:last-xp';
-  let initialized = false;
-
-  function ensureModal() {
-    let modal = document.getElementById('levelUpModal');
-    if (modal) return modal;
-    modal = document.createElement('div');
-    modal.id = 'levelUpModal';
-    modal.className = 'levelup-backdrop';
-    modal.innerHTML = [
-      '<div class="levelup-card" role="dialog" aria-modal="true" aria-label="Level up">',
-      '<div class="levelup-burst" aria-hidden="true"></div>',
-      '<button class="levelup-close" type="button" aria-label="Fechar">×</button>',
-      '<span class="levelup-kicker">Level up</span>',
-      '<h2 id="levelUpTitle">Nível alcançado!</h2>',
-      '<p id="levelUpText">Sua evolução acabou de subir.</p>',
-      '<div class="levelup-rewards">',
-      '<span><strong id="levelUpXp">0</strong> XP atual</span>',
-      '<span><strong id="levelUpCoins">0</strong> moedas</span>',
-      '<span><strong id="levelUpTitleName">Novo</strong> título</span>',
-      '</div>',
-      '<button class="prof-btn primary" type="button" id="levelUpOk">Continuar</button>',
-      '</div>'
-    ].join('');
-    document.body.appendChild(modal);
-    modal.querySelector('.levelup-close').addEventListener('click', close);
-    modal.querySelector('#levelUpOk').addEventListener('click', close);
-    modal.addEventListener('click', function(event){
-      if (event.target === modal) close();
+  function applyProgressValues(root) {
+    var scope = root || document;
+    scope.querySelectorAll('[data-progress], [data-pct], [data-progress-ring]').forEach(function (element) {
+      var raw = element.dataset.progress;
+      if (raw === undefined) raw = element.dataset.pct;
+      if (raw === undefined) raw = element.dataset.progressRing;
+      var value = clampPercentage(raw);
+      element.style.setProperty('--m-progress', value + '%');
+      if (element.hasAttribute('role') && element.getAttribute('role') === 'progressbar') {
+        element.setAttribute('aria-valuenow', String(Math.round(value)));
+      }
     });
-    return modal;
   }
 
-  function close() {
-    const modal = document.getElementById('levelUpModal');
-    if (modal) modal.classList.remove('open');
+  function setTheme(theme) {
+    var nextTheme = theme === 'dark' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = nextTheme;
+    localStorage.setItem('mundu:theme', nextTheme);
+    document.querySelectorAll('[data-theme-label]').forEach(function (label) {
+      label.textContent = nextTheme === 'dark' ? 'Tema claro' : 'Tema escuro';
+    });
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = nextTheme === 'dark' ? '#111411' : '#F8F9F7';
+    refreshIcons();
   }
 
-  function particleBurst(modal) {
-    const burst = modal.querySelector('.levelup-burst');
-    if (!burst) return;
-    burst.innerHTML = '';
-    for (let i = 0; i < 22; i += 1) {
-      const particle = document.createElement('span');
-      particle.style.setProperty('--angle', (i * 17) + 'deg');
-      particle.style.setProperty('--distance', (70 + (i % 5) * 12) + 'px');
-      particle.style.animationDelay = (i * 12) + 'ms';
-      burst.appendChild(particle);
+  function toggleTheme() {
+    setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+  }
+
+  function initTheme() {
+    setTheme(document.documentElement.dataset.theme || 'light');
+    document.querySelectorAll('[data-theme-toggle]').forEach(function (button) {
+      button.addEventListener('click', toggleTheme);
+    });
+  }
+
+  function openMobileNav() {
+    var nav = document.getElementById('mobileNav');
+    var trigger = document.getElementById('mobileNavTrigger');
+    if (!nav || !trigger) return;
+    lastFocusedElement = document.activeElement;
+    nav.hidden = false;
+    document.body.classList.add('m-nav-open');
+    trigger.setAttribute('aria-expanded', 'true');
+    var firstControl = nav.querySelector('button, a');
+    if (firstControl) firstControl.focus();
+  }
+
+  function closeMobileNav() {
+    var nav = document.getElementById('mobileNav');
+    var trigger = document.getElementById('mobileNavTrigger');
+    if (!nav || nav.hidden) return;
+    nav.hidden = true;
+    document.body.classList.remove('m-nav-open');
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+    if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+      lastFocusedElement.focus();
     }
   }
 
-  function show(data) {
-    const modal = ensureModal();
-    const level = data.nivel || (data.last_event && data.last_event.nivel_atual) || 1;
-    modal.querySelector('#levelUpTitle').textContent = 'Nível ' + level + ' alcançado!';
-    modal.querySelector('#levelUpText').textContent = data.last_event && data.last_event.descricao
-      ? data.last_event.descricao
-      : 'Você desbloqueou uma nova etapa na Mundu.';
-    modal.querySelector('#levelUpXp').textContent = data.xp_total || 0;
-    modal.querySelector('#levelUpCoins').textContent = data.moedas || 0;
-    modal.querySelector('#levelUpTitleName').textContent = data.titulo_ativo || data.nome_nivel || 'Novo';
-    particleBurst(modal);
-    modal.classList.add('open');
+  function initMobileNav() {
+    var trigger = document.getElementById('mobileNavTrigger');
+    if (trigger) trigger.addEventListener('click', openMobileNav);
+    document.querySelectorAll('[data-close-mobile-nav]').forEach(function (button) {
+      button.addEventListener('click', closeMobileNav);
+    });
   }
 
-  function refresh() {
-    fetch('/api/xp', {headers: {'Accept': 'application/json'}})
-      .then(function(response){
-        if (!response.ok) throw new Error('xp unavailable');
-        return response.json();
-      })
-      .then(function(data){
-        const previousLevel = parseInt(localStorage.getItem(storageKey) || data.nivel, 10);
-        const previousXp = parseInt(localStorage.getItem(xpKey) || data.xp_total, 10);
-        localStorage.setItem(storageKey, data.nivel);
-        localStorage.setItem(xpKey, data.xp_total);
+  function closeOpenMenus(event) {
+    document.querySelectorAll('details.m-menu[open]').forEach(function (menu) {
+      if (!event || !menu.contains(event.target)) menu.removeAttribute('open');
+    });
+  }
+
+  function showToast(message, tone) {
+    var toast = document.getElementById('munduToast');
+    if (!toast) return;
+    toast.textContent = message;
+    if (tone) toast.dataset.tone = tone;
+    else toast.removeAttribute('data-tone');
+    toast.classList.add('is-visible');
+    if (toastTimer) window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(function () {
+      toast.classList.remove('is-visible');
+    }, 3200);
+  }
+
+  function openQuickNote(title, source) {
+    var backdrop = document.getElementById('quicknoteBackdrop');
+    if (!backdrop) {
+      var next = encodeURIComponent(window.location.pathname + window.location.search);
+      window.location.href = '/login?next=' + next;
+      return;
+    }
+
+    lastFocusedElement = document.activeElement;
+    quicknoteSourceTitle = title || '';
+    var titleInput = document.getElementById('quicknoteTitle');
+    var contentInput = document.getElementById('quicknoteContent');
+    var sourceCopy = document.getElementById('quicknoteSource');
+    var error = document.getElementById('quicknoteError');
+
+    if (titleInput) titleInput.value = title ? 'Sobre: ' + title : '';
+    if (contentInput) contentInput.value = '';
+    if (sourceCopy) {
+      sourceCopy.textContent = source
+        ? 'Captura a partir de ' + source + '.'
+        : 'Uma nota curta agora pode virar uma decisão melhor depois.';
+    }
+    if (error) error.textContent = '';
+
+    backdrop.classList.add('is-open');
+    backdrop.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('m-nav-open');
+    window.setTimeout(function () {
+      if (contentInput) contentInput.focus();
+    }, 80);
+  }
+
+  function closeQuickNote() {
+    var backdrop = document.getElementById('quicknoteBackdrop');
+    if (!backdrop || !backdrop.classList.contains('is-open')) return;
+    backdrop.classList.remove('is-open');
+    backdrop.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('m-nav-open');
+    if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+      lastFocusedElement.focus();
+    }
+  }
+
+  async function submitQuickNote(event) {
+    event.preventDefault();
+    var titleInput = document.getElementById('quicknoteTitle');
+    var contentInput = document.getElementById('quicknoteContent');
+    var submitButton = document.getElementById('quicknoteSubmit');
+    var error = document.getElementById('quicknoteError');
+    var title = titleInput ? titleInput.value.trim() : '';
+    var content = contentInput ? contentInput.value.trim() : '';
+
+    if (!content) {
+      if (error) error.textContent = 'Escreva a ideia que deseja guardar.';
+      if (contentInput) contentInput.focus();
+      return;
+    }
+
+    if (error) error.textContent = '';
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.setAttribute('aria-busy', 'true');
+    }
+
+    try {
+      var response = await fetch('/api/quick-note', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title: title || 'Nota rápida',
+          content: content,
+          source: quicknoteSourceTitle
+        })
+      });
+      var payload = await response.json().catch(function () { return {}; });
+      if (!response.ok || payload.ok === false) {
+        throw new Error(payload.erro || payload.error || 'Não foi possível salvar a nota.');
+      }
+      closeQuickNote();
+      showToast('Nota salva no My Brain · +10 XP');
+      if (window.MunduGamification) window.MunduGamification.refresh();
+    } catch (requestError) {
+      if (error) error.textContent = requestError.message || 'Não foi possível salvar. Tente novamente.';
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.removeAttribute('aria-busy');
+      }
+    }
+  }
+
+  function initQuickNote() {
+    document.querySelectorAll('[data-open-quicknote]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        openQuickNote(button.dataset.noteTitle || '', button.dataset.noteSource || '');
+      });
+    });
+    document.querySelectorAll('[data-close-quicknote]').forEach(function (button) {
+      button.addEventListener('click', closeQuickNote);
+    });
+    var form = document.getElementById('quicknoteForm');
+    if (form) form.addEventListener('submit', submitQuickNote);
+    var backdrop = document.getElementById('quicknoteBackdrop');
+    if (backdrop) {
+      backdrop.addEventListener('click', function (event) {
+        if (event.target === backdrop) closeQuickNote();
+      });
+    }
+  }
+
+  function markNotificationRead(link, notificationId) {
+    if (!link || !link.classList.contains('is-unread')) return;
+    fetch('/api/notifications/' + notificationId + '/read', {
+      method: 'POST',
+      headers: {'Accept': 'application/json'},
+      keepalive: true
+    }).then(function (response) {
+      if (!response.ok) return;
+      link.classList.remove('is-unread');
+      var badge = document.getElementById('notifBadge');
+      if (!badge) return;
+      var remaining = Math.max(0, Number.parseInt(badge.textContent, 10) - 1);
+      if (remaining === 0) badge.remove();
+      else badge.textContent = String(remaining);
+    }).catch(function () {
+      /* Navigation may cancel this background request; do not show false state. */
+    });
+  }
+
+  async function markAllNotificationsRead() {
+    var button = document.querySelector('[data-mark-all-notifications]');
+    if (button) button.disabled = true;
+    try {
+      var response = await fetch('/api/notifications/read-all', {
+        method: 'POST',
+        headers: {'Accept': 'application/json'}
+      });
+      if (!response.ok) throw new Error();
+      document.querySelectorAll('.m-notification.is-unread').forEach(function (item) {
+        item.classList.remove('is-unread');
+      });
+      var badge = document.getElementById('notifBadge');
+      if (badge) badge.remove();
+      if (button) button.remove();
+      showToast('Notificações marcadas como lidas');
+    } catch (error) {
+      showToast('Não foi possível atualizar as notificações', 'danger');
+      if (button) button.disabled = false;
+    }
+  }
+
+  function initNotifications() {
+    document.querySelectorAll('[data-notification-id]').forEach(function (link) {
+      link.addEventListener('click', function () {
+        markNotificationRead(link, link.dataset.notificationId);
+      });
+    });
+    var markAllButton = document.querySelector('[data-mark-all-notifications]');
+    if (markAllButton) markAllButton.addEventListener('click', markAllNotificationsRead);
+  }
+
+  function scrollRail(trackId, direction) {
+    var track = document.getElementById(trackId);
+    if (!track) return;
+    var amount = Math.max(280, track.clientWidth * 0.82);
+    track.scrollBy({left: amount * direction, behavior: 'smooth'});
+  }
+
+  function initTabs(root) {
+    var scope = root || document;
+    scope.querySelectorAll('[data-tabs]').forEach(function (tabs) {
+      var buttons = Array.from(tabs.querySelectorAll('[role="tab"][data-tab]'));
+      var containerId = tabs.dataset.tabs;
+      var panelScope = containerId ? document.getElementById(containerId) : tabs.parentElement;
+      if (!panelScope || !buttons.length) return;
+      var panels = Array.from(panelScope.querySelectorAll('[role="tabpanel"][data-tab-panel]'));
+
+      function activate(button, moveFocus) {
+        var key = button.dataset.tab;
+        buttons.forEach(function (item) {
+          var selected = item === button;
+          item.setAttribute('aria-selected', selected ? 'true' : 'false');
+          item.tabIndex = selected ? 0 : -1;
+        });
+        panels.forEach(function (panel) {
+          panel.hidden = panel.dataset.tabPanel !== key;
+        });
+        if (moveFocus) button.focus();
+      }
+
+      buttons.forEach(function (button, index) {
+        button.addEventListener('click', function () { activate(button, false); });
+        button.addEventListener('keydown', function (event) {
+          if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+          event.preventDefault();
+          var offset = event.key === 'ArrowRight' ? 1 : -1;
+          var next = buttons[(index + offset + buttons.length) % buttons.length];
+          activate(next, true);
+        });
+      });
+    });
+  }
+
+  function initDisclosures(root) {
+    var scope = root || document;
+    scope.querySelectorAll('[data-disclosure]').forEach(function (button) {
+      var panel = document.getElementById(button.dataset.disclosure);
+      if (!panel) return;
+      button.addEventListener('click', function () {
+        var expanded = button.getAttribute('aria-expanded') === 'true';
+        button.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+        panel.hidden = expanded;
+      });
+    });
+  }
+
+  function initConfirmations() {
+    document.querySelectorAll('form[data-confirm]').forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        var message = form.dataset.confirm || 'Confirmar esta a\u00e7\u00e3o?';
+        if (!window.confirm(message)) event.preventDefault();
+      });
+    });
+  }
+
+  function initReveal() {
+    var elements = document.querySelectorAll('.m-reveal');
+    if (!elements.length) return;
+    if (!('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      elements.forEach(function (element) { element.classList.add('is-visible'); });
+      return;
+    }
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target);
+      });
+    }, {threshold: 0.08, rootMargin: '0px 0px -30px'});
+    elements.forEach(function (element) { observer.observe(element); });
+  }
+
+  function createLevelDialog() {
+    var backdrop = document.createElement('div');
+    backdrop.id = 'levelUpModal';
+    backdrop.className = 'm-dialog-backdrop';
+    backdrop.setAttribute('aria-hidden', 'true');
+    backdrop.innerHTML = [
+      '<section class="m-dialog" role="dialog" aria-modal="true" aria-labelledby="levelUpTitle">',
+      '  <div class="m-dialog__body m-level-dialog__body">',
+      '    <div class="m-level-dialog__visual" id="levelUpNumber">2</div>',
+      '    <span class="m-eyebrow">Novo marco</span>',
+      '    <h2 id="levelUpTitle" class="m-section-title">Você avançou de nível</h2>',
+      '    <p id="levelUpText" class="m-section-description">Sua constância abriu uma nova etapa.</p>',
+      '    <button class="m-button m-button--primary m-level-dialog__action" id="levelUpClose" type="button">Continuar aprendendo</button>',
+      '  </div>',
+      '</section>'
+    ].join('');
+    document.body.appendChild(backdrop);
+    backdrop.querySelector('#levelUpClose').addEventListener('click', function () {
+      backdrop.classList.remove('is-open');
+      backdrop.setAttribute('aria-hidden', 'true');
+    });
+    return backdrop;
+  }
+
+  var MunduGamification = (function () {
+    var initialized = false;
+    var levelKey = 'mundu:last-level';
+    var xpKey = 'mundu:last-xp';
+
+    function show(data) {
+      var modal = document.getElementById('levelUpModal') || createLevelDialog();
+      var level = data.nivel || 1;
+      modal.querySelector('#levelUpNumber').textContent = String(level);
+      modal.querySelector('#levelUpTitle').textContent = 'Nível ' + level + ' alcançado';
+      modal.querySelector('#levelUpText').textContent = data.last_event && data.last_event.descricao
+        ? data.last_event.descricao
+        : 'Sua constância abriu uma nova etapa na Mundu.';
+      modal.classList.add('is-open');
+      modal.setAttribute('aria-hidden', 'false');
+      modal.querySelector('#levelUpClose').focus();
+    }
+
+    async function refresh() {
+      if (!document.querySelector('.m-xp-orbit')) return;
+      try {
+        var response = await fetch('/api/xp', {headers: {'Accept': 'application/json'}});
+        if (!response.ok) throw new Error();
+        var data = await response.json();
+        var previousLevel = Number.parseInt(localStorage.getItem(levelKey) || String(data.nivel), 10);
+        var previousXp = Number.parseInt(localStorage.getItem(xpKey) || String(data.xp_total), 10);
+        localStorage.setItem(levelKey, String(data.nivel));
+        localStorage.setItem(xpKey, String(data.xp_total));
         if (initialized && (data.nivel > previousLevel || (data.last_event && data.last_event.level_up))) {
           show(data);
-        }
-        if (initialized && data.xp_total > previousXp && window.showToast) {
+        } else if (initialized && data.xp_total > previousXp) {
           showToast('+' + (data.xp_total - previousXp) + ' XP');
         }
+      } catch (error) {
+        /* XP is supplemental UI; the page remains usable if unavailable. */
+      } finally {
         initialized = true;
-      })
-      .catch(function(){
-        initialized = true;
-      });
+      }
+    }
+
+    return {refresh: refresh, show: show};
+  }());
+
+  function handleEscape(event) {
+    if (event.key !== 'Escape') return;
+    closeMobileNav();
+    closeQuickNote();
+    closeOpenMenus();
   }
 
-  document.addEventListener('DOMContentLoaded', function(){
-    refresh();
-    setTimeout(refresh, 1500);
-  });
+  function initialize() {
+    initTheme();
+    initMobileNav();
+    initQuickNote();
+    initNotifications();
+    initTabs();
+    initDisclosures();
+    initConfirmations();
+    initReveal();
+    applyProgressValues();
+    refreshIcons();
 
-  return {refresh: refresh, show: show};
-})();
+    document.addEventListener('click', closeOpenMenus);
+    document.addEventListener('keydown', handleEscape);
+    document.addEventListener('keydown', function (event) {
+      var backdrop = document.getElementById('quicknoteBackdrop');
+      if (!backdrop || !backdrop.classList.contains('is-open')) return;
+      if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+        event.preventDefault();
+        var form = document.getElementById('quicknoteForm');
+        if (form) form.requestSubmit();
+      }
+    });
 
-window.MunduGamification = MunduGamification;
+    MunduGamification.refresh();
+  }
+
+  window.Mundu = {
+    applyProgressValues: applyProgressValues,
+    refreshIcons: refreshIcons,
+    initTabs: initTabs,
+    initDisclosures: initDisclosures,
+    scrollRail: scrollRail
+  };
+  window.MunduGamification = MunduGamification;
+  window.openQuickNote = openQuickNote;
+  window.closeQuickNote = closeQuickNote;
+  window.showToast = showToast;
+  window.markNotificationRead = markNotificationRead;
+  window.markAllNotificationsRead = markAllNotificationsRead;
+  window.scrollRail = scrollRail;
+  window.scrollCarousel = function (trackId, amount) {
+    scrollRail(trackId, amount < 0 ? -1 : 1);
+  };
+  window.toggleTheme = toggleTheme;
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initialize);
+  } else {
+    initialize();
+  }
+}());

@@ -13,7 +13,11 @@
 </div>
 
 <section class="prof-detail-hero">
-  <div class="prof-thumb" {% if aula.thumbnail %}style="background-image:url('{{ aula.thumbnail }}')"{% endif %}></div>
+  {% if aula.thumbnail %}
+  <img class="prof-thumb" src="{{ aula.thumbnail }}" alt="">
+  {% else %}
+  <div class="prof-thumb prof-thumb--empty"><i data-lucide="play" aria-hidden="true"></i></div>
+  {% endif %}
   <div>
     <span class="prof-pill {{ aula.status }}">{{ aula.get_status_display() }}</span>
     <p>{{ aula.descricao or 'Sem descrição.' }}</p>

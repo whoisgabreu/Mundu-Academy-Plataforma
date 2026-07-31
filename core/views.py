@@ -113,23 +113,98 @@ def build_unified_feed(sort="for-you"):
 # ============ VIEWS ============
 
 def index(request):
-    sort = request.GET.get('sort', 'for-you')
-    if sort not in ('for-you', 'following', 'popular', 'community'):
-        sort = 'for-you'
-    feed = build_unified_feed(sort=sort)
-    topics = get_trending_topics(5)
-    if not topics:
-        topics = []
-    from social.models import Follow
-    followed_count = 0
+    from library.models import Framework
+    from usuarios.models import UserAchievement
+
+    modules_qs = Modulo.objects.prefetch_related('aulas').order_by('ordem')
+    progress_by_module = {}
+    resume_progress = None
     if request.user.is_authenticated:
-        followed_count = Follow.objects.filter(seguidor=request.user).count()
+        user_progress = ProgressoModulo.objects.filter(
+            usuario=request.user
+        ).select_related('modulo').order_by('-data_inicio')
+        progress_by_module = {
+            progress.modulo_id: progress.progresso
+            for progress in user_progress
+        }
+        resume_progress = user_progress.filter(
+            progresso__gt=0, progresso__lt=100
+        ).first()
+
+    def module_payload(module, progress=0):
+        first_lesson = module.aulas.order_by('ordem').first()
+        return {
+            'id': module.id,
+            'title': module.titulo,
+            'description': module.descricao,
+            'thumbnail': module.thumbnail,
+            'duration': module.duracao_total,
+            'xp': module.xp_total,
+            'level': module.nivel,
+            'lessons': module.total_aulas,
+            'progress': progress,
+            'url': (
+                f'/watch/{module.slug}/{first_lesson.ordem}/'
+                if first_lesson else '/conteudos'
+            ),
+        }
+
+    home_continue = None
+    if resume_progress:
+        home_continue = module_payload(
+            resume_progress.modulo,
+            resume_progress.progresso,
+        )
+    elif modules_qs:
+        first_module = modules_qs.first()
+        if first_module:
+            home_continue = module_payload(
+                first_module,
+                progress_by_module.get(first_module.id, 0),
+            )
+
+    home_courses = [
+        module_payload(module, progress_by_module.get(module.id, 0))
+        for module in modules_qs[:4]
+    ]
+
+    challenge_progress = {}
+    if request.user.is_authenticated:
+        challenge_progress = {
+            item.desafio_id: item.progresso
+            for item in ProgressoDesafio.objects.filter(usuario=request.user)
+        }
+    home_missions = []
+    for challenge in Desafio.objects.filter(ativo=True).order_by('tipo', 'id')[:3]:
+        progress = challenge_progress.get(challenge.id, 0)
+        home_missions.append({
+            'id': challenge.id,
+            'title': challenge.titulo,
+            'description': challenge.descricao,
+            'xp': challenge.xp,
+            'icon': challenge.icon,
+            'progress': progress,
+            'goal': challenge.meta,
+            'progress_pct': min(100, int(progress / max(challenge.meta, 1) * 100)),
+            'complete': progress >= challenge.meta,
+            'type': challenge.tipo,
+        })
+
+    communities = Community.objects.order_by('-online_now', '-members')[:3]
+    frameworks = Framework.objects.order_by('-uses', '-rating')[:3]
+    recent_achievement = None
+    if request.user.is_authenticated:
+        recent_achievement = UserAchievement.objects.filter(
+            usuario=request.user
+        ).select_related('achievement').order_by('-earned_at').first()
+
     return render(request, 'index.html', {
-        'feed': feed,
-        'sort': sort,
-        'trending_topics': topics,
-        'who_to_follow': get_who_to_follow(3),
-        'followed_count': followed_count,
+        'home_continue': home_continue,
+        'home_courses': home_courses,
+        'home_missions': home_missions,
+        'home_communities': communities,
+        'home_frameworks': frameworks,
+        'recent_achievement': recent_achievement,
     })
 
 
@@ -155,15 +230,17 @@ def explorar(request):
     if request.user.is_authenticated:
         pms = ProgressoModulo.objects.filter(
             usuario=request.user, progresso__gt=0, progresso__lt=100
-        ).select_related('modulo')[:3]
+        ).select_related('modulo').prefetch_related('modulo__aulas')[:3]
         for pm in pms:
             m = pm.modulo
+            first_lesson = m.aulas.order_by('ordem').first()
             continue_watching.append({
                 'id': str(m.id), 'title': m.titulo,
                 'subtitle': f'{m.nivel} • Módulo',
                 'thumbnail': m.thumbnail,
                 'duration': m.duracao_total or '—',
                 'xp': m.xp_total, 'progress': pm.progresso, 'type': 'course',
+                'url': f'/watch/{m.slug}/{first_lesson.ordem}/' if first_lesson else '/conteudos',
             })
 
     # Challenges — from Desafio model
@@ -177,9 +254,11 @@ def explorar(request):
         prog = prog_map.get(d.id, 0)
         label = {'daily': 'Diário', 'weekly': 'Semanal', 'special': 'Especial'}.get(d.tipo, 'Desafio')
         challenges.append({
+            'id': d.id,
             'type': d.tipo, 'label': label,
             'title': d.titulo, 'description': d.descricao,
             'xp': d.xp, 'progress': prog,
+            'progress_pct': min(100, int(prog / max(d.meta, 1) * 100)),
             'progress_text': f'{prog} de {d.meta} concluído' if d.meta > 1 else ('Concluído' if prog >= d.meta else 'Não iniciado'),
         })
 
@@ -195,6 +274,7 @@ def explorar(request):
             'type': fc.tipo,
             'badge': fc.badge,
             'participants': fc.participantes,
+            'url': '/conteudos',
         } for fc in qs]
 
     recommended_qs = FeaturedContent.objects.filter(ativo=True, tipo='recommended').order_by('ordem')
@@ -442,14 +522,23 @@ def trilhas(request):
 
 
 @login_required(login_url='/login')
-@login_required(login_url='/login')
 def desafios(request):
     prog_map = {p.desafio_id: p.progresso for p in ProgressoDesafio.objects.filter(usuario=request.user)}
     def _build(tipo):
         result = []
         for d in Desafio.objects.filter(tipo=tipo, ativo=True):
             prog = prog_map.get(d.id, 0)
-            result.append({'titulo': d.titulo, 'desc': d.descricao, 'xp': d.xp, 'prog': prog, 'meta': d.meta, 'icon': d.icon, 'comp': prog >= d.meta})
+            result.append({
+                'id': d.id,
+                'titulo': d.titulo,
+                'desc': d.descricao,
+                'xp': d.xp,
+                'prog': prog,
+                'meta': d.meta,
+                'pct': min(100, int(prog / max(d.meta, 1) * 100)),
+                'icon': d.icon,
+                'comp': prog >= d.meta,
+            })
         return result
 
     daily_list = _build('daily')
@@ -475,12 +564,6 @@ def desafios(request):
     total_achs = len(conquistas)
     unlocked_achs = sum(1 for c in conquistas if c['unlocked'])
 
-    # Unlockables — from a simple model or static for now
-    unlockables = [
-        {'titulo': 'Avatar Mestre', 'desc': 'Avatar exclusivo', 'icon': 'gem', 'prog': 42, 'meta': 50, 'pct': 84},
-        {'titulo': 'Tema Dark Gold', 'desc': 'Tema premium', 'icon': 'sparkles', 'prog': 12, 'meta': 30, 'pct': 40},
-    ]
-
     return render(request, 'desafios.html', {
         'daily': daily_list,
         'weekly': weekly_list,
@@ -492,7 +575,6 @@ def desafios(request):
         'conquistas': conquistas,
         'total_conquistas': total_achs,
         'unlocked_conquistas': unlocked_achs,
-        'unlockables': unlockables,
     })
 
 
@@ -528,24 +610,33 @@ def ao_vivo(request):
 def insumos(request):
     from resources.models import Resource, ResourceCategory
 
-    cats = ['Todos'] + [c.nome for c in ResourceCategory.objects.all()]
+    categories = list(ResourceCategory.objects.all())
+    cats = ['Todos'] + [c.nome for c in categories]
+    category_filters = [
+        {'name': 'Todos', 'slug': 'all'},
+        *[{'name': c.nome, 'slug': c.slug} for c in categories],
+    ]
     qs = Resource.objects.select_related('categoria').all()
     insumos_list = []
     for r in qs:
         views = r.visualizacoes
         if views >= 1000:
-            meta = f'{views//1000}k views'
+            meta = f'{views//1000} mil visualizações'
         else:
-            meta = f'{views} views'
+            meta = f'{views} visualizações'
         insumos_list.append({
             'id': str(r.id), 'title': r.titulo, 'desc': r.descricao,
             'meta': meta, 'author': r.autor, 'thumb': r.thumbnail,
             'new': r.novo, 'trend': r.em_alta, 'prem': r.premium,
-            'fmt': r.formato,
+            'fmt': r.formato, 'url': r.url,
+            'category': r.categoria.nome if r.categoria else 'Geral',
+            'category_slug': r.categoria.slug if r.categoria else 'geral',
         })
     return render(request, 'insumos.html', {
         'cats': cats,
+        'category_filters': category_filters,
         'insumos': insumos_list,
+        'trending_insumos': [item for item in insumos_list if item['trend']],
     })
 
 
@@ -563,6 +654,11 @@ def networking(request):
         author = resolve_user(t.author_handle)
         posts.append({
             'id': str(t.id),
+            'title': t.title,
+            'thread_slug': t.slug,
+            'community_slug': t.community.slug,
+            'community_name': t.community.name,
+            'handle': t.author_handle,
             'name': author['nome_completo'],
             'user': f'@{t.author_handle}',
             'iniciais': author['iniciais'],
@@ -588,6 +684,7 @@ def networking(request):
     for p in sug_qs:
         sug.append({
             'name': p.usuario.get_full_name() or p.usuario.username,
+            'handle': p.usuario.username,
             'user': f'@{p.usuario.username}',
             'iniciais': p.iniciais,
             'bio': p.role or 'Membro Mundu',
@@ -627,11 +724,25 @@ def user_profile(request, handle):
         'iniciais': p.iniciais,
         'role': p.role,
         'bio': p.bio,
+        'foto': p.foto,
+        'banner': p.banner,
+        'cargo': p.cargo,
+        'empresa': p.empresa,
+        'localizacao': p.localizacao or p.cidade,
+        'linkedin': p.linkedin,
+        'instagram': p.instagram,
+        'nivel': p.nivel,
+        'nome_nivel': p.nome_nivel,
         'karma': p.karma,
         'followers': Follow.objects.filter(seguido=u).count(),
         'following': Follow.objects.filter(seguidor=u).count(),
         'joined_at': p.data_criacao.strftime('%b %Y') if p.data_criacao else '',
         'is_self': request.user.is_authenticated and request.user.username == handle,
+        'is_following': (
+            request.user.is_authenticated
+            and request.user.id != u.id
+            and Follow.objects.filter(seguidor=request.user, seguido=u).exists()
+        ),
     }
 
     threads_qs = Thread.objects.filter(author_handle=handle).select_related('community').annotate(
@@ -659,9 +770,15 @@ def user_profile(request, handle):
             },
         })
 
+    from guild.models import GuildMembership
+
+    communities = GuildMembership.objects.filter(usuario=u).select_related('community')
     tab = request.GET.get('tab', 'posts')
+    if tab not in {'posts', 'comments', 'communities'}:
+        tab = 'posts'
     return render(request, 'profile.html', {
         'user': user, 'posts': user_posts, 'comments': user_comments,
+        'communities': communities,
         'tab': tab, 'is_self': user.get('is_self', False),
     })
 
@@ -707,7 +824,11 @@ def quiz_resultado(request, quiz_id):
     questoes = []
     for q in questoes_raw:
         respostas_json = tentativa.respostas or {}
-        resposta_id = respostas_json.get(str(q.id))
+        resposta_id_raw = respostas_json.get(str(q.id))
+        try:
+            resposta_id = int(resposta_id_raw) if resposta_id_raw is not None else None
+        except (TypeError, ValueError):
+            resposta_id = None
         alt_correta = q.alternativas.filter(correta=True).first()
         questoes.append({
             'id': q.id,

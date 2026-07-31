@@ -1,186 +1,264 @@
 {% extends "base.html" %}
 
-{% block title %}Mundu Academy - The Guild{% endblock %}
-{% block page_title %}The Guild{% endblock %}
+{% block title %}Comunidades - Mundu Academy{% endblock %}
+{% block page_title %}Comunidades{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/community.css') }}">
+{% endblock %}
 
 {% block content %}
-
-<!-- ============ PILAR HEADER ============ -->
-<section class="pillar-header">
-  <div class="pillar-header-content">
-    <div class="pillar-eyebrow">
-      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-      <span>The Guild</span>
+<div class="m-page community-page">
+  <header class="c-hero" aria-labelledby="communities-heading">
+    <div class="c-hero__content">
+      <span class="m-eyebrow">Aprender junto</span>
+      <h1 class="c-hero__title" id="communities-heading">Ideias crescem em boa companhia.</h1>
+      <p class="c-hero__lead">
+        Comunidades para transformar experiência em repertório: acompanhe casos reais,
+        faça perguntas melhores e avance com pessoas que vivem desafios parecidos.
+      </p>
     </div>
-    <h1 class="pillar-title">A discussão de caso virou comunidade</h1>
-    <p class="pillar-subtitle">O coração da Mundu. Onde o aprendizado deixa de ser passivo e vira social, crítico — método de Harvard com a turma toda.</p>
-  </div>
-  <div class="pillar-header-stats">
-    <div class="pillar-stat">
-      <span class="pillar-stat-value">{{ communities|length }}</span>
-      <span class="pillar-stat-label">comunidades</span>
-    </div>
-    <div class="pillar-stat">
-      <span class="pillar-stat-value">{{ communities|sum(attribute='posts_today') }}</span>
-      <span class="pillar-stat-label">posts hoje</span>
-    </div>
-  </div>
-</section>
-
-<!-- ============ COMUNIDADES ============ -->
-<section class="library-section">
-  <div class="library-section-header">
-    <div>
-      <h2>Suas comunidades</h2>
-      <p>Entre por interesse, fique pelo time.</p>
-    </div>
-    {% if can_manage_guild %}
-    <a class="btn-outline" href="/guild/nova">
-      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-      Nova guilda
-    </a>
-    {% endif %}
-  </div>
-
-  <div class="communities-grid">
-    {% for c in communities %}
-    <a href="/g/{{ c.slug }}" class="community-card community-{{ c.color }} animate-fade-in-up" data-delay="{{ loop.index0 * 0.05 }}">
-      <div class="community-card-icon">
-        <i data-lucide="{{ c.icon }}"></i>
+    <div class="c-hero__stats" aria-label="Atividade das comunidades">
+      <div class="c-hero-stat">
+        <strong>{{ communities|length }}</strong>
+        <span>comunidades ativas</span>
       </div>
-      <h3 class="community-card-name">r/{{ c.slug }}</h3>
-      <p class="community-card-desc">{{ c.description }}</p>
-      <div class="community-card-stats">
-        <span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          {{ c.members }} membros
-        </span>
-        <span>
-          <span class="community-pulse"></span>
-          {{ c.posts_today }} hoje
-        </span>
+      <div class="c-hero-stat">
+        <strong>{{ communities|sum(attribute='posts_today') }}</strong>
+        <span>conversas hoje</span>
       </div>
-      <span class="community-card-btn">Entrar →</span>
-    </a>
-    {% endfor %}
-  </div>
-</section>
-
-<section class="library-section">
-  <div class="library-section-header">
-    <div>
-      <h2>Ranking geral</h2>
-      <p>XP acumulado por integrantes das guildas.</p>
     </div>
-  </div>
-  <div class="guild-rank-grid">
-    {% for item in ranking %}
-    <a href="/u/{{ item.usuario.username }}" class="guild-rank-card">
-      <span>#{{ loop.index }}</span>
-      <div class="guild-rank-avatar">{{ item.usuario.perfil.iniciais }}</div>
-      <div>
-        <strong>{{ item.usuario.get_full_name() or item.usuario.username }}</strong>
-        <small>{{ item.community.name }} · nível {{ item.usuario.perfil.nivel }}</small>
+  </header>
+
+  <section class="m-section" id="communities" aria-labelledby="directory-heading">
+    <div class="m-section-head">
+      <div class="m-section-head__copy">
+        <span class="m-section-kicker">Encontre sua mesa</span>
+        <h2 class="m-section-title" id="directory-heading">Comunidades editoriais</h2>
+        <p class="m-section-description">
+          Cada espaço reúne um tema, uma prática e pessoas dispostas a compartilhar o que funciona.
+        </p>
       </div>
-      <b>{{ item.xp }} XP</b>
-    </a>
-    {% else %}
-    <p class="prof-empty">Nenhum integrante ranqueado ainda.</p>
-    {% endfor %}
-  </div>
-</section>
-
-<!-- ============ THREADS — FEED DE DISCUSSÃO ============ -->
-<section class="library-section">
-  <div class="library-section-header">
-    <div>
-      <h2>Em alta na Guild</h2>
-      <p>Discussões de caso reais — entre, comente, defenda um ponto.</p>
+      {% if can_manage_guild %}
+      <a class="m-button m-button--secondary m-button--sm" href="/guild/nova">
+        <i data-lucide="plus" aria-hidden="true"></i>
+        Nova comunidade
+      </a>
+      {% endif %}
     </div>
-    <div class="thread-filters">
-      <a class="thread-filter-chip {% if sort == 'hot' %}active{% endif %}" href="/guild?sort=hot">Em alta</a>
-      <a class="thread-filter-chip {% if sort == 'new' %}active{% endif %}" href="/guild?sort=new">Recentes</a>
-      <a class="thread-filter-chip {% if sort == 'unanswered' %}active{% endif %}" href="/guild?sort=unanswered">Sem resposta</a>
-    </div>
-  </div>
 
-  <div class="threads-list">
-    {% for t in threads %}
-    <article class="thread-card animate-fade-in-up" data-delay="{{ loop.index0 * 0.05 }}">
-      <div class="thread-card-vote">
-        <button class="thread-vote-btn" type="button" data-post-id="{{ t.id }}" data-direction="up" aria-label="Upvote">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
-        </button>
-        <span class="thread-vote-count">{{ t.upvotes }}</span>
-        <button class="thread-vote-btn" type="button" data-post-id="{{ t.id }}" data-direction="down" aria-label="Downvote">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
-      </div>
-
-      <div class="thread-card-body">
-        <div class="thread-card-meta">
-          <a href="/g/{{ t.community_slug }}" class="thread-card-community">r/{{ t.community_slug }}</a>
-          <span>·</span>
-          <a href="/u/{{ t.author }}" class="author-link">por u/{{ t.author }}</a>
-          <span>·</span>
-          <span>{{ t.time_ago }}</span>
-          <span class="thread-card-tag thread-tag-{{ t.tag }}">{{ t.tag }}</span>
-        </div>
-        <a href="/g/{{ t.community_slug }}/post/{{ t.slug }}" class="thread-card-titlelink">
-          <h3 class="thread-card-title">{{ t.title }}</h3>
-          <p class="thread-card-preview">{{ t.preview }}</p>
-        </a>
-        <div class="thread-card-footer">
-          <a href="/g/{{ t.community_slug }}/post/{{ t.slug }}" class="thread-action">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            {{ t.replies }} respostas
-          </a>
-          <span class="thread-action">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
-            Salvar
+    {% if communities %}
+    <div class="c-directory">
+      {% for community in communities %}
+      <a class="c-community-entry" href="/g/{{ community.slug }}">
+        <div class="c-community-entry__top">
+          <span class="c-community-entry__index">{{ "%02d"|format(loop.index) }}</span>
+          <span class="c-community-entry__mark" aria-hidden="true">
+            <i data-lucide="{{ community.icon }}"></i>
           </span>
         </div>
+        <div>
+          <h3>{{ community.name }}</h3>
+          <p>{{ community.description }}</p>
+        </div>
+        <div class="c-community-entry__foot">
+          <span class="c-community-entry__metrics">
+            <span>{{ community.members }} membros</span>
+            <span>{{ community.posts_today }} conversas hoje</span>
+            {% if community.online_now %}<span class="c-online">{{ community.online_now }} online</span>{% endif %}
+          </span>
+          <span class="c-community-entry__arrow" aria-hidden="true">
+            <i data-lucide="arrow-right"></i>
+          </span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="m-empty">
+      <div class="m-empty__inner">
+        <span class="m-empty__icon"><i data-lucide="users" aria-hidden="true"></i></span>
+        <h3>Nenhuma comunidade publicada</h3>
+        <p>Assim que uma comunidade for criada, ela aparecerá neste diretório.</p>
+        {% if can_manage_guild %}
+        <a class="m-button m-button--primary" href="/guild/nova">Criar a primeira comunidade</a>
+        {% endif %}
       </div>
-    </article>
-    {% endfor %}
-  </div>
-</section>
+    </div>
+    {% endif %}
+  </section>
 
-<!-- ============ CRIAR DISCUSSÃO ============ -->
-<section class="guild-cta animate-fade-in-up">
-  <div>
-    <h3>Você tem um caso?</h3>
-    <p>Compartilhe um problema real do seu dia. A comunidade discute e você sai com 3 hipóteses pra testar.</p>
-  </div>
-  <a href="/g/gestao-pessoas" class="btn-primary">
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-    Entrar em uma comunidade
-  </a>
-</section>
+  <section class="m-section" aria-labelledby="discussions-heading">
+    <div class="c-editorial-layout">
+      <div>
+        <div class="m-section-head">
+          <div class="m-section-head__copy">
+            <span class="m-section-kicker">Agora nas comunidades</span>
+            <h2 class="m-section-title" id="discussions-heading">Discussões que merecem leitura</h2>
+            <p class="m-section-description">Casos, perguntas e aprendizados compartilhados pela comunidade.</p>
+          </div>
+          <nav class="m-tabs" aria-label="Ordenar discussões">
+            <a class="m-tab" href="/guild?sort=hot" {% if sort == 'hot' %}aria-current="page"{% endif %}>Em destaque</a>
+            <a class="m-tab" href="/guild?sort=new" {% if sort == 'new' %}aria-current="page"{% endif %}>Recentes</a>
+            <a class="m-tab" href="/guild?sort=unanswered" {% if sort == 'unanswered' %}aria-current="page"{% endif %}>Sem resposta</a>
+          </nav>
+        </div>
 
+        {% if threads %}
+        <div class="c-discussion-list">
+          {% for thread in threads %}
+          <article class="c-discussion">
+            {% if request.user.is_authenticated %}
+            <div class="c-vote" data-vote-widget data-object="post" data-object-id="{{ thread.id }}" data-current="">
+              <button class="c-vote__button" type="button" data-direction="up" aria-label="Apoiar discussão" aria-pressed="false">
+                <i data-lucide="chevron-up" aria-hidden="true"></i>
+              </button>
+              <span class="c-vote__count" data-vote-count>{{ thread.upvotes }}</span>
+              <button class="c-vote__button" type="button" data-direction="down" aria-label="Discordar da discussão" aria-pressed="false">
+                <i data-lucide="chevron-down" aria-hidden="true"></i>
+              </button>
+            </div>
+            {% else %}
+            <div class="c-vote c-vote--readonly" aria-label="{{ thread.upvotes }} apoios">
+              <span class="c-vote__count">{{ thread.upvotes }}</span>
+            </div>
+            {% endif %}
+
+            <div class="c-discussion__body">
+              <div class="c-discussion__context">
+                <a href="/g/{{ thread.community_slug }}">{{ thread.community }}</a>
+                <span>·</span>
+                <a href="/u/{{ thread.author }}">@{{ thread.author }}</a>
+                <span>·</span>
+                <time>{{ thread.time_ago }}</time>
+                {% if thread.tag %}<span class="m-chip">{{ thread.tag }}</span>{% endif %}
+              </div>
+              <h3 class="c-discussion__title">
+                <a href="/g/{{ thread.community_slug }}/post/{{ thread.slug }}">{{ thread.title }}</a>
+              </h3>
+              {% if thread.preview %}<p class="c-discussion__excerpt">{{ thread.preview }}</p>{% endif %}
+              <div class="c-discussion__foot">
+                <a href="/g/{{ thread.community_slug }}/post/{{ thread.slug }}">
+                  <i data-lucide="message-circle" aria-hidden="true"></i>
+                  {{ thread.replies }} respostas
+                </a>
+                {% if request.user.is_authenticated %}
+                <button
+                  type="button"
+                  data-open-quicknote
+                  data-note-title="{{ thread.title }}"
+                  data-note-source="Comunidade · {{ thread.community }}">
+                  <i data-lucide="notebook-pen" aria-hidden="true"></i>
+                  Anotar
+                </button>
+                {% endif %}
+              </div>
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="m-empty">
+          <div class="m-empty__inner">
+            <span class="m-empty__icon"><i data-lucide="messages-square" aria-hidden="true"></i></span>
+            <h3>Nenhuma discussão nesta seleção</h3>
+            <p>Explore outra ordenação ou entre em uma comunidade para iniciar uma conversa.</p>
+            <a class="m-button m-button--secondary" href="/guild?sort=hot">Ver destaques</a>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if not request.user.is_authenticated %}
+        <div class="c-signin-note">
+          <p>Entre na Mundu para apoiar ideias, comentar e participar das comunidades.</p>
+          <a class="m-button m-button--primary m-button--sm" href="/login?next={{ request.path }}">Entrar</a>
+        </div>
+        {% endif %}
+      </div>
+
+      <aside class="c-ranking" aria-labelledby="ranking-heading">
+        <span class="m-section-kicker">Quem movimenta a conversa</span>
+        <h2 class="m-section-title" id="ranking-heading">Contribuidores</h2>
+        <p class="m-section-description">XP conquistado em participação e missões da comunidade.</p>
+        {% if ranking %}
+        <div class="c-ranking__list">
+          {% for item in ranking %}
+          <a class="c-ranking__item" href="/u/{{ item.usuario.username }}">
+            <span class="c-ranking__position">{{ "%02d"|format(loop.index) }}</span>
+            <span class="c-avatar">{{ item.usuario.perfil.iniciais }}</span>
+            <span class="c-ranking__identity">
+              <span class="c-ranking__name">{{ item.usuario.get_full_name() or item.usuario.username }}</span>
+              <span class="c-ranking__meta">{{ item.community.name }} · nível {{ item.usuario.perfil.nivel }}</span>
+              <span class="c-ranking__xp">{{ item.xp }} XP</span>
+            </span>
+          </a>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="m-empty">
+          <div class="m-empty__inner">
+            <p>O ranking será formado conforme os membros participarem.</p>
+          </div>
+        </div>
+        {% endif %}
+      </aside>
+    </div>
+  </section>
+</div>
 {% endblock %}
 
 {% block scripts %}
+{% if request.user.is_authenticated %}
 <script>
-  document.querySelectorAll('.thread-vote-btn[data-post-id]').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      const postId = btn.dataset.postId;
-      const direction = btn.dataset.direction;
-      fetch('/api/post/' + postId + '/vote', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({direction: direction})
-      })
-      .then(function(resp){ return resp.json(); })
-      .then(function(data){
-        if (typeof data.upvotes !== 'undefined') {
-          const count = btn.parentElement.querySelector('.thread-vote-count');
-          if (count) count.textContent = data.upvotes;
-        }
-      })
-      .catch(function(){ if (window.showToast) showToast('Não foi possível votar'); });
-    });
-  });
-</script>
-{% endblock %}
+  (function () {
+    function voteDelta(current, next) {
+      var delta = 0;
+      if (current === 'up') delta -= 1;
+      if (current === 'down') delta += 1;
+      if (next === 'up') delta += 1;
+      if (next === 'down') delta -= 1;
+      return delta;
+    }
 
+    document.querySelectorAll('[data-vote-widget]').forEach(function (widget) {
+      widget.querySelectorAll('[data-direction]').forEach(function (button) {
+        button.addEventListener('click', async function () {
+          var current = widget.dataset.current || null;
+          var requested = button.dataset.direction;
+          var next = current === requested ? null : requested;
+          var buttons = widget.querySelectorAll('[data-direction]');
+          var count = widget.querySelector('[data-vote-count]');
+
+          buttons.forEach(function (item) { item.disabled = true; });
+          try {
+            var response = await fetch('/api/post/' + widget.dataset.objectId + '/vote', {
+              method: 'POST',
+              headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+              body: JSON.stringify({direction: next})
+            });
+            var payload = await response.json().catch(function () { return {}; });
+            if (!response.ok || payload.ok === false) {
+              throw new Error(payload.erro || 'Não foi possível registrar seu apoio.');
+            }
+
+            widget.dataset.current = next || '';
+            buttons.forEach(function (item) {
+              item.classList.toggle('is-active', item.dataset.direction === next);
+              item.setAttribute('aria-pressed', item.dataset.direction === next ? 'true' : 'false');
+            });
+            if (count) {
+              count.textContent = typeof payload.upvotes === 'number'
+                ? payload.upvotes
+                : parseInt(count.textContent || '0', 10) + voteDelta(current, next);
+            }
+          } catch (error) {
+            if (window.showToast) window.showToast(error.message, 'danger');
+          } finally {
+            buttons.forEach(function (item) { item.disabled = false; });
+          }
+        });
+      });
+    });
+  }());
+</script>
+{% endif %}
+{% endblock %}

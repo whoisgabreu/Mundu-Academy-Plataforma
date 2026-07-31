@@ -1,92 +1,284 @@
 {% extends "base.html" %}
 
-{% block title %}{{ quiz.titulo }} - Mundu Academy{% endblock %}
-{% block page_title %}{{ quiz.titulo }}{% endblock %}
+{% block title %}{{ quiz.titulo }} — Mundu Academy{% endblock %}
+{% block meta_description %}Valide seu domínio em {{ quiz.titulo }} na Mundu Academy.{% endblock %}
+{% block body_class %}learning-body{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/learning.css') }}">
+{% endblock %}
 
 {% block content %}
-<div class="px-4 md:px-8 py-4 md:py-6 space-y-6 pb-20 md:pb-6 w-full max-w-4xl mx-auto">
-  <div class="flex items-center justify-between">
+<div class="m-page quiz-page">
+  <a class="quiz-breadcrumb" href="/conteudos">
+    <i data-lucide="arrow-left" aria-hidden="true"></i>
+    Voltar para {{ quiz.modulo.titulo }}
+  </a>
+
+  <header class="quiz-intro">
     <div>
-      <p class="text-sm text-muted-foreground">{{ quiz.modulo.titulo }}</p>
-      <h1 class="text-2xl font-bold text-foreground">{{ quiz.titulo }}</h1>
-      {% if quiz.descricao %}<p class="text-sm text-muted-foreground mt-1">{{ quiz.descricao }}</p>{% endif %}
+      <span class="m-eyebrow">Etapa de domínio</span>
+      <h1>{{ quiz.titulo }}</h1>
+      {% if quiz.descricao %}
+      <p class="quiz-intro__description">{{ quiz.descricao }}</p>
+      {% else %}
+      <p class="quiz-intro__description">Responda com calma. Esta etapa ajuda a reconhecer o que já foi consolidado.</p>
+      {% endif %}
     </div>
-    <div class="text-right">
-      <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold bg-primary/20 text-primary border-primary/30">+{{ quiz.xp_total }} XP</span>
-      <p class="text-xs text-muted-foreground mt-1">Nota mínima: {{ quiz.aprovacao_percentual }}%</p>
-    </div>
-  </div>
+    <dl class="quiz-intro__facts">
+      <div class="quiz-intro__fact">
+        <dt>Questões</dt>
+        <dd><strong>{{ questoes|length }}</strong></dd>
+      </div>
+      <div class="quiz-intro__fact">
+        <dt>Domínio mínimo</dt>
+        <dd><strong>{{ quiz.aprovacao_percentual }}%</strong></dd>
+      </div>
+      <div class="quiz-intro__fact">
+        <dt>Recompensa</dt>
+        <dd><strong>{{ quiz.xp_total }} XP</strong></dd>
+      </div>
+    </dl>
+  </header>
 
   {% if tentativa %}
-  <div class="rounded-xl border p-4 {% if tentativa.aprovado %}bg-emerald-500/10 border-emerald-500/30{% else %}bg-red-500/10 border-red-500/30{% endif %}">
-    <div class="flex items-center gap-3">
-      <i data-lucide="{% if tentativa.aprovado %}check-circle{% else %}x-circle{% endif %}" class="h-6 w-6 {% if tentativa.aprovado %}text-emerald-400{% else %}text-red-400{% endif %}"></i>
-      <div class="flex-1">
-        <p class="font-bold text-foreground">{% if tentativa.aprovado %}Aprovado!{% else %}Não foi dessa vez{% endif %}</p>
-        <p class="text-sm text-muted-foreground">{{ tentativa.pontuacao }}/{{ tentativa.total_questoes }} acertos ({{ tentativa.percentual }}%)</p>
-      </div>
-      <a href="/quiz/{{ quiz.id }}/resultado" class="inline-flex items-center rounded-lg bg-primary text-primary-foreground px-3 py-1.5 text-xs font-medium hover:bg-primary/90 transition-colors">
-        Ver Resultado
-      </a>
-    </div>
-  </div>
+  <aside class="quiz-attempt {% if tentativa.aprovado %}is-approved{% endif %}" aria-label="Última tentativa">
+    <span class="quiz-attempt__icon">
+      <i data-lucide="{% if tentativa.aprovado %}check{% else %}rotate-ccw{% endif %}" aria-hidden="true"></i>
+    </span>
+    <span class="quiz-attempt__copy">
+      <strong>{% if tentativa.aprovado %}Domínio alcançado{% else %}Última tentativa: {{ tentativa.percentual }}%{% endif %}</strong>
+      <span>
+        {{ tentativa.pontuacao }} de {{ tentativa.total_questoes }} respostas corretas
+        {% if not tentativa.aprovado and pode_tentar %}
+        · {{ tentativas_restantes }} tentativa{% if tentativas_restantes != 1 %}s{% endif %} restante{% if tentativas_restantes != 1 %}s{% endif %}
+        {% endif %}
+      </span>
+    </span>
+    <a class="m-button m-button--secondary m-button--sm" href="/quiz/{{ quiz.id }}/resultado">
+      Rever resultado
+    </a>
+  </aside>
   {% endif %}
 
-  <form id="quiz-form" class="space-y-6">
+  {% if not pode_tentar %}
+  <section class="quiz-locked" aria-labelledby="quiz-locked-title">
+    <span class="quiz-locked__icon">
+      <i data-lucide="{% if tentativa and tentativa.aprovado %}badge-check{% else %}lock-keyhole{% endif %}" aria-hidden="true"></i>
+    </span>
+    <h2 id="quiz-locked-title">
+      {% if tentativa and tentativa.aprovado %}
+      Esta etapa já foi concluída
+      {% else %}
+      Limite de tentativas alcançado
+      {% endif %}
+    </h2>
+    <p>
+      {% if tentativa and tentativa.aprovado %}
+      Seu resultado está registrado. Você pode revisá-lo ou seguir para o próximo conteúdo.
+      {% else %}
+      Você utilizou as {{ tentativas_feitas }} tentativas disponíveis. Revise o curso antes de continuar sua jornada.
+      {% endif %}
+    </p>
+    <div class="m-actions">
+      {% if tentativa %}
+      <a class="m-button m-button--primary" href="/quiz/{{ quiz.id }}/resultado">Ver resultado</a>
+      {% endif %}
+      <a class="m-button m-button--secondary" href="/conteudos">Voltar aos cursos</a>
+    </div>
+  </section>
+  {% elif not questoes %}
+  <section class="quiz-locked" aria-labelledby="quiz-empty-title">
+    <span class="quiz-locked__icon"><i data-lucide="file-question" aria-hidden="true"></i></span>
+    <h2 id="quiz-empty-title">Esta etapa ainda está sendo preparada</h2>
+    <p>As questões aparecerão aqui assim que forem publicadas.</p>
+    <div class="m-actions">
+      <a class="m-button m-button--secondary" href="/conteudos">Voltar aos cursos</a>
+    </div>
+  </section>
+  {% else %}
+  <form class="quiz-session" id="quiz-form" novalidate>
     {{ csrf_input }}
-    {% for q in questoes %}
-    <div class="rounded-xl border border-border/50 bg-card p-4 space-y-3">
-      <div class="flex items-start gap-3">
-        <span class="flex items-center justify-center w-7 h-7 rounded-full bg-primary/20 text-primary text-sm font-bold shrink-0">{{ loop.index }}</span>
-        <div>
-          <p class="font-medium text-foreground">{{ q.enunciado }}</p>
-          {% if q.tipo == 'verdadeiro_falso' %}<span class="text-xs text-muted-foreground">Verdadeiro ou Falso</span>{% endif %}
-        </div>
+    <div class="quiz-progress" aria-live="polite">
+      <div class="quiz-progress__track" aria-hidden="true">
+        <div class="quiz-progress__fill" id="quiz-progress-fill"></div>
       </div>
-      <div class="space-y-2 ml-10">
-        {% for a in q.alternativas %}
-        <label class="flex items-center gap-3 p-3 rounded-lg border border-border/30 hover:border-primary/40 cursor-pointer transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5">
-          <input type="radio" name="q_{{ q.id }}" value="{{ a.id }}" class="accent-primary" required>
-          <span class="text-sm text-foreground">{{ a.texto }}</span>
-        </label>
-        {% endfor %}
+      <span id="quiz-progress-copy">Questão 1 de {{ questoes|length }}</span>
+    </div>
+
+    <div id="quiz-questions">
+      {% for q in questoes %}
+      <fieldset class="quiz-question {% if loop.first %}is-current{% endif %}" data-question-index="{{ loop.index0 }}">
+        <span class="quiz-question__number">Questão {{ loop.index }} de {{ questoes|length }}</span>
+        <legend>{{ q.enunciado }}</legend>
+        {% if q.tipo == 'verdadeiro_falso' %}
+        <span class="quiz-question__type">Escolha entre verdadeiro e falso.</span>
+        {% else %}
+        <span class="quiz-question__type">Escolha uma alternativa.</span>
+        {% endif %}
+        <div class="quiz-options">
+          {% for alternativa in q.alternativas %}
+          <label class="quiz-option">
+            <input type="radio" name="q_{{ q.id }}" value="{{ alternativa.id }}" required>
+            <span>{{ alternativa.texto }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+      {% endfor %}
+    </div>
+
+    <p class="quiz-form-error" id="quiz-form-error" role="alert" tabindex="-1"></p>
+
+    <div class="quiz-navigation">
+      <button class="m-button m-button--quiet" id="quiz-previous" type="button" hidden>
+        <i data-lucide="arrow-left" aria-hidden="true"></i>
+        Anterior
+      </button>
+      <div class="quiz-navigation__right">
+        <button class="m-button m-button--primary" id="quiz-next" type="button">
+          Próxima questão
+          <i data-lucide="arrow-right" aria-hidden="true"></i>
+        </button>
+        <button class="m-button m-button--primary" id="quiz-submit" type="submit" hidden>
+          <i data-lucide="check" aria-hidden="true"></i>
+          <span>Finalizar etapa</span>
+        </button>
       </div>
     </div>
-    {% endfor %}
-
-    {% if not tentativa or not tentativa.aprovado %}
-    <button type="submit" class="inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground px-6 py-3 font-medium hover:bg-primary/90 transition-colors w-full">
-      Enviar Respostas
-    </button>
-    {% endif %}
   </form>
+  {% endif %}
 </div>
+{% endblock %}
 
+{% block scripts %}
+{% if pode_tentar and questoes %}
 <script>
-function getCookie(name) {
-  const val = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
-  return val ? decodeURIComponent(val.pop()) : '';
-}
-document.getElementById('quiz-form')?.addEventListener('submit', async function(e) {
-  e.preventDefault();
-  const respostas = {};
-  this.querySelectorAll('input[type="radio"]:checked').forEach(r => {
-    const name = r.name.replace('q_', '');
-    respostas[name] = r.value;
-  });
-  const btn = this.querySelector('button[type="submit"]');
-  btn.disabled = true; btn.textContent = 'Enviando...';
-  try {
-    const res = await fetch('/api/quiz/{{ quiz.id }}/submit', {
-      method: 'POST', headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
-      body: JSON.stringify({respostas}),
-    });
-    const data = await res.json();
-    window.location.href = '/quiz/{{ quiz.id }}/resultado';
-  } catch(e) {
-    alert('Erro ao enviar. Tente novamente.');
-    btn.disabled = false; btn.textContent = 'Enviar Respostas';
+(function () {
+  'use strict';
+
+  var form = document.getElementById('quiz-form');
+  if (!form) return;
+
+  var questions = Array.prototype.slice.call(form.querySelectorAll('.quiz-question'));
+  var previousButton = document.getElementById('quiz-previous');
+  var nextButton = document.getElementById('quiz-next');
+  var submitButton = document.getElementById('quiz-submit');
+  var submitLabel = submitButton ? submitButton.querySelector('span') : null;
+  var errorBox = document.getElementById('quiz-form-error');
+  var progressFill = document.getElementById('quiz-progress-fill');
+  var progressCopy = document.getElementById('quiz-progress-copy');
+  var currentIndex = 0;
+
+  function getCookie(name) {
+    var match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return match ? decodeURIComponent(match.pop()) : '';
   }
-});
+
+  function selectedAnswer(question) {
+    return question ? question.querySelector('input[type="radio"]:checked') : null;
+  }
+
+  function setError(message) {
+    if (!errorBox) return;
+    errorBox.textContent = message || '';
+    if (message) errorBox.focus();
+  }
+
+  function updateStep() {
+    questions.forEach(function (question, index) {
+      question.classList.toggle('is-current', index === currentIndex);
+    });
+    if (previousButton) previousButton.hidden = currentIndex === 0;
+    if (nextButton) nextButton.hidden = currentIndex === questions.length - 1;
+    if (submitButton) submitButton.hidden = currentIndex !== questions.length - 1;
+
+    var completed = questions.length ? ((currentIndex + 1) / questions.length) * 100 : 0;
+    if (progressFill) progressFill.style.setProperty('--quiz-progress', completed + '%');
+    if (progressCopy) progressCopy.textContent = 'Questão ' + (currentIndex + 1) + ' de ' + questions.length;
+    setError('');
+
+    var legend = questions[currentIndex] ? questions[currentIndex].querySelector('legend') : null;
+    if (legend && currentIndex > 0) {
+      window.setTimeout(function () {
+        legend.setAttribute('tabindex', '-1');
+        legend.focus();
+      }, 40);
+    }
+  }
+
+  function moveNext() {
+    if (!selectedAnswer(questions[currentIndex])) {
+      setError('Escolha uma alternativa antes de continuar.');
+      var firstInput = questions[currentIndex].querySelector('input[type="radio"]');
+      if (firstInput) firstInput.focus();
+      return;
+    }
+    currentIndex = Math.min(questions.length - 1, currentIndex + 1);
+    updateStep();
+  }
+
+  function movePrevious() {
+    currentIndex = Math.max(0, currentIndex - 1);
+    updateStep();
+  }
+
+  function collectAnswers() {
+    var answers = {};
+    questions.forEach(function (question) {
+      var selected = selectedAnswer(question);
+      if (!selected) return;
+      answers[selected.name.replace('q_', '')] = selected.value;
+    });
+    return answers;
+  }
+
+  if (nextButton) nextButton.addEventListener('click', moveNext);
+  if (previousButton) previousButton.addEventListener('click', movePrevious);
+
+  form.addEventListener('submit', async function (event) {
+    event.preventDefault();
+    var answers = collectAnswers();
+    if (Object.keys(answers).length !== questions.length) {
+      var missingIndex = questions.findIndex(function (question) {
+        return !selectedAnswer(question);
+      });
+      if (missingIndex >= 0) currentIndex = missingIndex;
+      updateStep();
+      setError('Responda esta questão antes de finalizar.');
+      return;
+    }
+
+    submitButton.disabled = true;
+    submitButton.setAttribute('aria-busy', 'true');
+    if (submitLabel) submitLabel.textContent = 'Salvando resultado...';
+    setError('');
+
+    try {
+      var response = await fetch('/api/quiz/{{ quiz.id }}/submit', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({respostas: answers})
+      });
+      var payload = await response.json().catch(function () { return {}; });
+      if (!response.ok) {
+        throw new Error(payload.erro || payload.error || 'Não foi possível registrar suas respostas.');
+      }
+      window.location.assign('/quiz/{{ quiz.id }}/resultado');
+    } catch (error) {
+      setError(error.message || 'Não foi possível enviar. Tente novamente.');
+      submitButton.disabled = false;
+      submitButton.removeAttribute('aria-busy');
+      if (submitLabel) submitLabel.textContent = 'Finalizar etapa';
+    }
+  });
+
+  form.classList.add('is-enhanced');
+  updateStep();
+}());
 </script>
+{% endif %}
 {% endblock %}

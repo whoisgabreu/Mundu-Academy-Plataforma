@@ -3,8 +3,9 @@
 {% block professor_content %}
 <div class="prof-page-head">
   <div>
-    <span class="prof-eyebrow">Credenciais</span>
+    <span class="prof-eyebrow">Reconhecimento verificável</span>
     <h1>Certificados</h1>
+    <p>Defina os modelos e acompanhe as credenciais já emitidas.</p>
   </div>
   <a href="/professor/certificados/novo/" class="prof-btn primary"><i data-lucide="plus"></i><span>Criar template</span></a>
 </div>
@@ -30,7 +31,7 @@
             <td class="prof-actions">
               <a class="prof-icon-btn" href="/professor/certificados/{{ template.id }}/" aria-label="Visualizar"><i data-lucide="eye"></i></a>
               <a class="prof-icon-btn" href="/professor/certificados/{{ template.id }}/editar/" aria-label="Editar"><i data-lucide="pencil"></i></a>
-              <form method="post" action="/professor/certificados/{{ template.id }}/excluir/" onsubmit="return confirm('Excluir este template?')">
+              <form method="post" action="/professor/certificados/{{ template.id }}/excluir/" data-confirm="Excluir este template?">
                 {{ csrf_input }}
                 <button class="prof-icon-btn danger" type="submit" aria-label="Excluir"><i data-lucide="trash-2"></i></button>
               </form>
@@ -63,4 +64,3 @@
   </article>
 </section>
 {% endblock %}
-

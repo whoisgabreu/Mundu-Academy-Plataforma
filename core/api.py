@@ -3,6 +3,8 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 from django.contrib.contenttypes.models import ContentType
+from django.db import transaction
+from django.db.models import Avg, Count
 from django.utils.text import slugify
 import json
 
@@ -204,7 +206,6 @@ def fork_framework(request, framework_id):
 @csrf_exempt
 @require_POST
 def review_framework(request, framework_id):
-    fw = get_object_or_404(Framework, framework_id=framework_id)
     payload = json_body(request)
     rating = payload.get('rating')
     text = (payload.get('text') or '').strip()
@@ -213,14 +214,32 @@ def review_framework(request, framework_id):
     if not text:
         return JsonResponse({"erro": "review precisa de texto"}, status=400)
 
-    FrameworkReview.objects.create(
-        framework=fw,
-        usuario=request.user,
-        rating=rating,
-        texto=text,
-    )
+    with transaction.atomic():
+        fw = get_object_or_404(
+            Framework.objects.select_for_update(),
+            framework_id=framework_id,
+        )
+        FrameworkReview.objects.create(
+            framework=fw,
+            author_handle=request.user.username,
+            rating=rating,
+            text=text,
+            time_ago='agora',
+        )
+        aggregates = FrameworkReview.objects.filter(framework=fw).aggregate(
+            average=Avg('rating'),
+            count=Count('id'),
+        )
+        fw.rating = round(aggregates['average'] or 0, 1)
+        fw.reviews_count = aggregates['count'] or 0
+        fw.save(update_fields=['rating', 'reviews_count'])
+
     return JsonResponse({"ok": True, "review": {
-        "framework_id": framework_id, "rating": rating, "text": text,
+        "framework_id": framework_id,
+        "rating": rating,
+        "text": text,
+        "average": fw.rating,
+        "reviews_count": fw.reviews_count,
     }}, status=201)
 
 
@@ -339,19 +358,16 @@ def update_progress(request):
 
 @csrf_exempt
 @require_POST
-def complete_challenge(request):
+def complete_challenge(request, desafio_id):
     from cursos.models import Desafio, ProgressoDesafio
-    payload = json_body(request)
-    desafio_id = payload.get('desafio_id')
-    if not desafio_id:
-        return JsonResponse({"erro": "desafio_id é obrigatório"}, status=400)
     desafio = get_object_or_404(Desafio, id=desafio_id)
     pd, _ = ProgressoDesafio.objects.get_or_create(
         usuario=request.user, desafio=desafio,
         defaults={'progresso': 0}
     )
-    pd.progresso += 1
-    if pd.progresso >= desafio.meta:
+    previous_progress = pd.progresso
+    pd.progresso = min(desafio.meta, pd.progresso + 1)
+    if previous_progress < desafio.meta <= pd.progresso:
         request.user.perfil.adicionar_xp(desafio.xp)
     pd.save()
     return JsonResponse({"ok": True, "progresso": pd.progresso, "meta": desafio.meta})

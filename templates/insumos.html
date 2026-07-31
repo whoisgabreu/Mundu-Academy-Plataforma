@@ -1,200 +1,269 @@
 {% extends "base.html" %}
 
-{% block title %}Biblioteca de Insumos - Mundu Academy{% endblock %}
-{% block page_title %}Biblioteca de Insumos{% endblock %}
+{% block title %}Estante de Insumos — Mundu Academy{% endblock %}
+{% block meta_description %}Templates, planilhas, prompts e ferramentas selecionadas para aplicar o aprendizado.{% endblock %}
+{% block body_class %}knowledge-page{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/knowledge.css') }}">
+{% endblock %}
 
 {% block content %}
-<div class="px-4 md:px-8 py-4 md:py-6 space-y-6 pb-20 md:pb-6 w-full max-w-7xl mx-auto">
-  
-  <!-- Header & Search -->
-  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-    <div class="flex items-center gap-3">
-      <div class="p-2 rounded-lg bg-primary/20">
-        <i data-lucide="folder-open" class="h-6 w-6 text-primary"></i>
-      </div>
-      <div>
-        <h1 class="text-2xl font-bold text-foreground">Biblioteca de Insumos</h1>
-        <p class="text-muted-foreground text-sm">Templates, manuais e ferramentas prontas</p>
-      </div>
+<div class="k-page">
+  <header class="k-resource-head">
+    <div class="k-resource-head__copy">
+      <span class="m-eyebrow">Estante de ferramentas</span>
+      <h1 class="m-display m-display--sm">Recursos para tirar a ideia do papel.</h1>
+      <p class="m-lead">
+        Templates, planilhas, prompts e materiais selecionados para apoiar a próxima aplicação.
+      </p>
     </div>
-    
-    <div class="flex items-center gap-2">
-      <div class="relative w-full md:w-64">
-        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"></i>
-        <input type="text" placeholder="Buscar insumos..." class="flex h-10 w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-9 bg-card border-secondary/40">
-      </div>
+    <div class="k-resource-controls" role="search">
+      <label class="k-search">
+        <span class="m-sr-only">Buscar insumos</span>
+        <i data-lucide="search" aria-hidden="true"></i>
+        <input class="m-input" id="resourceSearch" type="search"
+          autocomplete="off"
+          placeholder="Buscar por tema, autor ou formato">
+      </label>
+      <label>
+        <span class="m-sr-only">Filtrar por formato</span>
+        <select class="m-select" id="resourceFormat">
+          <option value="all">Todos os formatos</option>
+          <option value="PDF">PDF</option>
+          <option value="Planilha">Planilha</option>
+          <option value="Prompt">Prompt</option>
+          <option value="Template">Template</option>
+          <option value="Vídeo">Vídeo</option>
+          <option value="Tool">Ferramenta</option>
+        </select>
+      </label>
     </div>
+  </header>
+
+  <div class="k-filter-bar" aria-label="Filtrar por categoria">
+    {% for category in category_filters %}
+    <button class="k-filter"
+      type="button"
+      data-category-filter="{{ category.slug }}"
+      aria-pressed="{% if loop.first %}true{% else %}false{% endif %}">
+      {{ category.name }}
+    </button>
+    {% endfor %}
   </div>
 
-  <!-- Tabs Navigation -->
-  <div class="w-full">
-    <div class="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground w-full md:w-auto bg-card/50 border border-border/50">
-      <button onclick="switchTab('descobrir')" id="tab-btn-descobrir" class="tab-btn inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-background text-foreground shadow min-w-[120px]">
-        <i data-lucide="sparkles" class="h-4 w-4 mr-2"></i> Descobrir
-      </button>
-      <button onclick="switchTab('meus-insumos')" id="tab-btn-meus-insumos" class="tab-btn inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-w-[120px]">
-        <i data-lucide="bookmark" class="h-4 w-4 mr-2"></i> Meus Insumos
-      </button>
+  {% if trending_insumos %}
+  <section class="k-section" aria-labelledby="trending-resources-title">
+    <header class="k-section__head">
+      <div class="k-section__copy">
+        <span class="k-section__eyebrow">Em alta agora</span>
+        <h2 class="k-section__title" id="trending-resources-title">Ferramentas que estão circulando</h2>
+        <p class="k-section__description">Recursos com interesse crescente entre os membros da Mundu.</p>
+      </div>
+    </header>
+
+    <div class="k-resource-rail">
+      {% for resource in trending_insumos %}
+      <article class="k-resource-card">
+        <div class="k-resource-card__visual">
+          {% if resource.thumb %}
+          <img src="{{ resource.thumb }}" alt="" loading="lazy">
+          {% else %}
+          <span class="k-resource-card__placeholder" aria-hidden="true">
+            <i data-lucide="package-open"></i>
+          </span>
+          {% endif %}
+          <div class="k-resource-card__badges">
+            <span class="m-chip">{{ resource.fmt }}</span>
+            {% if resource.new %}<span class="m-chip">Novo</span>{% endif %}
+            {% if resource.prem %}<span class="m-chip">Premium</span>{% endif %}
+          </div>
+        </div>
+        <div class="k-resource-card__body">
+          <span class="k-resource-card__category">{{ resource.category }}</span>
+          <h3 class="k-resource-card__title">{{ resource.title }}</h3>
+          <p class="k-resource-card__description">{{ resource.desc }}</p>
+          <div class="k-resource-card__meta">
+            <span>{{ resource.meta }}</span>
+            <span>{{ resource.fmt }}</span>
+          </div>
+          <footer class="k-resource-card__footer">
+            <span class="k-resource-card__author">por {{ resource.author }}</span>
+            {% if resource.url and resource.url != '#' %}
+            <a class="m-button m-button--primary m-button--sm"
+              href="{{ resource.url }}"
+              target="_blank"
+              rel="noopener noreferrer">
+              Abrir recurso
+              <i data-lucide="external-link" aria-hidden="true"></i>
+            </a>
+            {% else %}
+            <span class="m-button m-button--secondary m-button--sm" aria-disabled="true">Link indisponível</span>
+            {% endif %}
+          </footer>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="k-section" aria-labelledby="all-resources-title">
+    <header class="k-section__head">
+      <div class="k-section__copy">
+        <span class="k-section__eyebrow">Acervo completo</span>
+        <h2 class="k-section__title" id="all-resources-title">Encontre a ferramenta certa</h2>
+        <p class="k-section__description">
+          Pesquise pelo que precisa fazer, pelo autor ou pelo tipo de material.
+        </p>
+      </div>
+      <p class="k-result-count" id="resourceResultCount" aria-live="polite">
+        {{ insumos|length }} recurso{% if insumos|length != 1 %}s{% endif %}
+      </p>
+    </header>
+
+    {% if insumos %}
+    <div class="k-resource-grid" id="resourceGrid">
+      {% for resource in insumos %}
+      <article class="k-resource-card"
+        data-resource-card
+        data-resource-category="{{ resource.category_slug }}"
+        data-resource-format="{{ resource.fmt }}"
+        data-resource-search="{{ resource.title }} {{ resource.desc }} {{ resource.author }} {{ resource.category }} {{ resource.fmt }}">
+        <div class="k-resource-card__visual">
+          {% if resource.thumb %}
+          <img src="{{ resource.thumb }}" alt="" loading="lazy">
+          {% else %}
+          <span class="k-resource-card__placeholder" aria-hidden="true">
+            <i data-lucide="package-open"></i>
+          </span>
+          {% endif %}
+          <div class="k-resource-card__badges">
+            <span class="m-chip">{{ resource.fmt }}</span>
+            {% if resource.new %}<span class="m-chip">Novo</span>{% endif %}
+            {% if resource.trend %}<span class="m-chip">Em alta</span>{% endif %}
+            {% if resource.prem %}<span class="m-chip">Premium</span>{% endif %}
+          </div>
+        </div>
+        <div class="k-resource-card__body">
+          <span class="k-resource-card__category">{{ resource.category }}</span>
+          <h3 class="k-resource-card__title">{{ resource.title }}</h3>
+          <p class="k-resource-card__description">{{ resource.desc }}</p>
+          <div class="k-resource-card__meta">
+            <span>{{ resource.meta }}</span>
+            <span>{{ resource.fmt }}</span>
+          </div>
+          <footer class="k-resource-card__footer">
+            <span class="k-resource-card__author">por {{ resource.author }}</span>
+            {% if resource.url and resource.url != '#' %}
+            <a class="m-button m-button--primary m-button--sm"
+              href="{{ resource.url }}"
+              target="_blank"
+              rel="noopener noreferrer">
+              Abrir recurso
+              <i data-lucide="external-link" aria-hidden="true"></i>
+            </a>
+            {% else %}
+            <span class="m-button m-button--secondary m-button--sm" aria-disabled="true">Link indisponível</span>
+            {% endif %}
+          </footer>
+        </div>
+      </article>
+      {% endfor %}
     </div>
 
-    <!-- Tab Content: Descobrir -->
-    <div id="tab-content-descobrir" class="tab-content mt-6 space-y-8">
-      
-      <!-- Categories -->
-      <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-        {% for cat in cats %}
-        <button class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border bg-transparent hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3 shrink-0 rounded-full {% if loop.first %}border-primary bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary{% else %}border-secondary/40 bg-card hover:border-primary/50 text-muted-foreground hover:text-foreground{% endif %}">
-          {{ cat }}
+    <div class="m-empty" id="resourceEmpty" hidden>
+      <div class="m-empty__inner">
+        <span class="m-empty__icon"><i data-lucide="search-x" aria-hidden="true"></i></span>
+        <h3>Nenhum recurso encontrado</h3>
+        <p>Tente outro termo, formato ou categoria.</p>
+        <button class="m-button m-button--secondary" id="clearResourceFilters" type="button">
+          Limpar filtros
         </button>
-        {% endfor %}
-      </div>
-
-      <!-- Em Alta -->
-      <div class="space-y-3">
-        <div class="flex items-center gap-2">
-          <i data-lucide="flame" class="w-5 h-5 text-orange-500"></i>
-          <div>
-            <h2 class="text-base font-semibold text-foreground">Em Alta</h2>
-            <p class="text-xs text-muted-foreground">Os mais baixados e acessados na última semana</p>
-          </div>
-        </div>
-        <div class="flex gap-4 overflow-x-auto scrollbar-none pb-1 -mx-4 px-4">
-          {% for i in insumos %}
-          <div class="w-[260px] shrink-0 group cursor-pointer">
-            <div class="rounded-xl border text-card-foreground shadow-sm overflow-hidden border-secondary/40 bg-card hover:border-primary/50 transition-all h-full">
-              <div class="relative h-[140px] overflow-hidden">
-                <img src="{{ i.thumb }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
-                <div class="absolute top-2 left-2 flex items-center gap-1.5">
-                  {% if i.new %}
-                  <span class="inline-flex items-center rounded-full px-2 py-0.5 font-medium bg-emerald-500 text-white border-0 text-[10px]">Novo</span>
-                  {% endif %}
-                  {% if i.trend %}
-                  <span class="inline-flex items-center rounded-full px-2 py-0.5 font-medium bg-orange-500 text-white border-0 text-[10px]"><i data-lucide="flame" class="w-3 h-3 mr-0.5"></i> Em alta</span>
-                  {% endif %}
-                  {% if i.prem %}
-                  <span class="inline-flex items-center rounded-full px-2 py-0.5 font-medium bg-amber-500 text-black border-0 text-[10px]"><i data-lucide="crown" class="w-3 h-3 mr-0.5"></i> Premium</span>
-                  {% endif %}
-                </div>
-                <span class="absolute top-2 right-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold bg-black/80 text-white border-0 text-[10px]">{{ i.fmt }}</span>
-                <button class="absolute bottom-2 right-2 p-1.5 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <i data-lucide="heart" class="w-4 h-4 text-white"></i>
-                </button>
-                <div class="absolute bottom-2 left-2 flex items-center gap-1.5">
-                  <span class="w-5 h-5 rounded-full border border-white/30 object-cover bg-primary/20 flex items-center justify-center text-[10px] text-white font-bold">{{ i.author[0] }}</span>
-                  <span class="text-[11px] text-white font-medium">{{ i.author }}</span>
-                </div>
-              </div>
-              <div class="p-3 space-y-2">
-                <h3 class="font-medium text-sm text-foreground line-clamp-1 group-hover:text-primary transition-colors">{{ i.title }}</h3>
-                <p class="text-xs text-muted-foreground line-clamp-1">{{ i.desc }}</p>
-                <div class="flex items-center justify-between pt-1">
-                  <div class="flex items-center gap-3 text-[11px] text-muted-foreground">
-                    <span class="flex items-center gap-1"><i data-lucide="eye" class="w-3 h-3"></i> {{ i.meta }}</span>
-                  </div>
-                  <div class="flex items-center gap-0.5">
-                    <i data-lucide="star" class="w-3.5 h-3.5 fill-yellow-400 text-yellow-400"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          {% endfor %}
-        </div>
-      </div>
-      
-      <!-- Explorar Todos -->
-      <div class="space-y-4">
-        <div class="flex items-center gap-2">
-          <i data-lucide="layout-grid" class="w-5 h-5 text-primary"></i>
-          <div>
-            <h2 class="text-base font-semibold text-foreground">Explorar Todos</h2>
-            <p class="text-xs text-muted-foreground">Encontre todos os materiais disponíveis</p>
-          </div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {% for i in insumos %}
-          <div class="w-full shrink-0 group cursor-pointer">
-            <div class="rounded-xl border text-card-foreground shadow-sm overflow-hidden border-secondary/40 bg-card hover:border-primary/50 transition-all h-full">
-              <div class="relative h-[140px] overflow-hidden">
-                <img src="{{ i.thumb }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
-                <button class="absolute bottom-2 right-2 p-1.5 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <i data-lucide="heart" class="w-4 h-4 text-white"></i>
-                </button>
-              </div>
-              <div class="p-3 space-y-2">
-                <h3 class="font-medium text-sm text-foreground line-clamp-1 group-hover:text-primary transition-colors">{{ i.title }}</h3>
-                <p class="text-xs text-muted-foreground line-clamp-1">{{ i.desc }}</p>
-                <div class="flex items-center justify-between pt-1">
-                  <div class="flex items-center gap-3 text-[11px] text-muted-foreground">
-                    <span class="flex items-center gap-1">{{ i.author }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          {% endfor %}
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Tab Content: Meus Insumos -->
-    <div id="tab-content-meus-insumos" class="tab-content mt-6 space-y-8 hidden">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <i data-lucide="heart" class="w-5 h-5 text-red-500 fill-red-500"></i>
-          <div>
-            <h2 class="text-base font-semibold text-foreground">Favoritos</h2>
-            <p class="text-xs text-muted-foreground">Seus insumos marcados com coração</p>
-          </div>
-        </div>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {% for i in insumos %}
-        {% if loop.index < 3 %}
-        <div class="w-full shrink-0 group cursor-pointer">
-            <div class="rounded-xl border text-card-foreground shadow-sm overflow-hidden border-secondary/40 bg-card hover:border-primary/50 transition-all h-full">
-              <div class="relative h-[140px] overflow-hidden">
-                <img src="{{ i.thumb }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
-                <button class="absolute bottom-2 right-2 p-1.5 rounded-full bg-black/60 transition-opacity">
-                  <i data-lucide="heart" class="w-4 h-4 text-red-500 fill-red-500"></i>
-                </button>
-              </div>
-              <div class="p-3 space-y-2">
-                <h3 class="font-medium text-sm text-foreground line-clamp-1 group-hover:text-primary transition-colors">{{ i.title }}</h3>
-                <p class="text-xs text-muted-foreground line-clamp-1">{{ i.desc }}</p>
-              </div>
-            </div>
-          </div>
-        {% endif %}
-        {% endfor %}
       </div>
     </div>
-  </div>
+    {% else %}
+    <div class="m-empty">
+      <div class="m-empty__inner">
+        <span class="m-empty__icon"><i data-lucide="package-open" aria-hidden="true"></i></span>
+        <h3>A estante ainda está vazia</h3>
+        <p>Os recursos publicados pela equipe aparecerão aqui.</p>
+      </div>
+    </div>
+    {% endif %}
+  </section>
 </div>
+{% endblock %}
 
+{% block scripts %}
 <script>
-  function switchTab(tabId) {
-    // Hide all contents
-    document.querySelectorAll('.tab-content').forEach(function(el) {
-      el.classList.add('hidden');
+  (function () {
+    var search = document.getElementById('resourceSearch');
+    var format = document.getElementById('resourceFormat');
+    var cards = Array.from(document.querySelectorAll('[data-resource-card]'));
+    var categoryButtons = Array.from(document.querySelectorAll('[data-category-filter]'));
+    var resultCount = document.getElementById('resourceResultCount');
+    var empty = document.getElementById('resourceEmpty');
+    var clearButton = document.getElementById('clearResourceFilters');
+    var activeCategory = 'all';
+
+    function normalize(value) {
+      return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+    }
+
+    function applyFilters() {
+      var query = normalize(search ? search.value : '');
+      var selectedFormat = format ? format.value : 'all';
+      var visible = 0;
+
+      cards.forEach(function (card) {
+        var matchesQuery = !query || normalize(card.dataset.resourceSearch).includes(query);
+        var matchesCategory = activeCategory === 'all' ||
+          card.dataset.resourceCategory === activeCategory;
+        var matchesFormat = selectedFormat === 'all' ||
+          card.dataset.resourceFormat === selectedFormat;
+        var matches = matchesQuery && matchesCategory && matchesFormat;
+
+        card.hidden = !matches;
+        if (matches) visible += 1;
+      });
+
+      if (resultCount) {
+        resultCount.textContent = visible + (visible === 1 ? ' recurso' : ' recursos');
+      }
+      if (empty) empty.hidden = visible !== 0;
+    }
+
+    categoryButtons.forEach(function (button) {
+      button.addEventListener('click', function () {
+        activeCategory = button.dataset.categoryFilter;
+        categoryButtons.forEach(function (item) {
+          item.setAttribute('aria-pressed', item === button ? 'true' : 'false');
+        });
+        applyFilters();
+      });
     });
-    // Remove active styles from buttons
-    document.querySelectorAll('.tab-btn').forEach(function(el) {
-      el.classList.remove('bg-background', 'text-foreground', 'shadow');
-    });
-    // Add active styles to clicked button
-    document.getElementById('tab-btn-' + tabId).classList.add('bg-background', 'text-foreground', 'shadow');
-    // Show selected content
-    document.getElementById('tab-content-' + tabId).classList.remove('hidden');
-  }
+
+    if (search) search.addEventListener('input', applyFilters);
+    if (format) format.addEventListener('change', applyFilters);
+    if (clearButton) {
+      clearButton.addEventListener('click', function () {
+        activeCategory = 'all';
+        if (search) search.value = '';
+        if (format) format.value = 'all';
+        categoryButtons.forEach(function (button) {
+          button.setAttribute(
+            'aria-pressed',
+            button.dataset.categoryFilter === 'all' ? 'true' : 'false'
+          );
+        });
+        applyFilters();
+        if (search) search.focus();
+      });
+    }
+  }());
 </script>
-<style>
-  .scrollbar-none::-webkit-scrollbar {
-    display: none;
-  }
-</style>
 {% endblock %}

@@ -1,177 +1,167 @@
 {% extends "base.html" %}
 
 {% block title %}Networking - Mundu Academy{% endblock %}
-{% block page_title %}Comunidade{% endblock %}
+{% block page_title %}Networking{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/community.css') }}">
+{% endblock %}
 
 {% block content %}
-<div class="px-4 md:px-8 py-4 md:py-6 pb-20 md:pb-6 w-full max-w-7xl mx-auto flex flex-col md:flex-row gap-6">
-
-  <!-- Main Feed -->
-  <div class="flex-1 w-full max-w-2xl border-r border-border md:pr-6">
-    
-    <!-- Header / Tabs -->
-    <div class="sticky top-0 z-10 w-full bg-background/95 backdrop-blur-md border-b border-border mb-4">
-      <div class="flex">
-        <button class="flex-1 border-b-2 border-primary py-3 font-medium text-sm text-foreground">Para você</button>
-        <button class="flex-1 border-b-2 border-transparent py-3 font-medium text-sm text-muted-foreground hover:text-foreground">Seguindo</button>
-      </div>
+<div class="m-page community-page">
+  <header class="c-network-intro">
+    <div>
+      <span class="m-eyebrow">Pessoas e repertório</span>
+      <h1>Encontre quem pode ampliar sua próxima conversa.</h1>
     </div>
+    <div class="c-network-intro__note">
+      <p>
+        Este diretório parte das discussões reais da Mundu. Descubra pessoas pelo que elas
+        compartilham, volte ao contexto original e construa conexões com intenção.
+      </p>
+      <a class="m-text-link" href="/guild">
+        Explorar comunidades
+        <i data-lucide="arrow-right" aria-hidden="true"></i>
+      </a>
+    </div>
+  </header>
 
-    <!-- Create Post Box -->
-    <div class="p-4 border border-border rounded-xl bg-card mb-6 flex gap-4">
-      <div class="shrink-0">
-        <span class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
-          <img class="aspect-square h-full w-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100" />
-        </span>
-      </div>
-      <div class="flex-1">
-        <textarea class="w-full bg-transparent border-none resize-none px-0 py-2 text-foreground focus:ring-0 placeholder:text-muted-foreground min-h-[60px]" placeholder="O que você está aprendendo hoje?"></textarea>
-        <div class="flex items-center justify-between pt-2 border-t border-border/50">
-          <div class="flex gap-1 text-primary">
-            <button class="p-2 rounded-full hover:bg-primary/10 transition-colors"><i data-lucide="image" class="w-5 h-5"></i></button>
-            <button class="p-2 rounded-full hover:bg-primary/10 transition-colors"><i data-lucide="video" class="w-5 h-5"></i></button>
-            <button class="p-2 rounded-full hover:bg-primary/10 transition-colors"><i data-lucide="link" class="w-5 h-5"></i></button>
-          </div>
-          <button class="rounded-full px-4 py-1.5 text-sm font-bold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">Publicar</button>
+  <div class="c-network-grid">
+    <main aria-labelledby="network-conversations-heading">
+      <div class="m-section-head">
+        <div class="m-section-head__copy">
+          <span class="m-section-kicker">Conversas recentes</span>
+          <h2 class="m-section-title" id="network-conversations-heading">Conheça pelo que foi compartilhado</h2>
+          <p class="m-section-description">Cada trecho leva à discussão completa e à comunidade de origem.</p>
         </div>
       </div>
-    </div>
 
-    <!-- Posts Feed -->
-    <div class="space-y-6">
-      {% for p in posts %}
-      <div class="p-4 border border-border rounded-xl bg-card hover:bg-muted/10 transition-colors">
-        <div class="flex gap-4">
-          <div class="shrink-0">
-            <div class="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-sm font-bold text-white">{{ p.iniciais }}</div>
-          </div>
-          <div class="flex-1 min-w-0">
-            <!-- Author Header -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1">
-              <div class="flex items-center gap-1.5 flex-wrap">
-                <span class="font-bold text-foreground hover:underline cursor-pointer">{{ p.name }}</span>
-                {% if p.ver %}<i data-lucide="check-circle-2" class="w-4 h-4 text-blue-500 fill-blue-500"></i>{% endif %}
-                <span class="text-sm text-muted-foreground">{{ p.user }}</span>
-                <span class="text-xs text-muted-foreground">· {{ p.time }}</span>
-              </div>
-              <button class="text-muted-foreground hover:text-foreground"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
-            </div>
-            {% if p.role %}
-            <div class="text-xs text-muted-foreground mb-2">{{ p.role }}</div>
-            {% endif %}
-
-            <!-- Content -->
-            <p class="text-sm text-foreground whitespace-pre-wrap mb-3">{{ p.content }}</p>
-
-            {% if p.img %}
-            <div class="rounded-xl overflow-hidden border border-border/50 mb-3 bg-secondary/20">
-              <img src="{{ p.img }}" class="w-full h-auto max-h-[400px] object-cover" />
-            </div>
-            {% endif %}
-
-            <!-- Actions -->
-            <div class="flex items-center justify-between text-muted-foreground max-w-md">
-              <button class="flex items-center gap-2 hover:text-blue-500 transition-colors group">
-                <div class="p-2 rounded-full group-hover:bg-blue-500/10"><i data-lucide="message-square" class="w-4 h-4"></i></div>
-                <span class="text-xs">{{ p.coms }}</span>
-              </button>
-              <button class="flex items-center gap-2 hover:text-green-500 transition-colors group">
-                <div class="p-2 rounded-full group-hover:bg-green-500/10"><i data-lucide="repeat-2" class="w-4 h-4"></i></div>
-                <span class="text-xs">{{ p.reps }}</span>
-              </button>
-              <button class="flex items-center gap-2 hover:text-red-500 transition-colors group">
-                <div class="p-2 rounded-full group-hover:bg-red-500/10"><i data-lucide="heart" class="w-4 h-4"></i></div>
-                <span class="text-xs">{{ p.likes }}</span>
-              </button>
-              <button class="flex items-center gap-2 hover:text-primary transition-colors group">
-                <div class="p-2 rounded-full group-hover:bg-primary/10"><i data-lucide="bookmark" class="w-4 h-4"></i></div>
-              </button>
-              <button class="flex items-center gap-2 hover:text-primary transition-colors group">
-                <div class="p-2 rounded-full group-hover:bg-primary/10"><i data-lucide="share" class="w-4 h-4"></i></div>
-              </button>
-            </div>
-          </div>
-        </div>
+      {% if posts %}
+      <div>
+        {% for post in posts %}
+        <article class="c-conversation">
+          <a class="c-conversation__author" href="/u/{{ post.handle }}">
+            <span class="c-avatar">{{ post.iniciais }}</span>
+            <span class="c-conversation__identity">
+              <strong>{{ post.name }}</strong>
+              <span>@{{ post.handle }}{% if post.role %} · {{ post.role }}{% endif %}</span>
+            </span>
+          </a>
+          <h3 class="c-conversation__title">
+            <a href="/g/{{ post.community_slug }}/post/{{ post.thread_slug }}">{{ post.title }}</a>
+          </h3>
+          {% if post.content %}<p class="c-conversation__excerpt">{{ post.content }}</p>{% endif %}
+          <footer class="c-conversation__foot">
+            <a href="/g/{{ post.community_slug }}/post/{{ post.thread_slug }}">
+              {{ post.community_name }} · ler discussão
+            </a>
+            <span>{{ post.likes }} apoios</span>
+            <span>{{ post.coms }} respostas</span>
+            <time>{{ post.time }}</time>
+          </footer>
+        </article>
+        {% endfor %}
       </div>
       {% else %}
-      <div class="text-center py-12 text-muted-foreground">
-        <i data-lucide="message-circle" class="h-12 w-12 mx-auto mb-4 opacity-30"></i>
-        <p>Nenhum post no feed ainda.</p>
-        <p class="text-xs mt-1">Participe das comunidades para aparecer aqui!</p>
+      <div class="m-empty">
+        <div class="m-empty__inner">
+          <span class="m-empty__icon"><i data-lucide="messages-square" aria-hidden="true"></i></span>
+          <h3>Ainda não há conversas para apresentar</h3>
+          <p>Quando as comunidades publicarem discussões, seus autores aparecerão aqui.</p>
+          <a class="m-button m-button--secondary" href="/guild">Ver comunidades</a>
+        </div>
       </div>
-      {% endfor %}
-    </div>
-  </div>
+      {% endif %}
+    </main>
 
-  <!-- Right Sidebar (Desktop Only) -->
-  <div class="hidden lg:block w-80 shrink-0 space-y-6">
-    
-    <!-- Search -->
-    <div class="relative">
-      <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"></i>
-      <input type="text" placeholder="Buscar no networking..." class="w-full bg-muted border-none rounded-full pl-10 h-10 text-sm focus:ring-2 focus:ring-primary focus:outline-none">
-    </div>
-
-    <!-- Who to follow -->
-    <div class="bg-card border border-border rounded-xl flex flex-col hidden md:flex">
-      <div class="p-4 border-b border-border">
-        <h3 class="font-bold text-lg flex items-center gap-2"><i data-lucide="users" class="h-5 w-5 text-primary"></i> Quem seguir</h3>
-      </div>
-      <div class="flex flex-col">
-        {% for s in sug %}
-        <div class="p-4 hover:bg-muted/20 transition-colors flex items-center justify-between gap-2 border-b border-border last:border-b-0 cursor-pointer">
-          <div class="flex items-center gap-3 min-w-0">
-            <div class="h-10 w-10 rounded-full bg-gradient-to-br from-primary via-primary to-secondary flex items-center justify-center text-sm font-bold text-white flex-shrink-0">{{ s.iniciais }}</div>
-            <div class="flex flex-col min-w-0">
-              <span class="font-bold text-foreground text-sm truncate hover:underline">{{ s.name }}</span>
-              <span class="text-xs text-muted-foreground truncate">{{ s.user }}</span>
-            </div>
+    <aside class="c-network-aside" aria-label="Sugestões de networking">
+      <section aria-labelledby="people-heading">
+        <span class="m-section-kicker">Pontes possíveis</span>
+        <h2 class="m-section-title" id="people-heading">Pessoas para conhecer</h2>
+        <p class="m-section-description">Perfis com experiência e participação ativa na plataforma.</p>
+        {% if sug %}
+        <div class="c-people-list">
+          {% for person in sug %}
+          <div class="c-person-row" data-person-suggestion>
+            <span class="c-avatar">{{ person.iniciais }}</span>
+            <span class="c-person-row__copy">
+              <a href="/u/{{ person.handle }}">{{ person.name }}</a>
+              <span>{{ person.bio }}</span>
+            </span>
+            <button
+              class="m-button m-button--secondary m-button--sm"
+              type="button"
+              data-follow-suggestion
+              data-handle="{{ person.handle }}">
+              Seguir
+            </button>
           </div>
-          <a href="/u/{{ s.user[1:] }}" class="rounded-full px-4 py-1 text-xs font-bold bg-foreground text-background hover:bg-foreground/90 transition-colors shrink-0">Seguir</a>
+          {% endfor %}
         </div>
         {% else %}
-        <div class="p-4 text-center text-muted-foreground text-sm">Nenhuma sugestão no momento.</div>
-        {% endfor %}
-      </div>
-      <div class="p-4 border-t border-border">
-        <button class="text-primary text-sm font-medium hover:underline">Mostrar mais</button>
-      </div>
-    </div>
-
-    <!-- Trending Topics -->
-    <div class="bg-card border border-border rounded-xl hidden md:flex flex-col">
-      <div class="p-4 border-b border-border">
-        <h3 class="font-bold text-lg">Assuntos do momento</h3>
-      </div>
-      <div class="flex flex-col">
-        {% for t in trends %}
-        <div class="p-4 hover:bg-muted/20 transition-colors cursor-pointer border-b border-border last:border-b-0">
-          <div class="flex justify-between items-start">
-            <div>
-              <span class="text-xs text-muted-foreground">{{ t.cat }}</span>
-              <p class="font-bold text-foreground text-sm mt-0.5">{{ t.tags }}</p>
-              <span class="text-xs text-muted-foreground">{{ t.posts }}</span>
-            </div>
-            <button class="text-muted-foreground hover:text-foreground"><i data-lucide="more-horizontal" class="w-4 h-4"></i></button>
+        <div class="m-empty">
+          <div class="m-empty__inner">
+            <p>Você já acompanha todas as sugestões disponíveis.</p>
           </div>
         </div>
+        {% endif %}
+      </section>
+
+      <section aria-labelledby="themes-heading">
+        <span class="m-section-kicker">Assuntos em movimento</span>
+        <h2 class="m-section-title" id="themes-heading">Temas recorrentes</h2>
+        <p class="m-section-description">Uma leitura rápida do que a comunidade está elaborando agora.</p>
+        {% if trends %}
+        <div class="c-theme-list">
+          {% for theme in trends %}
+          <span class="c-theme">
+            <strong>{{ theme.tags }}</strong>
+            <span>{{ theme.posts }}</span>
+          </span>
+          {% endfor %}
+        </div>
         {% else %}
-        <div class="p-4 text-center text-muted-foreground text-sm">Nenhum tópico em alta.</div>
-        {% endfor %}
-      </div>
-    </div>
-
-    <!-- Footer Links -->
-    <div class="text-xs text-muted-foreground px-4 flex flex-wrap gap-x-3 gap-y-1">
-      <a href="#" class="hover:underline">Termos de Serviço</a>
-      <a href="#" class="hover:underline">Política de Privacidade</a>
-      <a href="#" class="hover:underline">Política de Cookies</a>
-      <a href="#" class="hover:underline">Acessibilidade</a>
-      <a href="#" class="hover:underline">Informações de anúncios</a>
-      <span>© 2024 Mundu Academy.</span>
-    </div>
-
+        <p class="m-section-description">Os temas aparecem quando as discussões recebem tags.</p>
+        {% endif %}
+      </section>
+    </aside>
   </div>
-
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    function notify(message, tone) {
+      if (window.showToast) window.showToast(message, tone);
+    }
+
+    document.querySelectorAll('[data-follow-suggestion]').forEach(function (button) {
+      button.addEventListener('click', async function () {
+        button.disabled = true;
+        button.setAttribute('aria-busy', 'true');
+        try {
+          var response = await fetch('/api/follow/' + button.dataset.handle, {
+            method: 'POST',
+            headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+            body: JSON.stringify({following: true})
+          });
+          var payload = await response.json().catch(function () { return {}; });
+          if (!response.ok || payload.ok === false || payload.following !== true) {
+            throw new Error(payload.erro || payload.error || 'Não foi possível seguir esta pessoa.');
+          }
+          button.textContent = 'Seguindo';
+          button.classList.remove('m-button--secondary');
+          button.classList.add('m-button--quiet');
+          button.setAttribute('aria-pressed', 'true');
+          notify('Você agora acompanha @' + button.dataset.handle + '.');
+        } catch (error) {
+          button.disabled = false;
+          notify(error.message, 'danger');
+        } finally {
+          button.removeAttribute('aria-busy');
+        }
+      });
+    });
+  }());
+</script>
 {% endblock %}

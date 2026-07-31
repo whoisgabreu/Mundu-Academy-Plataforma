@@ -1,224 +1,153 @@
 {% extends "base.html" %}
 
-{% block title %}Editar Identidade - Mundu Academy{% endblock %}
-{% block page_title %}Editar Identidade{% endblock %}
+{% block title %}Editar identidade — Mundu Academy{% endblock %}
+{% block meta_description %}Atualize como sua identidade aparece na Mundu Academy.{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/growth.css') }}">
+{% endblock %}
 
 {% block content %}
-<div class="sticky top-[56px] z-40 bg-background/80 backdrop-blur-xl border-b border-border/30 w-full mb-6 -mt-6">
-  <div class="px-4 py-4 flex items-center justify-between max-w-6xl mx-auto">
-    <a href="/perfil" class="flex items-center gap-2 text-foreground-muted hover:text-foreground transition-colors group">
-      <div class="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-        <i data-lucide="arrow-left" class="w-4 h-4 text-primary"></i>
-      </div>
-      <span class="text-sm font-medium hidden sm:block">Voltar ao perfil</span>
-    </a>
-    <div class="flex items-center gap-3">
-      <button type="submit" form="config-form" class="px-5 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5">
-        <i data-lucide="save" class="h-4 w-4"></i> Salvar Alterações
-      </button>
+<div class="m-page settings-page">
+  <header class="settings-heading m-reveal">
+    <div>
+      <a class="m-text-link" href="/perfil"><i data-lucide="arrow-left" aria-hidden="true"></i>Voltar à evolução</a>
+      <span class="m-eyebrow">Identidade</span>
+      <h1 class="m-display m-display--sm">Mostre com clareza quem você é e o que constrói.</h1>
+      <p class="m-lead">Essas informações ajudam a comunidade a reconhecer sua experiência e encontrar pontos em comum.</p>
     </div>
-  </div>
-</div>
+    <button class="m-button m-button--primary" type="submit" form="profileSettingsForm">
+      <i data-lucide="check" aria-hidden="true"></i>Salvar alterações
+    </button>
+  </header>
 
-<div class="w-full max-w-6xl mx-auto pb-20 md:pb-8">
-  <div class="mb-6 md:mb-8">
-    <h1 class="text-xl md:text-2xl lg:text-3xl font-bold text-foreground">Editar Identidade</h1>
-    <p class="text-sm md:text-base text-foreground-muted mt-1">Gerencie como você aparece para a comunidade MUNDU</p>
-  </div>
-
-  <div class="grid lg:grid-cols-[360px_1fr] xl:grid-cols-[420px_1fr] gap-6 md:gap-8">
-    <!-- Left Column - Preview -->
-    <div class="lg:sticky lg:top-36 lg:self-start space-y-4 md:space-y-6 order-2 lg:order-1">
-      <div class="flex items-center gap-2 text-xs text-foreground-muted uppercase tracking-wider font-medium">
-        <div class="h-2 w-2 rounded-full bg-primary animate-pulse"></div> Preview em tempo real
+  <div class="settings-layout m-reveal">
+    <aside class="settings-preview" aria-label="Como seu perfil aparece hoje">
+      <span class="m-section-kicker">Como aparece hoje</span>
+      <div class="settings-preview__portrait">
+        {% if current_user.foto %}
+        <img src="{{ current_user.foto }}" alt="{{ current_user.nome_completo }}">
+        {% else %}
+        <span>{{ current_user.perfil.iniciais }}</span>
+        {% endif %}
       </div>
-      
-      <div class="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-card via-card to-primary/5">
-        <div class="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-primary/10 to-transparent rounded-bl-full"></div>
-        <div class="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-secondary/10 to-transparent rounded-tr-full"></div>
-        <div class="h-20 bg-gradient-to-r from-primary/30 via-secondary/20 to-primary/10 relative"></div>
-        <div class="px-6 pb-6 -mt-10 relative z-10">
-          <div class="flex items-end gap-4 mb-5">
-            <div class="relative group">
-              <div class="h-20 w-20 rounded-2xl bg-gradient-to-br from-primary via-primary to-secondary flex items-center justify-center text-2xl font-bold text-white shadow-xl shadow-primary/40 border-4 border-card">{{ current_user.perfil.iniciais }}</div>
-              <button class="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-primary flex items-center justify-center shadow-lg hover:bg-primary/90 transition-colors border-2 border-card"><i data-lucide="camera" class="h-3.5 w-3.5 text-white"></i></button>
-              <div class="absolute -top-1 -left-1 h-6 w-6 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-card flex items-center justify-center shadow-lg"><i data-lucide="star" class="h-3 w-3 text-white"></i></div>
-            </div>
-            <div class="flex-1 min-w-0 pb-1">
-              <div class="flex items-center gap-2">
-                <h2 class="text-lg font-bold text-foreground truncate">{{ current_user.nome_completo }}</h2>
-                <i data-lucide="shield" class="h-4 w-4 text-primary flex-shrink-0"></i>
-              </div>
-              <p class="text-foreground-muted text-sm">@{{ current_user.username }}</p>
-            </div>
-          </div>
-          <div class="flex flex-wrap gap-2 mb-5">
-            <span class="px-3 py-1.5 rounded-lg bg-primary/15 border border-primary/25 text-primary text-xs font-semibold flex items-center gap-1.5"><i data-lucide="briefcase" class="h-3 w-3"></i> {{ current_user.cargo or 'Sem cargo' }}</span>
-            <span class="px-3 py-1.5 rounded-lg bg-primary/10 border border-primary/20 text-primary text-xs font-semibold flex items-center gap-1.5"><i data-lucide="star" class="h-3 w-3"></i> Nível {{ current_user.perfil.nivel }}</span>
-          </div>
-          <div class="space-y-2.5 py-4 border-t border-border/30">
-            <div class="flex items-center gap-3 text-sm">
-              <i data-lucide="building-2" class="w-4 h-4 text-primary"></i> <span class="text-foreground-muted">{{ current_user.empresa }}{% if current_user.localizacao %} · {{ current_user.localizacao }}{% endif %}</span>
-            </div>
-            <p class="text-sm text-foreground-muted leading-relaxed line-clamp-2">{{ current_user.bio or 'Nenhuma bio definida.' }}</p>
-          </div>
-          <div class="flex gap-2 pt-4 border-t border-border/30">
-            <div class="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors cursor-pointer"><i data-lucide="mail" class="h-4 w-4 text-primary"></i></div>
-            <div class="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors cursor-pointer"><i data-lucide="linkedin" class="h-4 w-4 text-primary"></i></div>
-            <div class="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors cursor-pointer"><i data-lucide="instagram" class="h-4 w-4 text-primary"></i></div>
-          </div>
-        </div>
-      </div>
+      <h2>{{ current_user.nome_completo }}</h2>
+      <p class="settings-preview__handle">@{{ current_user.username }}</p>
+      <p class="settings-preview__role">{{ current_user.cargo or 'Área de atuação não informada' }}{% if current_user.empresa %} · {{ current_user.empresa }}{% endif %}</p>
+      <p class="settings-preview__bio">{{ current_user.bio or 'Sua apresentação aparecerá aqui.' }}</p>
+      <dl>
+        <div><dt>Nível</dt><dd>{{ current_user.perfil.nivel }}</dd></div>
+        <div><dt>Certificados</dt><dd>{{ cert_count }}</dd></div>
+        <div><dt>Seguidores</dt><dd>{{ followers_count }}</dd></div>
+      </dl>
+      <a class="m-text-link" href="/u/{{ current_user.username }}">Ver perfil público <i data-lucide="arrow-up-right" aria-hidden="true"></i></a>
+    </aside>
 
-      <div class="rounded-2xl border border-primary/20 bg-card p-5">
-        <div class="flex items-center justify-between mb-5">
-          <div class="flex items-center gap-2"><i data-lucide="award" class="h-5 w-5 text-primary"></i> <span class="text-sm font-semibold text-foreground">Nível de Reputação</span></div>
-          <span class="text-xs text-primary font-medium bg-primary/10 px-2 py-1 rounded-full">2 de 4</span>
-        </div>
-        <div class="flex items-center justify-between">
-          <div class="flex flex-col items-center flex-1">
-            <div class="flex items-center w-full"><div class="h-12 w-12 rounded-xl flex items-center justify-center transition-all border-2 bg-primary border-primary shadow-lg shadow-primary/30 mx-auto"><i data-lucide="user" class="h-5 w-5 text-white"></i></div><div class="flex-1 h-0.5 bg-primary"></div></div>
-            <span class="text-[10px] font-medium mt-2 text-center text-primary">Membro</span>
-          </div>
-          <div class="flex flex-col items-center flex-1">
-            <div class="flex items-center w-full"><div class="flex-1 h-0.5 bg-primary"></div><div class="h-12 w-12 rounded-xl flex items-center justify-center transition-all border-2 bg-primary border-primary shadow-lg shadow-primary/30 mx-auto"><i data-lucide="star" class="h-5 w-5 text-white"></i></div><div class="flex-1 h-0.5 bg-border"></div></div>
-            <span class="text-[10px] font-medium mt-2 text-center text-primary">Contribuidor</span>
-          </div>
-          <div class="flex flex-col items-center flex-1">
-            <div class="flex items-center w-full"><div class="flex-1 h-0.5 bg-border"></div><div class="h-12 w-12 rounded-xl flex items-center justify-center transition-all border-2 bg-card border-border"><i data-lucide="sparkles" class="h-5 w-5 text-muted-foreground"></i></div><div class="flex-1 h-0.5 bg-border"></div></div>
-            <span class="text-[10px] font-medium mt-2 text-center text-muted-foreground">Creator</span>
-          </div>
-          <div class="flex flex-col items-center flex-1">
-            <div class="flex items-center w-full"><div class="flex-1 h-0.5 bg-border"></div><div class="h-12 w-12 rounded-xl flex items-center justify-center transition-all border-2 bg-card border-border mx-auto"><i data-lucide="crown" class="h-5 w-5 text-muted-foreground"></i></div></div>
-            <span class="text-[10px] font-medium mt-2 text-center text-muted-foreground">Mentor</span>
-          </div>
-    </form>
-  </div>
-</div>
-
-    <!-- Right Column - Edit Forms -->
-    <form id="config-form" method="POST" class="space-y-4 md:space-y-6 order-1 lg:order-2">
+    <form class="m-form settings-form" id="profileSettingsForm" method="post" novalidate>
       {{ csrf_input }}
-      
-      <!-- Identity -->
-      <section class="rounded-2xl border border-primary/20 bg-card overflow-hidden">
-        <div class="px-6 py-4 border-b border-border/30 bg-gradient-to-r from-primary/10 to-transparent">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="h-10 w-10 rounded-xl bg-primary flex items-center justify-center"><i data-lucide="user" class="h-5 w-5 text-white"></i></div>
-              <div><h3 class="font-semibold text-foreground">Identidade</h3><p class="text-xs text-foreground-muted">Informações básicas do seu perfil</p></div>
-            </div>
-            <i data-lucide="pencil" class="h-4 w-4 text-primary"></i>
-          </div>
+      {% if form.non_field_errors() %}
+      <div class="settings-alert" role="alert">{{ form.non_field_errors()|join(', ') }}</div>
+      {% endif %}
+
+      <section class="settings-section" aria-labelledby="identity-section-title">
+        <div class="settings-section__head">
+          <span>01</span>
+          <div><h2 id="identity-section-title">Informações essenciais</h2><p>Nome, atuação e lugar de onde você fala.</p></div>
         </div>
-        <div class="p-6 space-y-5">
-          <div class="grid md:grid-cols-2 gap-5">
-            <div class="space-y-2">
-              <label class="flex items-center gap-2 text-sm font-medium text-foreground"><i data-lucide="user" class="h-3.5 w-3.5 text-primary"></i> Nome</label>
-              <input type="text" name="first_name" value="{{ form.first_name.value() or '' }}" class="w-full h-12 bg-background border border-border/50 rounded-xl px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all">
-            </div>
-            <div class="space-y-2">
-              <label class="flex items-center gap-2 text-sm font-medium text-foreground"><i data-lucide="user" class="h-3.5 w-3.5 text-primary"></i> Sobrenome</label>
-              <input type="text" name="last_name" value="{{ form.last_name.value() or '' }}" class="w-full h-12 bg-background border border-border/50 rounded-xl px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all">
-            </div>
+        <div class="m-form-grid">
+          <div class="m-field">
+            <label for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+            {{ form.first_name }}
+            {% if form.first_name.errors %}<div class="m-form-error">{{ form.first_name.errors|join(', ') }}</div>{% endif %}
           </div>
-          <div class="grid md:grid-cols-2 gap-5">
-            <div class="space-y-2">
-              <label class="flex items-center gap-2 text-sm font-medium text-foreground"><i data-lucide="at-sign" class="h-3.5 w-3.5 text-primary"></i> Username</label>
-              <div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-foreground-muted text-sm">@</span><input type="text" value="{{ current_user.username }}" disabled class="w-full h-12 bg-background/50 border border-border/50 rounded-xl pl-8 pr-4 text-foreground/60 cursor-not-allowed"></div>
-            </div>
-            <div class="space-y-2">
-              <label class="flex items-center gap-2 text-sm font-medium text-foreground"><i data-lucide="briefcase" class="h-3.5 w-3.5 text-primary"></i> Cargo / Função</label>
-              <input type="text" name="cargo" value="{{ form.cargo.value or '' }}" class="w-full h-12 bg-background border border-border/50 rounded-xl px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all">
-            </div>
+          <div class="m-field">
+            <label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+            {{ form.last_name }}
+            {% if form.last_name.errors %}<div class="m-form-error">{{ form.last_name.errors|join(', ') }}</div>{% endif %}
           </div>
-          <div class="grid md:grid-cols-2 gap-5">
-            <div class="space-y-2">
-              <label class="flex items-center gap-2 text-sm font-medium text-foreground"><i data-lucide="building-2" class="h-3.5 w-3.5 text-primary"></i> Empresa</label>
-              <input type="text" name="empresa" value="{{ form.empresa.value or '' }}" class="w-full h-12 bg-background border border-border/50 rounded-xl px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all">
-            </div>
-            <div class="space-y-2">
-              <label class="flex items-center gap-2 text-sm font-medium text-foreground"><i data-lucide="map-pin" class="h-3.5 w-3.5 text-primary"></i> Localização</label>
-              <input type="text" name="localizacao" value="{{ form.localizacao.value or '' }}" class="w-full h-12 bg-background border border-border/50 rounded-xl px-4 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all">
-            </div>
+          <div class="m-field">
+            <label for="{{ form.cargo.id_for_label }}">{{ form.cargo.label }}</label>
+            {{ form.cargo }}
+            {% if form.cargo.errors %}<div class="m-form-error">{{ form.cargo.errors|join(', ') }}</div>{% endif %}
+          </div>
+          <div class="m-field">
+            <label for="{{ form.empresa.id_for_label }}">{{ form.empresa.label }}</label>
+            {{ form.empresa }}
+            {% if form.empresa.errors %}<div class="m-form-error">{{ form.empresa.errors|join(', ') }}</div>{% endif %}
+          </div>
+          <div class="m-field">
+            <label for="{{ form.localizacao.id_for_label }}">{{ form.localizacao.label }}</label>
+            {{ form.localizacao }}
+            <span class="m-field__hint">Ex.: Região Sudeste, Brasil</span>
+            {% if form.localizacao.errors %}<div class="m-form-error">{{ form.localizacao.errors|join(', ') }}</div>{% endif %}
+          </div>
+          <div class="m-field">
+            <label for="{{ form.cidade.id_for_label }}">{{ form.cidade.label }}</label>
+            {{ form.cidade }}
+            {% if form.cidade.errors %}<div class="m-form-error">{{ form.cidade.errors|join(', ') }}</div>{% endif %}
           </div>
         </div>
       </section>
 
-      <!-- Bio Secton -->
-      <section class="rounded-2xl border border-primary/20 bg-card overflow-hidden">
-        <div class="px-6 py-4 border-b border-border/30 bg-gradient-to-r from-primary/10 to-transparent">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="h-10 w-10 rounded-xl bg-primary flex items-center justify-center"><i data-lucide="file-text" class="h-5 w-5 text-white"></i></div>
-              <div><h3 class="font-semibold text-foreground">Sobre você</h3><p class="text-xs text-foreground-muted">Uma breve descrição da sua trajetória</p></div>
-            </div>
-            <i data-lucide="pencil" class="h-4 w-4 text-primary"></i>
-          </div>
+      <section class="settings-section" aria-labelledby="story-section-title">
+        <div class="settings-section__head">
+          <span>02</span>
+          <div><h2 id="story-section-title">Sua história em poucas linhas</h2><p>Contexto suficiente para iniciar boas conversas.</p></div>
         </div>
-        <div class="p-6">
-          <textarea name="bio" rows="4" class="w-full bg-background border border-border/50 rounded-xl px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all resize-none">{{ form.bio.value or '' }}</textarea>
+        <div class="m-field">
+          <label for="{{ form.bio.id_for_label }}">{{ form.bio.label }}</label>
+          {{ form.bio }}
+          <span class="m-field__hint">Conte sua experiência, seus interesses e o que está buscando aprender.</span>
+          {% if form.bio.errors %}<div class="m-form-error">{{ form.bio.errors|join(', ') }}</div>{% endif %}
         </div>
       </section>
 
-      <!-- Contact -->
-      <section class="rounded-2xl border border-primary/20 bg-card overflow-hidden">
-        <div class="px-6 py-4 border-b border-border/30 bg-gradient-to-r from-primary/10 to-transparent">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="h-10 w-10 rounded-xl bg-primary flex items-center justify-center"><i data-lucide="globe" class="h-5 w-5 text-white"></i></div>
-              <div><h3 class="font-semibold text-foreground">Contato e Links</h3><p class="text-xs text-foreground-muted">Formas de se conectar com você</p></div>
-            </div>
-            <i data-lucide="pencil" class="h-4 w-4 text-primary"></i>
-          </div>
+      <section class="settings-section" aria-labelledby="image-section-title">
+        <div class="settings-section__head">
+          <span>03</span>
+          <div><h2 id="image-section-title">Presença visual</h2><p>Use URLs públicas para foto e imagem de capa.</p></div>
         </div>
-        <div class="p-6 space-y-4">
-          <div class="flex items-center gap-4 p-4 rounded-xl bg-background border border-border/30 hover:border-primary/30 transition-all group">
-            <div class="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/15 transition-colors"><i data-lucide="mail" class="h-5 w-5 text-primary"></i></div>
-            <div class="flex-1 min-w-0"><label class="text-xs text-foreground-muted font-medium">Email</label><input type="email" value="{{ current_user.email }}" disabled class="w-full bg-transparent text-foreground/60 focus:outline-none text-sm cursor-not-allowed"></div>
+        <div class="m-form-grid">
+          <div class="m-field">
+            <label for="{{ form.foto.id_for_label }}">{{ form.foto.label }}</label>
+            {{ form.foto }}
+            <span class="m-field__hint">URL de uma imagem quadrada.</span>
+            {% if form.foto.errors %}<div class="m-form-error">{{ form.foto.errors|join(', ') }}</div>{% endif %}
           </div>
-          <div class="flex items-center gap-4 p-4 rounded-xl bg-background border border-border/30 hover:border-primary/30 transition-all group">
-            <div class="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/15 transition-colors"><i data-lucide="linkedin" class="h-5 w-5 text-primary"></i></div>
-            <div class="flex-1 min-w-0"><label class="text-xs text-foreground-muted font-medium">LinkedIn</label><div class="flex items-center gap-1"><span class="text-foreground-muted text-sm">linkedin.com/in/</span><input type="text" name="linkedin" value="{{ form.linkedin.value or '' }}" class="flex-1 bg-transparent text-foreground focus:outline-none text-sm"></div></div>
-          </div>
-          <div class="flex items-center gap-4 p-4 rounded-xl bg-background border border-border/30 hover:border-primary/30 transition-all group">
-            <div class="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/15 transition-colors"><i data-lucide="instagram" class="h-5 w-5 text-primary"></i></div>
-            <div class="flex-1 min-w-0"><label class="text-xs text-foreground-muted font-medium">Instagram</label><div class="flex items-center gap-1"><span class="text-foreground-muted text-sm">@</span><input type="text" name="instagram" value="{{ form.instagram.value or '' }}" class="flex-1 bg-transparent text-foreground focus:outline-none text-sm"></div></div>
+          <div class="m-field">
+            <label for="{{ form.banner.id_for_label }}">{{ form.banner.label }}</label>
+            {{ form.banner }}
+            <span class="m-field__hint">URL de uma imagem horizontal.</span>
+            {% if form.banner.errors %}<div class="m-form-error">{{ form.banner.errors|join(', ') }}</div>{% endif %}
           </div>
         </div>
       </section>
 
-      <!-- Stats -->
-      <section class="rounded-2xl border border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 overflow-hidden">
-        <div class="px-6 py-4 border-b border-border/30 bg-gradient-to-r from-primary/10 to-transparent">
-          <div class="flex items-center gap-3">
-            <div class="h-10 w-10 rounded-xl bg-primary flex items-center justify-center"><i data-lucide="trending-up" class="h-5 w-5 text-white"></i></div>
-            <div><h3 class="font-semibold text-foreground">Suas Estatísticas</h3><p class="text-xs text-foreground-muted">Seu progresso na comunidade</p></div>
-          </div>
+      <section class="settings-section" aria-labelledby="links-section-title">
+        <div class="settings-section__head">
+          <span>04</span>
+          <div><h2 id="links-section-title">Onde encontrar você</h2><p>Adicione apenas canais que deseja tornar públicos.</p></div>
         </div>
-        <div class="p-6">
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="p-4 rounded-xl bg-background border border-primary/20 hover:border-primary/40 transition-all group">
-              <div class="flex items-center gap-2 mb-2"><div class="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors"><i data-lucide="zap" class="h-4 w-4 text-primary"></i></div></div>
-              <p class="text-2xl font-bold text-foreground">{{ "{:,}".format(current_user.perfil.xp_total).replace(',', '.') }}</p><p class="text-xs text-foreground-muted mt-1">Pontos XP</p>
-            </div>
-            <div class="p-4 rounded-xl bg-background border border-primary/20 hover:border-primary/40 transition-all group">
-              <div class="flex items-center gap-2 mb-2"><div class="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors"><i data-lucide="award" class="h-4 w-4 text-primary"></i></div></div>
-              <p class="text-2xl font-bold text-foreground">{{ cert_count or 0 }}</p><p class="text-xs text-foreground-muted mt-1">Certificados</p>
-            </div>
-            <div class="p-4 rounded-xl bg-background border border-primary/20 hover:border-primary/40 transition-all group">
-              <div class="flex items-center gap-2 mb-2"><div class="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors"><i data-lucide="users" class="h-4 w-4 text-primary"></i></div></div>
-              <p class="text-2xl font-bold text-foreground">{{ followers_count or 0 }}</p><p class="text-xs text-foreground-muted mt-1">Seguidores</p>
-            </div>
-            <div class="p-4 rounded-xl bg-background border border-primary/20 hover:border-primary/40 transition-all group">
-              <div class="flex items-center gap-2 mb-2"><div class="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/15 transition-colors"><i data-lucide="trophy" class="h-4 w-4 text-primary"></i></div></div>
-              <p class="text-2xl font-bold text-primary">Top {{ top_percent or 50 }}%</p><p class="text-xs text-foreground-muted mt-1">Ranking</p>
-            </div>
+        <div class="m-form-grid">
+          <div class="m-field">
+            <label for="{{ form.linkedin.id_for_label }}">{{ form.linkedin.label }}</label>
+            {{ form.linkedin }}
+            <span class="m-field__hint">Informe a URL completa, incluindo https://.</span>
+            {% if form.linkedin.errors %}<div class="m-form-error">{{ form.linkedin.errors|join(', ') }}</div>{% endif %}
+          </div>
+          <div class="m-field">
+            <label for="{{ form.instagram.id_for_label }}">{{ form.instagram.label }}</label>
+            {{ form.instagram }}
+            <span class="m-field__hint">Seu @ ou nome de usuário.</span>
+            {% if form.instagram.errors %}<div class="m-form-error">{{ form.instagram.errors|join(', ') }}</div>{% endif %}
           </div>
         </div>
       </section>
 
-    </div>
+      <footer class="settings-form__footer">
+        <a class="m-button m-button--quiet" href="/perfil">Cancelar</a>
+        <button class="m-button m-button--primary" type="submit"><i data-lucide="check" aria-hidden="true"></i>Salvar identidade</button>
+      </footer>
+    </form>
   </div>
 </div>
 {% endblock %}

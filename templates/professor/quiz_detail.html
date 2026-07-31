@@ -32,7 +32,7 @@
           <div><strong>{{ question.ordem }}. {{ question.enunciado }}</strong><span>{{ question.get_tipo_display() }}</span></div>
           <div class="prof-actions">
             <a class="prof-icon-btn" href="/professor/perguntas/{{ question.id }}/editar/" aria-label="Editar"><i data-lucide="pencil"></i></a>
-            <form method="post" action="/professor/perguntas/{{ question.id }}/excluir/" onsubmit="return confirm('Excluir esta pergunta?')">
+            <form method="post" action="/professor/perguntas/{{ question.id }}/excluir/" data-confirm="Excluir esta pergunta?">
               {{ csrf_input }}
               <button class="prof-icon-btn danger" type="submit" aria-label="Excluir"><i data-lucide="trash-2"></i></button>
             </form>
@@ -65,4 +65,3 @@
   </article>
 </section>
 {% endblock %}
-

@@ -1,198 +1,156 @@
 {% extends "base.html" %}
 
-{% block title %}Desafios & Gamificação - Mundu Academy{% endblock %}
-{% block page_title %}Desafios & Gamificação{% endblock %}
+{% block title %}Missões — Mundu Academy{% endblock %}
+{% block meta_description %}Compromissos curtos para manter seu aprendizado em movimento.{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/growth.css') }}">
+{% endblock %}
 
 {% block content %}
-<div class="px-4 md:px-8 py-4 md:py-6 space-y-8 pb-20 md:pb-6 w-full max-w-7xl mx-auto">
+<div class="m-page missions">
+  <header class="missions-hero m-reveal">
+    <div class="missions-hero__copy">
+      <span class="m-eyebrow">Ritual de progresso</span>
+      <h1 class="m-display">Consistência antes de intensidade.</h1>
+      <p class="m-lead">Missões pequenas transformam intenção em prática. Escolha uma, avance e deixe o próximo passo mais fácil.</p>
+    </div>
+    <div class="missions-streak">
+      <span class="missions-streak__orbit"><i data-lucide="flame" aria-hidden="true"></i></span>
+      <strong>{{ streak_dias }}</strong>
+      <span>dias de sequência</span>
+      <small>Cada retorno mantém a jornada viva.</small>
+    </div>
+  </header>
 
-  <!-- Header com Streak -->
-  <div class="relative overflow-hidden rounded-xl bg-gradient-to-r from-primary/20 via-card to-accent/20 border border-primary/30 p-4 md:p-5">
-    <div class="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-    <div class="absolute bottom-0 left-0 w-32 h-32 bg-accent/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
-    <div class="relative flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-4">
-        <div class="relative">
-          <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-primary via-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/40">
-            <i data-lucide="flame" class="h-8 w-8 md:h-10 md:w-10 text-primary-foreground"></i>
-          </div>
-          <div class="absolute -top-1 -right-1 w-6 h-6 md:w-7 md:h-7 bg-secondary rounded-full flex items-center justify-center border-2 border-background">
-            <i data-lucide="check-circle" class="h-3 w-3 md:h-4 md:w-4 text-secondary-foreground"></i>
-          </div>
-        </div>
-        <div class="text-center md:text-left">
-          <div class="flex items-baseline gap-1.5 justify-center md:justify-start">
-            <span class="text-3xl md:text-4xl font-bold text-foreground">{{ streak_dias }}</span>
-            <span class="text-base text-muted-foreground">dias</span>
-          </div>
-          <p class="text-sm text-muted-foreground">de sequência ativa</p>
-          <div class="flex items-center gap-2 mt-2 justify-center md:justify-start flex-wrap">
-            <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold bg-accent text-accent-foreground border-transparent">1.5x XP</span>
-            <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold bg-primary/20 text-primary border-primary/30">+300 XP hoje</span>
-          </div>
-        </div>
+  <section class="missions-focus m-reveal" aria-labelledby="today-title">
+    <div class="m-section-head">
+      <div>
+        <span class="m-section-kicker">Hoje</span>
+        <h2 class="m-section-title" id="today-title">Escolha uma missão possível agora</h2>
+        <p class="m-section-description">{{ daily_done }} de {{ daily_total }} concluídas.</p>
       </div>
-      <div class="flex flex-col items-center md:items-end gap-1.5 w-full md:w-auto mt-4 md:mt-0">
-        <p class="text-xs text-muted-foreground">Próximo bônus em</p>
-        <div class="flex items-center gap-1.5">
-          <span class="text-2xl font-bold text-primary">2</span>
-          <span class="text-sm text-muted-foreground">dias</span>
-        </div>
-        <div class="w-full md:w-32 h-2 rounded-full bg-muted overflow-hidden">
-          <div class="bg-primary h-full transition-all" style="width: 85%"></div>
-        </div>
-      </div>
+      <span class="m-chip m-chip--green">{{ daily_done }}/{{ daily_total }} hoje</span>
     </div>
-  </div>
 
-  <!-- Desafios Diários -->
-  <section class="space-y-4">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="p-2 rounded-lg bg-primary/20"><i data-lucide="rocket" class="h-5 w-5 text-primary"></i></div>
-        <div>
-          <h2 class="text-lg font-bold text-foreground">Desafios Diários</h2>
-          <p class="text-sm text-muted-foreground">Renova em 6h 42min</p>
-        </div>
-      </div>
-      <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold gap-1 text-foreground border-border bg-card">
-        <i data-lucide="check-circle" class="h-3 w-3"></i> {{ daily_done }}/{{ daily_total }}
-      </span>
-    </div>
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
-      {% for d in daily %}
-      <div class="rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden border-border/50 hover:border-primary/30 transition-all bg-card/80">
-        <div class="p-4">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 {% if d.comp %}bg-primary/20{% else %}bg-muted/50{% endif %}">
-              <i data-lucide="{{ d.icon }}" class="h-6 w-6 {% if d.comp %}text-primary{% else %}text-muted-foreground{% endif %}"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-start justify-between gap-2">
-                <div class="min-w-0">
-                  <div class="flex items-center gap-2">
-                    <h3 class="font-semibold text-foreground text-sm truncate">{{ d.titulo }}</h3>
-                    {% if d.comp %}<i data-lucide="check-circle" class="h-3.5 w-3.5 text-primary shrink-0"></i>{% endif %}
-                  </div>
-                  <p class="text-xs text-muted-foreground mt-0.5 truncate">{{ d.desc }}</p>
-                </div>
-                <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold shrink-0 {% if d.comp %}bg-primary text-primary-foreground border-transparent{% else %}bg-primary/20 text-primary border-transparent{% endif %}">+{{ d.xp }}</span>
-              </div>
-              <div class="mt-3">
-                <div class="h-1.5 bg-muted rounded-full overflow-hidden">
-                  <div class="h-full bg-gradient-to-r from-primary to-secondary rounded-full" style="width: {% if d.comp %}100{% else %}0{% endif %}%"></div>
-                </div>
-              </div>
-            </div>
+    <div class="missions-list">
+      {% for challenge in daily %}
+      <article class="mission-row {% if challenge.comp %}is-complete{% endif %}" data-challenge="{{ challenge.id }}">
+        <span class="mission-row__icon"><i data-lucide="{{ challenge.icon }}" aria-hidden="true"></i></span>
+        <div class="mission-row__copy">
+          <span class="mission-row__state">{% if challenge.comp %}Concluída{% else %}Missão diária{% endif %}</span>
+          <h3>{{ challenge.titulo }}</h3>
+          <p>{{ challenge.desc }}</p>
+          <div class="mission-row__progress">
+            <span class="m-progress" role="progressbar" aria-label="{{ challenge.prog }} de {{ challenge.meta }}"
+              aria-valuemin="0" aria-valuemax="{{ challenge.meta }}" aria-valuenow="{{ challenge.prog }}">
+              <span class="m-progress__fill" data-progress="{{ challenge.pct }}"></span>
+            </span>
+            <small>{{ challenge.prog }}/{{ challenge.meta }}</small>
           </div>
         </div>
-      </div>
-      {% endfor %}
-    </div>
-  </section>
-
-  <!-- Desafios Semanais -->
-  <section class="space-y-4">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="p-2 rounded-lg bg-secondary/20"><i data-lucide="target" class="h-5 w-5 text-secondary"></i></div>
-        <div>
-          <h2 class="text-lg font-bold text-foreground">Desafios Semanais</h2>
-          <p class="text-sm text-muted-foreground">Renova em 4 dias</p>
-        </div>
-      </div>
-      <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold gap-1 text-foreground border-border bg-card">
-        <i data-lucide="check-circle" class="h-3 w-3"></i> {{ weekly_done }}/{{ weekly_total }}
-      </span>
-    </div>
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
-      {% for w in weekly %}
-      <div class="rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden border-border/50 hover:border-secondary/30 transition-all bg-card/80">
-        <div class="p-4">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 {% if w.comp %}bg-secondary/20{% else %}bg-muted/50{% endif %}">
-              <i data-lucide="{{ w.icon }}" class="h-6 w-6 {% if w.comp %}text-secondary{% else %}text-muted-foreground{% endif %}"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-start justify-between gap-2">
-                <div class="min-w-0">
-                  <div class="flex items-center gap-2">
-                    <h3 class="font-semibold text-foreground text-sm truncate">{{ w.titulo }}</h3>
-                    {% if w.comp %}<i data-lucide="check-circle" class="h-3.5 w-3.5 text-secondary shrink-0"></i>{% endif %}
-                  </div>
-                  <p class="text-xs text-muted-foreground mt-0.5 truncate">{{ w.desc }}</p>
-                </div>
-                <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold shrink-0 {% if w.comp %}bg-secondary text-secondary-foreground border-transparent{% else %}bg-secondary/20 text-secondary border-transparent{% endif %}">+{{ w.xp }}</span>
-              </div>
-              <div class="mt-3 flex items-center gap-2">
-                <div class="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                  <div class="h-full bg-gradient-to-r from-secondary to-primary rounded-full transition-all" style="width: {{(w.prog / w.meta) * 100}}%"></div>
-                </div>
-                <span class="text-xs text-muted-foreground shrink-0">{{ w.prog }}/{{ w.meta }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-  </section>
-
-  <!-- Conquistas Grid -->
-  <section class="space-y-4">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="p-2 rounded-lg bg-accent/20"><i data-lucide="trophy" class="h-5 w-5 text-accent"></i></div>
-        <div>
-          <h2 class="text-lg font-bold text-foreground">Conquistas</h2>
-          <p class="text-sm text-muted-foreground">{{ unlocked_conquistas }} de {{ total_conquistas }} desbloqueadas</p>
-        </div>
-      </div>
-    </div>
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-      {% for c in conquistas %}
-      <div class="rounded-xl border bg-card text-card-foreground shadow-sm h-full bg-gradient-to-br {% if c.unlocked %}{{ c.cor_gradiente }}20 border-{{ c.cor_gradiente.split(' ')[0].replace('from-','') }}/40 shadow-lg{% else %}bg-muted/20 border-border/30 opacity-60{% endif %} overflow-hidden cursor-pointer hover:scale-105 transition-transform">
-        <div class="p-4 flex flex-col items-center text-center">
-          <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-3 {% if c.unlocked %}bg-gradient-to-br {{ c.cor_gradiente }}{% else %}bg-muted/50{% endif %}">
-            {% if c.unlocked %}
-            <i data-lucide="{{ c.icon }}" class="h-8 w-8 text-white"></i>
-            {% else %}
-            <i data-lucide="lock" class="h-6 w-6 text-muted-foreground"></i>
-            {% endif %}
-          </div>
-          <h3 class="font-bold text-foreground text-xs leading-tight mb-2">{{ c.titulo }}</h3>
-          {% if c.unlocked %}
-          <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold bg-emerald-500 text-white border-emerald-400">desbloqueada</span>
+        <div class="mission-row__action">
+          <strong>+{{ challenge.xp }} XP</strong>
+          {% if challenge.comp %}
+          <span class="mission-row__done"><i data-lucide="check" aria-hidden="true"></i>Feito</span>
+          {% else %}
+          <button class="m-button m-button--secondary m-button--sm" type="button"
+            data-advance-challenge="{{ challenge.id }}">Registrar avanço</button>
           {% endif %}
         </div>
-      </div>
+      </article>
+      {% else %}
+      <div class="m-empty"><div class="m-empty__inner"><h3>Dia livre</h3><p>Não há missões diárias ativas. Avance em uma aula no seu ritmo.</p><a class="m-button m-button--primary" href="/conteudos">Abrir cursos</a></div></div>
       {% endfor %}
     </div>
   </section>
 
-  <!-- Desbloqueáveis -->
-  <section class="space-y-4">
-    <div class="flex items-center gap-3">
-      <div class="p-2 rounded-lg bg-primary/20"><i data-lucide="gift" class="h-5 w-5 text-primary"></i></div>
-      <div><h2 class="text-lg font-bold text-foreground">Próximos Desbloqueáveis</h2><p class="text-sm text-muted-foreground">Recompensas exclusivas</p></div>
+  <section class="m-section missions-week m-reveal" aria-labelledby="week-title">
+    <div class="m-section-head">
+      <div>
+        <span class="m-section-kicker">Nesta semana</span>
+        <h2 class="m-section-title" id="week-title">Compromissos que pedem continuidade</h2>
+        <p class="m-section-description">{{ weekly_done }} de {{ weekly_total }} concluídos.</p>
+      </div>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {% for u in unlockables %}
-      <div class="rounded-xl border text-card-foreground shadow-sm bg-gradient-to-r from-card via-card to-primary/5 border-border/50 hover:border-primary/30 transition-all">
-        <div class="p-4 flex items-center gap-4">
-          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center"><i data-lucide="{{ u.icon }}" class="h-7 w-7 text-primary"></i></div>
-          <div class="flex-1">
-            <h3 class="font-bold text-foreground">{{ u.titulo }}</h3><p class="text-sm text-muted-foreground">{{ u.desc }}</p>
-            <div class="mt-2">
-              <div class="flex justify-between text-xs mb-1"><span class="text-muted-foreground">{{ u.prog }}/{{ u.meta }}</span><span class="text-primary font-medium">{{ u.pct }}%</span></div>
-              <div class="h-2 bg-muted rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-primary to-accent rounded-full" style="width: {{ u.pct }}%;"></div></div>
-            </div>
-          </div>
+    <div class="missions-week__grid">
+      {% for challenge in weekly %}
+      <article class="mission-weekly {% if challenge.comp %}is-complete{% endif %}" data-challenge="{{ challenge.id }}">
+        <span class="mission-weekly__index">0{{ loop.index }}</span>
+        <span class="mission-weekly__icon"><i data-lucide="{{ challenge.icon }}" aria-hidden="true"></i></span>
+        <h3>{{ challenge.titulo }}</h3>
+        <p>{{ challenge.desc }}</p>
+        <div class="mission-weekly__meter">
+          <span class="m-progress" role="progressbar" aria-label="{{ challenge.prog }} de {{ challenge.meta }}"
+            aria-valuemin="0" aria-valuemax="{{ challenge.meta }}" aria-valuenow="{{ challenge.prog }}">
+            <span class="m-progress__fill" data-progress="{{ challenge.pct }}"></span>
+          </span>
+          <small>{{ challenge.prog }} de {{ challenge.meta }}</small>
         </div>
-      </div>
+        <div class="mission-weekly__footer">
+          <strong>+{{ challenge.xp }} XP</strong>
+          {% if challenge.comp %}
+          <span><i data-lucide="check" aria-hidden="true"></i>Concluída</span>
+          {% else %}
+          <button class="m-button m-button--quiet m-button--sm" type="button"
+            data-advance-challenge="{{ challenge.id }}">Registrar avanço</button>
+          {% endif %}
+        </div>
+      </article>
+      {% else %}
+      <p class="m-section-description">Nenhum compromisso semanal ativo.</p>
       {% endfor %}
     </div>
   </section>
 
+  <section class="m-section mission-achievements m-reveal" aria-labelledby="mission-achievements-title">
+    <div class="mission-achievements__intro">
+      <span class="m-section-kicker">Marcos</span>
+      <h2 class="m-section-title" id="mission-achievements-title">Conquistas são rastros da prática.</h2>
+      <p>{{ unlocked_conquistas }} de {{ total_conquistas }} marcos já fazem parte da sua trajetória.</p>
+    </div>
+    <div class="mission-achievements__list">
+      {% for achievement in conquistas %}
+      <article class="{% if achievement.unlocked %}is-unlocked{% endif %}">
+        <span><i data-lucide="{% if achievement.unlocked %}{{ achievement.icon }}{% else %}lock{% endif %}" aria-hidden="true"></i></span>
+        <div>
+          <strong>{{ achievement.titulo }}</strong>
+          <small>{% if achievement.unlocked %}Conquista desbloqueada{% else %}Continue praticando para revelar este marco{% endif %}</small>
+        </div>
+      </article>
+      {% else %}
+      <p class="m-section-description">Os marcos aparecerão quando forem cadastrados.</p>
+      {% endfor %}
+    </div>
+  </section>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  document.querySelectorAll('[data-advance-challenge]').forEach(function (button) {
+    button.addEventListener('click', async function () {
+      var id = button.dataset.advanceChallenge;
+      button.disabled = true;
+      button.textContent = 'Registrando...';
+      try {
+        var response = await fetch('/api/desafio/' + id + '/completar', {
+          method: 'POST',
+          headers: {'Accept': 'application/json'}
+        });
+        var payload = await response.json().catch(function () { return {}; });
+        if (!response.ok || payload.ok === false) {
+          throw new Error(payload.erro || 'Não foi possível registrar o avanço.');
+        }
+        showToast(payload.progresso >= payload.meta ? 'Missão concluída' : 'Avanço registrado');
+        window.location.reload();
+      } catch (error) {
+        showToast(error.message || 'Não foi possível registrar o avanço.', 'danger');
+        button.disabled = false;
+        button.textContent = 'Registrar avanço';
+      }
+    });
+  });
+}());
+</script>
 {% endblock %}

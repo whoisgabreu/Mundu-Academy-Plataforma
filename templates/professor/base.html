@@ -1,23 +1,79 @@
 {% extends "base.html" %}
 
-{% block title %}Professor - Mundu Academy{% endblock %}
-{% block page_title %}Professor{% endblock %}
+{% block title %}Mundu Studio — Mundu Academy{% endblock %}
+{% block meta_description %}Crie, organize e acompanhe experiências de aprendizagem na Mundu Academy.{% endblock %}
+{% block body_class %}studio-page{% endblock %}
+{% block main_class %}studio-main{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/studio.css') }}">
+{% endblock %}
+
+{% block site_header %}
+<header class="studio-header" aria-label="Cabeçalho do Mundu Studio">
+  <div class="studio-header__inner">
+    <a class="studio-brand" href="/professor/" aria-label="Mundu Studio — Visão geral">
+      <img src="{{ url_for('static', filename='img/mundu-logo-icon.png') }}" alt="">
+      <span>
+        <strong>Mundu Studio</strong>
+        <small>Criação de aprendizagem</small>
+      </span>
+    </a>
+    <div class="studio-header__actions">
+      <button class="studio-theme-toggle" type="button" data-theme-toggle aria-label="Alternar tema">
+        <i data-lucide="sun-moon" aria-hidden="true"></i>
+      </button>
+      <a class="studio-preview-link" href="/conteudos">
+        <i data-lucide="eye" aria-hidden="true"></i>
+        <span>Ver como aluno</span>
+      </a>
+      <a class="studio-account" href="/perfil" aria-label="Voltar ao meu perfil">
+        {% if current_user.foto %}
+        <span class="m-avatar"><img src="{{ current_user.foto }}" alt=""></span>
+        {% else %}
+        <span class="m-avatar">{{ current_user.perfil.iniciais }}</span>
+        {% endif %}
+        <span>{{ current_user.nome }}</span>
+      </a>
+    </div>
+  </div>
+</header>
+{% endblock %}
 
 {% block content %}
 <div class="prof-shell">
-  <nav class="prof-nav" aria-label="Menu do professor">
-    <a class="prof-nav-item {% if prof_nav == 'dashboard' %}active{% endif %}" href="/professor/"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></a>
-    <a class="prof-nav-item {% if prof_nav == 'modules' %}active{% endif %}" href="/professor/modulos/"><i data-lucide="layers"></i><span>Módulos</span></a>
-    <a class="prof-nav-item {% if prof_nav == 'lessons' %}active{% endif %}" href="/professor/aulas/"><i data-lucide="play-circle"></i><span>Aulas</span></a>
-    <a class="prof-nav-item {% if prof_nav == 'quizzes' %}active{% endif %}" href="/professor/quizzes/"><i data-lucide="list-checks"></i><span>Quizzes</span></a>
-    <a class="prof-nav-item {% if prof_nav == 'certificates' %}active{% endif %}" href="/professor/certificados/"><i data-lucide="award"></i><span>Certificados</span></a>
-  </nav>
+  <div class="prof-nav-wrap">
+    <nav class="prof-nav" aria-label="Áreas do Mundu Studio">
+      <a class="prof-nav-item {% if prof_nav == 'dashboard' %}active{% endif %}" href="/professor/"
+        {% if prof_nav == 'dashboard' %}aria-current="page"{% endif %}>
+        <i data-lucide="sparkles" aria-hidden="true"></i><span>Visão geral</span>
+      </a>
+      <a class="prof-nav-item {% if prof_nav == 'modules' %}active{% endif %}" href="/professor/modulos/"
+        {% if prof_nav == 'modules' %}aria-current="page"{% endif %}>
+        <i data-lucide="layers-3" aria-hidden="true"></i><span>Cursos</span>
+      </a>
+      <a class="prof-nav-item {% if prof_nav == 'lessons' %}active{% endif %}" href="/professor/aulas/"
+        {% if prof_nav == 'lessons' %}aria-current="page"{% endif %}>
+        <i data-lucide="play-circle" aria-hidden="true"></i><span>Aulas</span>
+      </a>
+      <a class="prof-nav-item {% if prof_nav == 'quizzes' %}active{% endif %}" href="/professor/quizzes/"
+        {% if prof_nav == 'quizzes' %}aria-current="page"{% endif %}>
+        <i data-lucide="list-checks" aria-hidden="true"></i><span>Avaliações</span>
+      </a>
+      <a class="prof-nav-item {% if prof_nav == 'certificates' %}active{% endif %}" href="/professor/certificados/"
+        {% if prof_nav == 'certificates' %}aria-current="page"{% endif %}>
+        <i data-lucide="award" aria-hidden="true"></i><span>Certificados</span>
+      </a>
+    </nav>
+  </div>
 
-  <section class="prof-main">
+  <section class="prof-main" aria-label="Área de trabalho">
     {% if messages_list %}
-    <div class="prof-messages">
+    <div class="prof-messages" aria-live="polite">
       {% for message in messages_list %}
-      <div class="prof-message {{ message.tags }}">{{ message }}</div>
+      <div class="prof-message {{ message.tags }}">
+        <i data-lucide="{% if message.tags == 'error' %}circle-alert{% else %}circle-check{% endif %}" aria-hidden="true"></i>
+        <span>{{ message }}</span>
+      </div>
       {% endfor %}
     </div>
     {% endif %}
@@ -27,3 +83,6 @@
 </div>
 {% endblock %}
 
+{% block global_overlays %}
+<div class="m-toast" id="munduToast" role="status" aria-live="polite" aria-atomic="true"></div>
+{% endblock %}

@@ -1,63 +1,121 @@
 {% extends "base.html" %}
 
-{% block title %}Resultado - {{ tentativa.quiz.titulo }} - Mundu Academy{% endblock %}
-{% block page_title %}Resultado do Quiz{% endblock %}
+{% block title %}Resultado de {{ tentativa.quiz.titulo }} — Mundu Academy{% endblock %}
+{% block meta_description %}Revise seu resultado e reconheça os próximos passos de aprendizado.{% endblock %}
+{% block body_class %}learning-body{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/learning.css') }}">
+{% endblock %}
 
 {% block content %}
-<div class="px-4 md:px-8 py-4 md:py-6 space-y-6 pb-20 md:pb-6 w-full max-w-4xl mx-auto">
-  <div class="rounded-xl border p-6 {% if tentativa.aprovado %}bg-emerald-500/10 border-emerald-500/30{% else %}bg-red-500/10 border-red-500/30{% endif %}">
-    <div class="flex items-center gap-4">
-      <div class="h-16 w-16 rounded-full {% if tentativa.aprovado %}bg-emerald-500/20{% else %}bg-red-500/20{% endif %} flex items-center justify-center">
-        <i data-lucide="{% if tentativa.aprovado %}check-circle{% else %}x-circle{% endif %}" class="h-8 w-8 {% if tentativa.aprovado %}text-emerald-400{% else %}text-red-400{% endif %}"></i>
-      </div>
-      <div>
-        <h2 class="text-xl font-bold text-foreground">
-          {% if tentativa.aprovado %}Aprovado!{% else %}Não foi dessa vez{% endif %}
-        </h2>
-        <p class="text-muted-foreground">{{ tentativa.pontuacao }}/{{ tentativa.total_questoes }} acertos ({{ tentativa.percentual }}%)</p>
-        <p class="text-sm text-muted-foreground">Mínimo: {{ tentativa.quiz.aprovacao_percentual }}%</p>
+<div class="m-page quiz-page">
+  <a class="quiz-breadcrumb" href="/conteudos">
+    <i data-lucide="arrow-left" aria-hidden="true"></i>
+    Voltar aos cursos
+  </a>
+
+  <section class="quiz-result-hero {% if not tentativa.aprovado %}is-failed{% endif %}"
+    aria-labelledby="quiz-result-title">
+    <div class="quiz-score" data-progress="{{ tentativa.percentual }}"
+      role="img" aria-label="Resultado: {{ tentativa.percentual }} por cento">
+      <strong>{{ tentativa.percentual }}%</strong>
+      <span>domínio</span>
+    </div>
+
+    <div class="quiz-result-hero__copy">
+      <span class="m-eyebrow">{{ tentativa.quiz.modulo.titulo }}</span>
+      <h1 id="quiz-result-title">
+        {% if tentativa.aprovado %}
+        Você consolidou esta etapa.
+        {% else %}
+        Já sabemos onde aprofundar.
+        {% endif %}
+      </h1>
+      <p>
+        {% if tentativa.aprovado %}
+        Seu resultado foi registrado. Use a revisão abaixo para reforçar o que aprendeu antes de seguir.
+        {% else %}
+        Revise as respostas com calma e retorne ao conteúdo antes da próxima tentativa.
+        {% endif %}
+      </p>
+
+      <div class="quiz-result-facts" aria-label="Resumo do resultado">
+        <span><strong>{{ tentativa.pontuacao }}/{{ tentativa.total_questoes }}</strong> acertos</span>
+        <span><strong>{{ tentativa.quiz.aprovacao_percentual }}%</strong> mínimo</span>
+        <span><strong>{{ tentativas_feitas }}</strong> tentativa{% if tentativas_feitas != 1 %}s{% endif %} realizada{% if tentativas_feitas != 1 %}s{% endif %}</span>
         {% if primeira_tentativa and xp_ganho > 0 %}
-        <p class="text-sm font-semibold text-amber-400 mt-1">+{{ xp_ganho }} XP</p>
+        <span><strong>+{{ xp_ganho }} XP</strong> conquistados</span>
         {% elif not primeira_tentativa %}
-        <p class="text-sm text-muted-foreground mt-1">Revisão — nenhum XP ganho (já recompensado)</p>
+        <span>Revisão sem novo XP</span>
         {% endif %}
       </div>
-    </div>
-    <div class="mt-4 flex gap-3">
-      {% if not tentativa.aprovado %}
-      <a href="/quiz/{{ tentativa.quiz.id }}" class="inline-flex items-center rounded-lg bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:bg-primary/90 transition-colors">
-        Tentar Novamente
-      </a>
-      {% endif %}
-      <a href="/conteudos" class="inline-flex items-center rounded-lg border border-border/30 px-4 py-2 text-sm font-medium text-foreground hover:bg-card transition-colors">
-        Voltar para Conteúdos
-      </a>
-    </div>
-  </div>
 
-  <div class="space-y-4">
-    <h3 class="text-lg font-semibold text-foreground">Revisão das Questões</h3>
-    {% for item in questoes %}
-    <div class="rounded-xl border p-4 {% if item.acertou %}border-emerald-500/30 bg-emerald-500/5{% else %}border-red-500/30 bg-red-500/5{% endif %}">
-      <div class="flex items-start gap-3">
-        <span class="flex items-center justify-center w-7 h-7 rounded-full {% if item.acertou %}bg-emerald-500/20 text-emerald-400{% else %}bg-red-500/20 text-red-400{% endif %} text-sm font-bold shrink-0">{{ loop.index }}</span>
-        <div class="flex-1">
-          <p class="font-medium text-foreground">{{ item.enunciado }}</p>
-          <div class="mt-2 space-y-1 text-sm">
-            {% for a in item.alternativas %}
-            <div class="flex items-center gap-2 {% if a.id == item.resposta_id and not item.acertou %}text-red-400{% elif a.correta %}text-emerald-400{% else %}text-muted-foreground{% endif %}">
-              {% if a.id == item.resposta_id and item.acertou %}<i data-lucide="check" class="h-4 w-4 shrink-0"></i>
-              {% elif a.id == item.resposta_id and not item.acertou %}<i data-lucide="x" class="h-4 w-4 shrink-0"></i>
-              {% elif a.correta %}<i data-lucide="check" class="h-4 w-4 shrink-0"></i>
-              {% else %}<span class="w-4"></span>{% endif %}
-              <span>{{ a.texto }}</span>
+      <div class="quiz-result-actions">
+        {% if not tentativa.aprovado and tentativas_restantes > 0 %}
+        <a class="m-button m-button--primary" href="/quiz/{{ tentativa.quiz.id }}">
+          <i data-lucide="rotate-ccw" aria-hidden="true"></i>
+          Tentar novamente
+        </a>
+        {% elif not tentativa.aprovado %}
+        <span class="m-button m-button--secondary" aria-disabled="true">
+          Limite de tentativas alcançado
+        </span>
+        {% endif %}
+        <a class="m-button m-button--secondary" href="/conteudos">
+          <i data-lucide="book-open" aria-hidden="true"></i>
+          Voltar ao curso
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="quiz-review" aria-labelledby="quiz-review-title">
+    <div class="m-section-head">
+      <div class="m-section-head__copy">
+        <span class="m-section-kicker">Revisão guiada</span>
+        <h2 class="m-section-title" id="quiz-review-title">Entenda cada resposta</h2>
+        <p class="m-section-description">A resposta correta permanece destacada para orientar sua revisão.</p>
+      </div>
+      <span class="m-chip {% if tentativa.aprovado %}m-chip--green{% endif %}">
+        {% if tentativa.aprovado %}Domínio alcançado{% else %}Em desenvolvimento{% endif %}
+      </span>
+    </div>
+
+    <ol class="quiz-review__list">
+      {% for item in questoes %}
+      <li class="quiz-review-item {% if item.acertou %}is-correct{% endif %}">
+        <span class="quiz-review-item__index" aria-hidden="true">
+          {% if item.acertou %}<i data-lucide="check"></i>{% else %}{{ loop.index }}{% endif %}
+        </span>
+        <article>
+          <h3>{{ item.enunciado }}</h3>
+          <div class="quiz-review-options">
+            {% for alternativa in item.alternativas %}
+            <div class="quiz-review-option
+              {% if alternativa.correta %}is-correct{% elif alternativa.id == item.resposta_id and not item.acertou %}is-wrong{% endif %}">
+              {% if alternativa.correta %}
+              <i data-lucide="check" aria-hidden="true"></i>
+              {% elif alternativa.id == item.resposta_id and not item.acertou %}
+              <i data-lucide="x" aria-hidden="true"></i>
+              {% else %}
+              <span class="quiz-review-option__placeholder" aria-hidden="true"></span>
+              {% endif %}
+              <span>
+                {{ alternativa.texto }}
+                {% if alternativa.id == item.resposta_id %}
+                <span class="m-sr-only">— sua resposta</span>
+                {% endif %}
+                {% if alternativa.correta %}
+                <span class="m-sr-only">— resposta correta</span>
+                {% endif %}
+              </span>
             </div>
             {% endfor %}
           </div>
-        </div>
-      </div>
-    </div>
-    {% endfor %}
-  </div>
+        </article>
+      </li>
+      {% endfor %}
+    </ol>
+  </section>
 </div>
 {% endblock %}
